@@ -1,6 +1,6 @@
 {
-  "name": "testext",
-  "displayName": "testext",
+  "name": "gops",
+  "displayName": "gops",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -14,7 +14,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "testext.helloWorld",
+        "command": "gops.helloWorld",
         "title": "Hello World"
       }
     ]
