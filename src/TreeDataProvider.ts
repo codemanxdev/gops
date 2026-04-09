@@ -6,6 +6,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<MyItem> {
   }
 
   getChildren(element?: MyItem): Thenable<MyItem[]> {
+    vscode.window.showInformationMessage("Debug: getChildren called");
     if (!element) {
       // Root items
       return Promise.resolve([
