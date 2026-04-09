@@ -21,17 +21,18 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "gops",
+          "id": "gopsContainer",
           "title": "Gops",
           "icon": "resources/gops-icon.svg"
         }
       ]
     },
     "views": {
-      "gops":[
+      "gopsContainer": [
         {
-          "id": "gopsView",
-          "name": "Gops View"
+          "id": "gitOpsView",
+          "name": "Git Ops View",
+          "icon": "resources/gops-icon.svg"
         }
       ]
     }
