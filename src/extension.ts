@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
-import { TreeDataProvider } from './TreeDataProvider';
+import { TreeDataProvider } from './tree/TreeDataProvider';
+import { GitService } from './services/GitService';
 
 export function activate(context: vscode.ExtensionContext) {
-  const treeDataProvider = new TreeDataProvider();
+	const gitService = new GitService();
+  const treeDataProvider = new TreeDataProvider(gitService);
   vscode.window.registerTreeDataProvider("gitOpsView", treeDataProvider);
 	console.log('Congratulations, your extension "gops" is now active!');
 
