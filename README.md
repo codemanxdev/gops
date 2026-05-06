@@ -50,4 +50,4 @@ Ensure that you've read through the extensions guidelines and follow the best pr
 ## Build Process
 
 - npm install
--
+- npm run compile

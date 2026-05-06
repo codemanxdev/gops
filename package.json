@@ -16,6 +16,26 @@
       {
         "command": "gops.helloWorld",
         "title": "Gops Hello World"
+      },
+      {
+        "command": "gops.refresh",
+        "title": "Refresh Git Ops View",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "gops.pull",
+        "title": "Pull Latest Changes",
+        "icon": "$(repo-pull)"
+      },
+      {
+        "command": "gops.push",
+        "title": "Push Changes",
+        "icon": "$(repo-push)"
+      },
+      {
+        "command": "gops.branch",
+        "title": "New Branch",
+        "icon": "$(git-branch)"
       }
     ],
     "viewsContainers": {
@@ -30,9 +50,33 @@
     "views": {
       "gopsContainer": [
         {
-          "id": "gitOpsView",
+          "id": "gitOpsTreeview",
           "name": "Git Ops View",
           "icon": "resources/gops-icon.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "gops.refresh",
+          "when": "view == gitOpsTreeview",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.pull",
+          "when": "view == gitOpsTreeview",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.push",
+          "when": "view == gitOpsTreeview",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.branch",
+          "when": "view == gitOpsTreeview",
+          "group": "navigation"
         }
       ]
     }
