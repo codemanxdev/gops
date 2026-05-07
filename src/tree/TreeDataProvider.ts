@@ -53,17 +53,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItemModel> 
   }
 
   private async getRemoteBranches(): Promise<TreeItemModel[]> {
-    const remotes = await this.gitService.getRemotes();
-    let remoteBranches: TreeItemModel[] = [];
-
-    for (const remote of remotes) {
-      const branches = await this.gitService.getRemoteBranches(remote.name);
-      remoteBranches = remoteBranches.concat(
-        branches.map((b) => new RemoteBranchNode(b.remote, b.name, false))
-      );
-    }
-
-    return remoteBranches;
+    const remoteBranches = await this.gitService.getRemoteBranches("origin");
+    return remoteBranches.map((b) => new RemoteBranchNode(b.remote, b.name, false)) ;
   }
 
   private getRepositoryChildren(): TreeItemModel[] {
@@ -75,7 +66,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItemModel> 
       ),
       new TreeItemModel(
         "Remote Branches",
-        NodeType.Section,
+        NodeType.Remote,
         vscode.TreeItemCollapsibleState.Collapsed,
       ),
 
