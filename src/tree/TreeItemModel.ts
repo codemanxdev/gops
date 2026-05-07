@@ -1,14 +1,18 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { NodeType } from "./NodeType";
 
 export class TreeItemModel extends vscode.TreeItem {
   constructor(
     public readonly label: string,
+    public readonly type: NodeType,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly contextValue?: string,
     public readonly command?: vscode.Command,
+    public readonly children: TreeItemModel[] = [],
+    public contextValue?: string,
   ) {
     super(label, collapsibleState);
+
+    this.command = command;
     this.contextValue = contextValue;
-    this.command = command;    
   }
 }

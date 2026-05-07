@@ -1,102 +1,99 @@
 import * as vscode from "vscode";
 import { TreeItemModel } from "./TreeItemModel";
 import { GitService } from "../services/GitService";
+import { NodeType } from "./NodeType";
+import { RepositoryNode } from "./RepositoryNode";
+import { LocalBranchNode } from "./LocalBranchNode";
+import { RemoteBranchNode } from "./RemoteBranchNode";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<TreeItemModel> {
-  constructor(private gitService: GitService) {}
+  private _onDidChangeTreeData = new vscode.EventEmitter<
+    TreeItemModel | undefined
+  >();
+
+  readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+  // private remoteBranchesNode: TreeItemModel;
+  // private changesNode: TreeItemModel;
+  // private tagsNode: TreeItemModel;
+
+  constructor(private readonly gitService: GitService) {}
 
   getTreeItem(element: TreeItemModel): vscode.TreeItem {
     return element;
   }
 
   async getChildren(element?: TreeItemModel): Promise<TreeItemModel[]> {
+    //Root level: show repository
     if (!element) {
-      return [
-        new TreeItemModel(
-          "Branches",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "branches",
-        ),
-        new TreeItemModel(
-          "Changes",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "changes",
-        ),
-      ];
+      const repoName = await this.gitService.getRepoName();
+      const currentBranch = await this.gitService.getCurrentBranch();
+      return [new RepositoryNode(repoName, currentBranch)];
     }
 
-    // 🌿 Branches
-    if (element.contextValue === "branches") {
-      const branches = await this.gitService.getBranches();
-
-      return branches.all.map((branch) => {
-        const isCurrent = branch === branches.current;
-
-        return new TreeItemModel(
-          isCurrent ? `$(check) ${branch}` : branch,
-          vscode.TreeItemCollapsibleState.None,
-          "branch",
-          {
-            command: "gitTools.checkout",
-            title: "Checkout",
-            arguments: [branch],
-          },
-        );
-      });
+    //Routing based on node type
+    switch (element.type) {
+      case NodeType.Repository:
+        return this.getRepositoryChildren();
+      case NodeType.Local:
+        return this.getLocalBranches();
+      case NodeType.Remote:
+        return this.getRemoteBranches();
+      default:
+        return [];
     }
+  }
 
-    // 📁 Changes
-    if (element.contextValue === "changes") {
-      return [
-        new TreeItemModel(
-          "Staged",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "staged",
-        ),
-        new TreeItemModel(
-          "Unstaged",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "unstaged",
-        ),
-        new TreeItemModel(
-          "Untracked",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "untracked",
-        ),
-      ];
-    }
+  private async getLocalBranches(): Promise<TreeItemModel[]> {
+    const branches = await this.gitService.getLocalBranches();
 
-    // 📦 Staged Files
-    if (element.contextValue === "staged") {
-      const status = await this.gitService.getStatus();
+    return branches.map(
+      (b) => new LocalBranchNode(b.name, b.current, 0, 0),
+    );
+  }
 
-      return status.staged.map(
-        (file) =>
-          new TreeItemModel(file, vscode.TreeItemCollapsibleState.None, "file"),
+  private async getRemoteBranches(): Promise<TreeItemModel[]> {
+    const remotes = await this.gitService.getRemotes();
+    let remoteBranches: TreeItemModel[] = [];
+
+    for (const remote of remotes) {
+      const branches = await this.gitService.getRemoteBranches(remote.name);
+      remoteBranches = remoteBranches.concat(
+        branches.map((b) => new RemoteBranchNode(b.remote, b.name, false))
       );
     }
 
-    // 📦 Unstaged Files
-    if (element.contextValue === "unstaged") {
-      const status = await this.gitService.getStatus();
+    return remoteBranches;
+  }
 
-      return status.modified.map(
-        (file) =>
-          new TreeItemModel(file, vscode.TreeItemCollapsibleState.None, "file"),
-      );
-    }
+  private getRepositoryChildren(): TreeItemModel[] {
+    return [
+      new TreeItemModel(
+        "Local Branches",
+        NodeType.Local,
+        vscode.TreeItemCollapsibleState.Collapsed,
+      ),
+      new TreeItemModel(
+        "Remote Branches",
+        NodeType.Section,
+        vscode.TreeItemCollapsibleState.Collapsed,
+      ),
 
-    // 📦 Untracked Files
-    if (element.contextValue === "untracked") {
-      const status = await this.gitService.getStatus();
+      new TreeItemModel(
+        "Changes",
+        NodeType.Section,
+        vscode.TreeItemCollapsibleState.Collapsed,
+      ),
 
-      return status.not_added.map(
-        (file) =>
-          new TreeItemModel(file, vscode.TreeItemCollapsibleState.None, "file"),
-      );
-    }
+      new TreeItemModel(
+        "Tags",
+        NodeType.Section,
+        vscode.TreeItemCollapsibleState.Collapsed,
+      ),
+    ];
+  }
 
-    return [];
+  refresh(): void {
+    this._onDidChangeTreeData.fire(undefined);
   }
 }
-

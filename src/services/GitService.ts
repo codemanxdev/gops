@@ -1,5 +1,6 @@
 import simpleGit, { SimpleGit } from "simple-git";
 import * as vscode from "vscode";
+import * as path from "path";
 
 export class GitService {
   private git: SimpleGit;
@@ -21,6 +22,28 @@ export class GitService {
     return this.git.branch();
   }
 
+  async getLocalBranches() {
+    const branches = await this.git.branchLocal();
+    return branches.all.map((name) => ({
+      name,
+      current: name === branches.current,
+    }));
+  }
+
+  async getRemotes() {
+    return this.git.getRemotes();
+  }
+
+  async getRemoteBranches(remote: string) {
+    const branches = await this.git.branch({ '--remotes': null });
+    return branches.all
+      .filter((name) => name.startsWith(`${remote}/`))
+      .map((name) => ({
+        name: name.substring(remote.length + 1),
+        remote: remote,
+      }));
+  }
+
   async getLog() {
     const log = await this.git.log();
     return log.all;
@@ -40,5 +63,24 @@ export class GitService {
 
   async push() {
     return this.git.push();
+  }
+
+  async getRepoName(): Promise<string> {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+
+    const repoName = workspaceFolder
+      ? path.basename(workspaceFolder.uri.fsPath)
+      : "";
+    return repoName;
+  }
+
+  getRepoPath(): string {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    return workspaceFolder ? workspaceFolder.uri.fsPath : "";
+  }
+
+  async getCurrentBranch(): Promise<string> {
+    const branchSummary = await this.git.branch();
+    return branchSummary.current;
   }
 }
