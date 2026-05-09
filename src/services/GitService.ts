@@ -56,7 +56,34 @@ export class GitService {
   }
 
   async checkout(branch: string) {
-    return this.git.checkout(branch);
+    const outputChannel = vscode.window.createOutputChannel("GitOps");
+    
+    try {
+      await this.git.checkout(branch);
+      vscode.window.showInformationMessage(`Checked out to ${branch}`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+          ? error
+          : "An unknown error occurred.";
+
+      // Show a concise error message with a button
+      vscode.window
+        .showErrorMessage(
+          "Checkout failed. See details in the output.",
+          "Show Output",
+        )
+        .then((selection) => {
+          if (selection === "Show Output") {
+            outputChannel.show(true);
+          }
+        });
+
+      // Log the full error details
+      outputChannel.appendLine(`Checkout failed with error: ${errorMessage}`);
+    }
   }
 
   async commit(message: string) {
@@ -69,6 +96,10 @@ export class GitService {
 
   async push() {
     return this.git.push();
+  }
+
+  async createBranch(branchName: string) {
+    return this.git.checkoutLocalBranch(branchName);
   }
 
   async getRepoName(): Promise<string> {

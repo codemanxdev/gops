@@ -15,8 +15,8 @@ export class LocalBranchNode extends TreeItemModel {
       NodeType.Branch,
       vscode.TreeItemCollapsibleState.None,
     );
-    this.contextValue = ContextValue.LocalBranches;
-    // Set icon based on whether it's the current branch
+    this.contextValue = ContextValue.LocalBranches.toString();
+
     if (isCurrent) {
       this.iconPath = new vscode.ThemeIcon("check");
     }
@@ -70,5 +70,9 @@ export class LocalBranchNode extends TreeItemModel {
       ahead !== undefined ? `Ahead by ${ahead} commits` : "",
       behind !== undefined ? `Behind by ${behind} commits` : "",
     ].join("\n");
+  }
+
+  public toString(): string {
+    return `LocalBranchNode(${this.branchName}, current=${this.isCurrent}, ahead=${this.ahead}, behind=${this.behind}, contextValue=${this.contextValue})`;
   }
 }
