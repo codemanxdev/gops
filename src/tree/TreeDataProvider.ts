@@ -45,7 +45,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItemModel> 
     const branches = await this.gitService.getLocalBranches();
 
     return branches.map(
-      (b) => new LocalBranchNode(b.name, b.current, 0, 0),
+      (b) => new LocalBranchNode(b.name, b.current, b.ahead, b.behind),
     );
   }
 

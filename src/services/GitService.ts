@@ -27,6 +27,12 @@ export class GitService {
     return branches.all.map((name) => ({
       name,
       current: name === branches.current,
+      ahead: branches.branches[name].label.match(/ahead (\d+)/)
+        ? parseInt(branches.branches[name].label.match(/ahead (\d+)/)![1], 10)
+        : 0,
+      behind: branches.branches[name].label.match(/behind (\d+)/)
+        ? parseInt(branches.branches[name].label.match(/behind (\d+)/)![1], 10)
+        : 0,
     }));
   }
 
