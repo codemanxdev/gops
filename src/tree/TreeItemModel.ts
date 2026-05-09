@@ -3,7 +3,7 @@ import { NodeType } from "./NodeType";
 
 export class TreeItemModel extends vscode.TreeItem {
   constructor(
-    public readonly label: string,
+    public readonly label: vscode.TreeItemLabel,
     public readonly type: NodeType,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly command?: vscode.Command,

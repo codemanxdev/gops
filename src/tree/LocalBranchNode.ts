@@ -13,10 +13,20 @@ export class LocalBranchNode extends TreeItemModel {
     super(
       LocalBranchNode.formatLabel(branchName, isCurrent, ahead, behind),
       NodeType.Branch,
-      vscode.TreeItemCollapsibleState.Expanded,
+      vscode.TreeItemCollapsibleState.None,
     );
     this.contextValue = ContextValue.LocalBranches;
-    this.iconPath = new vscode.ThemeIcon("git-branch");
+    // Set icon based on whether it's the current branch
+    if (isCurrent) {
+      this.iconPath = new vscode.ThemeIcon("check");
+    }
+    
+    this.tooltip = LocalBranchNode.createTooltip(
+      branchName,
+      isCurrent,
+      ahead,
+      behind,
+    );
   }
 
   private static formatLabel(
@@ -24,15 +34,41 @@ export class LocalBranchNode extends TreeItemModel {
     isCurrent: boolean,
     ahead?: number,
     behind?: number,
-  ): string {
-    let label = isCurrent ? `✓ ${name}` : name;
+  ): vscode.TreeItemLabel {
+    let label = name;
 
     if (ahead !== undefined || behind !== undefined) {
-      const a = ahead ? `↑${ahead}` : "";
-      const b = behind ? `↓${behind}` : "";
-      label += ` ${a}${b}`;
+      const a = ahead ? ` ↑${ahead}` : "";
+      const b = behind ? ` ↓${behind}` : "";
+
+      label += `${a}${b}`;
     }
 
-    return label;
+    if (isCurrent) {
+      // Highlight the entire branch name (from start to the end of the branch name)
+      return {
+        label,
+        highlights: [[0, name.length]],
+      };
+    } else {
+      return {
+        label,
+        highlights: [],
+      };
+    }
+  }
+
+  private static createTooltip(
+    branch: string,
+    isCurrent: boolean,
+    ahead?: number,
+    behind?: number,
+  ): string {
+    return [
+      `Branch: ${branch}`,
+      isCurrent ? "Current branch" : "Not current",
+      ahead !== undefined ? `Ahead by ${ahead} commits` : "",
+      behind !== undefined ? `Behind by ${behind} commits` : "",
+    ].join("\n");
   }
 }

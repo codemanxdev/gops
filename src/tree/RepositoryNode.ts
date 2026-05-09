@@ -8,7 +8,7 @@ export class RepositoryNode extends TreeItemModel {
     public readonly repoName: string,
     public readonly branch: string,
   ) {
-    super(`${repoName} (${branch})`, NodeType.Repository, vscode.TreeItemCollapsibleState.Expanded);
+    super({ label: `${repoName} (${branch})` }, NodeType.Repository, vscode.TreeItemCollapsibleState.Expanded);
     this.contextValue = ContextValue.Repository;
     this.iconPath = new vscode.ThemeIcon("repo");
   }

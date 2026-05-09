@@ -5,6 +5,7 @@ import { NodeType } from "./NodeType";
 import { RepositoryNode } from "./RepositoryNode";
 import { LocalBranchNode } from "./LocalBranchNode";
 import { RemoteBranchNode } from "./RemoteBranchNode";
+import { Constants } from "../constants/Constants";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<TreeItemModel> {
   private _onDidChangeTreeData = new vscode.EventEmitter<
@@ -12,10 +13,6 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItemModel> 
   >();
 
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
-
-  // private remoteBranchesNode: TreeItemModel;
-  // private changesNode: TreeItemModel;
-  // private tagsNode: TreeItemModel;
 
   constructor(private readonly gitService: GitService) {}
 
@@ -57,32 +54,42 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItemModel> 
     return remoteBranches.map((b) => new RemoteBranchNode(b.remote, b.name, false)) ;
   }
 
-  private getRepositoryChildren(): TreeItemModel[] {
-    return [
-      new TreeItemModel(
-        "Local Branches",
-        NodeType.Local,
-        vscode.TreeItemCollapsibleState.Collapsed,
-      ),
-      new TreeItemModel(
-        "Remote Branches",
-        NodeType.Remote,
-        vscode.TreeItemCollapsibleState.Collapsed,
-      ),
-
-      new TreeItemModel(
-        "Changes",
-        NodeType.Section,
-        vscode.TreeItemCollapsibleState.Collapsed,
-      ),
-
-      new TreeItemModel(
-        "Tags",
-        NodeType.Section,
-        vscode.TreeItemCollapsibleState.Collapsed,
-      ),
-    ];
-  }
+   private getRepositoryChildren(): TreeItemModel[] {
+     const localBranchesItem = new TreeItemModel(
+       { label: Constants.LOCAL_BRANCHES_LABEL },
+       NodeType.Local,
+       vscode.TreeItemCollapsibleState.Collapsed,
+     );
+     localBranchesItem.iconPath = new vscode.ThemeIcon("go-to-file");
+ 
+     const remoteBranchesItem = new TreeItemModel(
+       { label: Constants.REMOTE_BRANCHES_LABEL },
+       NodeType.Remote,
+       vscode.TreeItemCollapsibleState.Collapsed,
+     );
+     remoteBranchesItem.iconPath = new vscode.ThemeIcon("cloud");
+ 
+     const changesItem = new TreeItemModel(
+       { label: Constants.CHANGES_LABEL },
+       NodeType.Section,
+       vscode.TreeItemCollapsibleState.Collapsed,
+     );
+     changesItem.iconPath = new vscode.ThemeIcon("diff");
+ 
+     const tagsItem = new TreeItemModel(
+       { label: Constants.TAGS_LABEL },
+       NodeType.Section,
+       vscode.TreeItemCollapsibleState.Collapsed,
+     );
+     tagsItem.iconPath = new vscode.ThemeIcon("tag");
+ 
+     return [
+       localBranchesItem,
+       remoteBranchesItem,
+       changesItem,
+       tagsItem,
+     ];
+   }
 
   refresh(): void {
     this._onDidChangeTreeData.fire(undefined);
