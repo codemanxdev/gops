@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { TreeItemModel } from "./TreeItemModel";
+import { TreeItemModel } from "../TreeItemModel";
 import { NodeType } from "./NodeType";
-import { ContextValue } from "./ContextValue";
+import { ContextValue } from "../ContextValue";
 
-export class RemoteBranchNode extends TreeItemModel {
+export class RemoteBranchNode extends TreeItemModel<NodeType.Remote> {
   constructor(
     public readonly remoteName: string, // e.g. origin/main
     public readonly branchName: string, // e.g. main
@@ -11,12 +11,11 @@ export class RemoteBranchNode extends TreeItemModel {
   ) {
     super(
       RemoteBranchNode.formatLabel(remoteName, branchName, isTracking),
-      NodeType.Branch,
+      NodeType.Remote,
       vscode.TreeItemCollapsibleState.None,
     );
 
     this.contextValue = ContextValue.RemoteBranches;
-
     this.tooltip = RemoteBranchNode.createTooltip(
       remoteName,
       branchName,

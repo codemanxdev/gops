@@ -1,9 +1,9 @@
-import { ContextValue } from "./ContextValue";
+import { ContextValue } from "../ContextValue";
 import { NodeType } from "./NodeType";
-import { TreeItemModel } from "./TreeItemModel";
+import { TreeItemModel } from "../TreeItemModel";
 import * as vscode from 'vscode';
 
-export class LocalBranchNode extends TreeItemModel {
+export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
   constructor(
     public readonly branchName: string,
     public readonly isCurrent: boolean,
@@ -12,7 +12,7 @@ export class LocalBranchNode extends TreeItemModel {
   ) {
     super(
       LocalBranchNode.formatLabel(branchName, isCurrent, ahead, behind),
-      NodeType.Branch,
+      NodeType.Local,
       vscode.TreeItemCollapsibleState.None,
     );
     this.contextValue = ContextValue.LocalBranches.toString();

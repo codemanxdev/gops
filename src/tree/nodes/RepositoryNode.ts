@@ -1,6 +1,6 @@
-import { ContextValue } from "./ContextValue";
+import { ContextValue } from "../ContextValue";
 import { NodeType } from "./NodeType";
-import { TreeItemModel } from "./TreeItemModel";
+import { TreeItemModel } from "../TreeItemModel";
 import * as vscode from 'vscode';
 
 export class RepositoryNode extends TreeItemModel {

@@ -40,7 +40,23 @@
       {
         "command": "gops.checkout",
         "title": "Checkout Branch",
-        "icon": "$(git-branch)"
+        "icon": "$(git-branch)",
+        "enablement": "!gops.isCurrentBranch"
+      },
+      {
+        "command": "gops.deleteBranch",
+        "title": "Delete Branch",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "gops.renameBranch",
+        "title": "Rename Branch",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "gops.tag",
+        "title": "Create Tag",
+        "icon": "$(tag)"
       }
     ],
     "viewsContainers": {
@@ -87,6 +103,21 @@
       "view/item/context": [
         {
           "command": "gops.checkout",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.deleteBranch",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.renameBranch",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.tag",
           "when": "view == gitOpsTreeview && viewItem == localBranches",
           "group": "navigation"
         }

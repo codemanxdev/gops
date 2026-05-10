@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { TreeDataProvider } from "../tree/TreeDataProvider";
 import { GitService } from "../services/GitService";
+import { COMMANDS } from "./Commands";
 
 export class CommandRegistrar {
   constructor(
@@ -10,37 +11,37 @@ export class CommandRegistrar {
   ) {}
 
   registerAll() {
-    this.register("gops.refresh", () => {
+    this.register(COMMANDS.REFRESH, () => {
       console.debug("executed command: gops.refresh");
       this.treeDataProvider.refresh();
     });
 
-    this.register("gops.checkout", (node) => {
+    this.register(COMMANDS.CHECKOUT_BRANCH, (node) => {
       console.debug("executed command: gops.checkout");
       this.gitService.checkout(node.branchName);
     });
 
-    this.register("gops.deleteBranch", (node) => {
+    this.register(COMMANDS.DELETE_BRANCH, (node) => {
       console.debug("executed command: gops.deleteBranch");
       //this.gitService.deleteBranch(node);
     });
 
-    this.register("gops.renameBranch", (node) => {
+    this.register(COMMANDS.RENAME_BRANCH, (node) => {
       console.debug("executed command: gops.renameBranch");
       //this.gitService.renameBranch(node);
     });
 
-    this.register("gops.push", () => {
+    this.register(COMMANDS.PUSH, () => {
       console.debug("executed command: gops.push");
       this.gitService.push();
     });   
     
-    this.register("gops.pull", () => {
+    this.register(COMMANDS.PULL, () => {
       console.debug("executed command: gops.pull");
       this.gitService.pull();
     });
     
-    this.register("gops.branch", (node) => {
+    this.register(COMMANDS.CREATE_BRANCH, (node) => {
       console.debug("executed command: gops.branch");
       this.gitService.createBranch(node);
     });
