@@ -2,7 +2,7 @@ import { ContextValue } from "../ContextValue";
 import { NodeType } from "./NodeType";
 import { TreeItemModel } from "../TreeItemModel";
 import * as vscode from 'vscode';
-import { formatLocalBranchLabel } from "./utils/nodeUtils";
+import { createLocalBranchTooltip, formatLocalBranchLabel } from "./utils/nodeUtils";
 
 export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
   constructor(
@@ -26,26 +26,12 @@ export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
       this.iconPath = new vscode.ThemeIcon("check");
     }
     
-    this.tooltip = LocalBranchNode.createTooltip(
+    this.tooltip = createLocalBranchTooltip(
       branchName,
       isCurrent,
       ahead,
       behind,
     );
-  }
-
-  private static createTooltip(
-    branch: string,
-    isCurrent: boolean,
-    ahead?: number,
-    behind?: number,
-  ): string {
-    return [
-      `Branch: ${branch}`,
-      isCurrent ? "Current branch" : "Not current",
-      ahead !== undefined ? `Ahead by ${ahead} commits` : "",
-      behind !== undefined ? `Behind by ${behind} commits` : "",
-    ].join("\n");
   }
 
   public toString(): string {
