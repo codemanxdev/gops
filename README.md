@@ -1,6 +1,9 @@
-# gops (Git Ops - Visual Git Toolkit)
+# Gops (Git Ops - Visual Git Toolkit)
 
-Git Operations - Visual Git Toolkit
+Git Operations - Visual Git Toolkit for VS Code
+
+## Build Status
+[![CI](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml/badge.svg)](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml)
 
 ## Features
 
@@ -19,6 +22,7 @@ Git Operations - Visual Git Toolkit
   - Rename branch
 - Local Changes
 - Tags
+
 
 ## Requirements
 
