@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-  pull_request:
     branches:
-      - ci
+      - develop
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -18,15 +17,13 @@ jobs:
         with:
           node-version: 20
           cache: npm
-
       - name: Install dependencies
         run: npm ci
-
       - name: Lint
         run: npm run lint
-
       - name: Compile TypeScript
-        run: npm run build
-
-      - name: Run tests
+        run: npm run compile
+      - name: Run unit tests
+        run: npm run test:unit
+      - name: Run extension tests
         run: npm test
