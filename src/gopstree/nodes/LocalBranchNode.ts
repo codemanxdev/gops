@@ -2,6 +2,7 @@ import { ContextValue } from "../ContextValue";
 import { NodeType } from "./NodeType";
 import { TreeItemModel } from "../TreeItemModel";
 import * as vscode from 'vscode';
+import { formatLocalBranchLabel } from "./utils/nodeUtils";
 
 export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
   constructor(
@@ -10,8 +11,12 @@ export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
     public readonly ahead?: number,
     public readonly behind?: number,
   ) {
+    const fomatted = formatLocalBranchLabel(branchName, isCurrent, ahead, behind);
     super(
-      LocalBranchNode.formatLabel(branchName, isCurrent, ahead, behind),
+      {
+        label: fomatted.label,
+        highlights: fomatted.highlights,
+      },
       NodeType.Local,
       vscode.TreeItemCollapsibleState.None,
     );
@@ -27,35 +32,6 @@ export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
       ahead,
       behind,
     );
-  }
-
-  private static formatLabel(
-    name: string,
-    isCurrent: boolean,
-    ahead?: number,
-    behind?: number,
-  ): vscode.TreeItemLabel {
-    let label = name;
-
-    if (ahead !== undefined || behind !== undefined) {
-      const a = ahead ? ` ↑${ahead}` : "";
-      const b = behind ? ` ↓${behind}` : "";
-
-      label += `${a}${b}`;
-    }
-
-    if (isCurrent) {
-      // Highlight the entire branch name (from start to the end of the branch name)
-      return {
-        label,
-        highlights: [[0, name.length]],
-      };
-    } else {
-      return {
-        label,
-        highlights: [],
-      };
-    }
   }
 
   private static createTooltip(

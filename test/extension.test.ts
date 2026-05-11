@@ -5,6 +5,9 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 // import * as myExtension from '../../extension';
 
+declare function suite(name: string, fn: () => void): void;
+declare function test(name: string, fn: () => void): void;
+
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 

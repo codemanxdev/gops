@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { TreeDataProvider } from "./tree/TreeDataProvider";
+import { TreeDataProvider } from "./gopstree/TreeDataProvider";
 import { GitService } from "./services/GitService";
 import { CommandRegistrar } from "./commands/CommandRegistrar";
-import { TreeSelectionController } from "./tree/controller/TreeSelectionController";
-import { MenuContextService } from "./tree/context/MenuContexttService";
+import { TreeSelectionController } from "./gopstree/controller/TreeSelectionController";
+import { MenuContextService } from "./gopstree/context/MenuContexttService";
 
 export function activate(context: vscode.ExtensionContext) {
   const gitService = new GitService();

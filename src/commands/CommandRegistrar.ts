@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { TreeDataProvider } from "../tree/TreeDataProvider";
+import { TreeDataProvider } from "../gopstree/TreeDataProvider";
 import { GitService } from "../services/GitService";
 import { COMMANDS } from "./Commands";
-import { GitTreeNode } from "../tree/types";
+import { GitTreeNode } from "../gopstree/types";
 
 export class CommandRegistrar {
   constructor(
