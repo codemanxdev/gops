@@ -4,6 +4,22 @@ Git Operations - Visual Git Toolkit
 
 ## Features
 
+### Tree View
+
+- Toolbar with following options
+  - Refresh treeview
+  - Push
+  - Pull
+  - New Branch
+- Local and Remote branches
+- Ability to interact and perform the following operations
+  - Checkout branch
+  - Create tag
+  - Delete branch
+  - Rename branch
+- Local Changes
+- Tags
+
 ## Requirements
 
 If you have any requirements or dependencies, add a section describing those and how to install and configure them.

@@ -34,7 +34,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       case NodeType.Repository:
         return this.getRepositoryChildren();
       case NodeType.Local:
-        return this.getLocalBranches();
+        return this.getLocalBranches(element);
       case NodeType.Remote:
         return this.getRemoteBranches();
       default:
@@ -42,10 +42,14 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     }
   }
 
-  private async getLocalBranches(): Promise<TreeItemModel[]> {
+  private async getLocalBranches(parent: TreeItemModel): Promise<TreeItemModel[]> {
     const branches = await this.gitService.getLocalBranches();
     const allLocalBranches = branches.map(
-      (b) => new LocalBranchNode(b.name, b.current, b.ahead, b.behind),
+      (b) => {
+        const node = new LocalBranchNode(b.name, b.current, b.ahead, b.behind);
+        node.parent = parent;
+        return node;
+      }
     );
     for (const branch of allLocalBranches) {
       console.debug(branch.toString());
@@ -92,7 +96,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     return [localBranchesItem, remoteBranchesItem, changesItem, tagsItem];
   }
 
-  refresh(): void {
-    this._onDidChangeTreeData.fire(undefined);
+  refresh(node?: GitTreeNode): void {
+    this._onDidChangeTreeData.fire(node);
   }
 }

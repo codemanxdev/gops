@@ -1,6 +1,6 @@
 export const COMMANDS = {
   REFRESH: "gops.refresh",
-  CHECKOUT_BRANCH: "gops.checkoutBranch",
+  CHECKOUT_BRANCH: "gops.checkout",
   DELETE_BRANCH: "gops.deleteBranch",
   RENAME_BRANCH: "gops.renameBranch",
   PUSH: "gops.push",

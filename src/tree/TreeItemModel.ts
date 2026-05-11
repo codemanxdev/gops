@@ -10,6 +10,7 @@ export class TreeItemModel<T extends NodeType = NodeType> extends vscode.TreeIte
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly command?: vscode.Command,
     public readonly children: TreeItemModel[] = [],
+    public parent?: TreeItemModel,
     public contextValue?: string,
   ) {
     super(label, collapsibleState);

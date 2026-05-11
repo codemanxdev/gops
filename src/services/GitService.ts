@@ -1,6 +1,8 @@
 import simpleGit, { SimpleGit } from "simple-git";
 import * as vscode from "vscode";
 import * as path from "path";
+import { Logger } from "../logging/Logger";
+import { Notifications } from "../notifications/Notifications";
 
 export class GitService {
   private git: SimpleGit;
@@ -55,34 +57,15 @@ export class GitService {
     return log.all;
   }
 
-  async checkout(branch: string) {
-    const outputChannel = vscode.window.createOutputChannel("GitOps");
-    
+  async checkout(branch: string) {    
     try {
       await this.git.checkout(branch);
-      vscode.window.showInformationMessage(`Checked out to ${branch}`);
+      Logger.info(`Checked out to ${branch}`);
+      Notifications.info(`Checked out to ${branch}`);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : typeof error === "string"
-          ? error
-          : "An unknown error occurred.";
-
-      // Show a concise error message with a button
-      vscode.window
-        .showErrorMessage(
-          "Checkout failed. See details in the output.",
-          "Show Output",
-        )
-        .then((selection) => {
-          if (selection === "Show Output") {
-            outputChannel.show(true);
-          }
-        });
-
-      // Log the full error details
-      outputChannel.appendLine(`Checkout failed with error: ${errorMessage}`);
+      const message = Logger.getErrorMessage(error);
+      Logger.error(`Checkout failed: ${message}`);
+      Notifications.errorWithOutput("Checkout failed. See details in output");
     }
   }
 
