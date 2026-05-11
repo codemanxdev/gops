@@ -7,6 +7,7 @@ import { LocalBranchNode } from "./nodes/LocalBranchNode";
 import { RemoteBranchNode } from "./nodes/RemoteBranchNode";
 import { Constants } from "../constants/Constants";
 import { GitTreeNode } from "./types";
+import { Notifications } from "../notifications/Notifications";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<
@@ -98,5 +99,10 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
 
   refresh(node?: GitTreeNode): void {
     this._onDidChangeTreeData.fire(node);
+
+    //Show notification for parent node refresh
+    if (node === undefined) {
+      Notifications.info("Git Ops tree view refreshed");
+    }
   }
 }
