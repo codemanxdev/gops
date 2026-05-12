@@ -107,27 +107,12 @@
       "view/item/context": [
         {
           "command": "gops.branch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
           "group": "navigation"
         },
         {
           "command": "gops.checkout",
           "when": "view == gitOpsTreeview && viewItem == localBranches",
-          "group": "navigation"
-        },
-        {
-          "command": "gops.deleteBranch",
-          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
-          "group": "navigation"
-        },
-        {
-          "command": "gops.renameBranch",
-          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
-          "group": "navigation"
-        },
-        {
-          "command": "gops.tag",
-          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
           "group": "navigation"
         }
       ]
