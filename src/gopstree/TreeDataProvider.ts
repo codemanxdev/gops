@@ -25,7 +25,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   async getChildren(element?: TreeItemModel): Promise<TreeItemModel[]> {
     //Root level: show repository
     if (!element) {
-      const repoName = await this.gitService.getRepoName();
+      const repoName = this.gitService.getRepoName();
       const currentBranch = await this.gitService.getCurrentBranch();
       return [new RepositoryNode(repoName, currentBranch)];
     }

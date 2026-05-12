@@ -38,6 +38,11 @@
         "icon": "$(git-branch)"
       },
       {
+        "command": "gops.branch.current",
+        "title": "Create Branch from Current",
+        "icon": "$(git-branch)"
+      },
+      {
         "command": "gops.checkout",
         "title": "Checkout Branch",
         "icon": "$(git-branch)"
@@ -94,12 +99,17 @@
           "group": "navigation"
         },
         {
-          "command": "gops.branch",
+          "command": "gops.branch.current",
           "when": "view == gitOpsTreeview",
           "group": "navigation"
         }
       ],
       "view/item/context": [
+        {
+          "command": "gops.branch",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
+        },
         {
           "command": "gops.checkout",
           "when": "view == gitOpsTreeview && viewItem == localBranches",
