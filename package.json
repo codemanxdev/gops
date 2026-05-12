@@ -40,8 +40,7 @@
       {
         "command": "gops.checkout",
         "title": "Checkout Branch",
-        "icon": "$(git-branch)",
-        "enablement": "!gops.isCurrentBranch"
+        "icon": "$(git-branch)"
       },
       {
         "command": "gops.deleteBranch",
