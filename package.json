@@ -108,17 +108,17 @@
         },
         {
           "command": "gops.deleteBranch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
           "group": "navigation"
         },
         {
           "command": "gops.renameBranch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
           "group": "navigation"
         },
         {
           "command": "gops.tag",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
           "group": "navigation"
         }
       ]
