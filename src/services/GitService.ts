@@ -60,10 +60,21 @@ export class GitService {
       }));
   }
 
+  async getTags(): Promise<string[]> {
+    return (await this.git.tags()).all;
+  }
+
+  async getStash(): Promise<string[]> {
+    const stashList = await this.git.stashList();
+    return stashList.all.map((s) => s.message);
+  }
+
   async getLog(): Promise<readonly (DefaultLogFields & ListLogLine)[]> {
     const log = await this.git.log();
     return log.all;
   }
+
+  // #region [Branch Operations]
 
   async checkout(branch: string) {
     return this.executeGitAction(
@@ -112,6 +123,7 @@ export class GitService {
       `Failed to create branch ${branchName}`,
     );
   }
+  // #endregion
 
   getRepoName(): string {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];

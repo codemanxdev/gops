@@ -38,6 +38,12 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
         return this.getLocalBranches(element);
       case NodeType.Remote:
         return this.getRemoteBranches();
+      case NodeType.Changes:
+        return this.getChanges();
+      case NodeType.Tags:
+        return this.getTags();
+      case NodeType.Stash:
+        return this.getStash();
       default:
         return [];
     }
@@ -65,6 +71,31 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     );
   }
 
+  private async getChanges(): Promise<TreeItemModel[]> {
+    const status = await this.gitService.getStatus();
+    const changedFiles = [
+      ...status.modified,
+      ...status.not_added,
+      ...status.created,
+      ...status.deleted,
+      ...status.renamed.map((f) => f.to),
+    ];
+
+    return changedFiles.map(
+      (f) => new TreeItemModel({ label: f }, NodeType.File, vscode.TreeItemCollapsibleState.None)
+    );
+  }
+
+  private async getTags(): Promise<TreeItemModel[]> {
+    const tags = await this.gitService.getTags();
+    return tags.map((t) => new TreeItemModel({ label: t }, NodeType.Tags, vscode.TreeItemCollapsibleState.None));
+  }
+
+  private async getStash(): Promise<TreeItemModel[]> {
+    const stash = await this.gitService.getStash();
+    return stash.map((s) => new TreeItemModel({ label: s }, NodeType.Stash, vscode.TreeItemCollapsibleState.None));
+  }
+
   private getRepositoryChildren(): TreeItemModel[] {
     const localBranchesItem = new TreeItemModel(
       { label: Constants.LOCAL_BRANCHES_LABEL },
@@ -82,19 +113,26 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
 
     const changesItem = new TreeItemModel(
       { label: Constants.CHANGES_LABEL },
-      NodeType.Section,
+      NodeType.Changes,
       vscode.TreeItemCollapsibleState.Collapsed,
     );
     changesItem.iconPath = new vscode.ThemeIcon("diff");
 
     const tagsItem = new TreeItemModel(
       { label: Constants.TAGS_LABEL },
-      NodeType.Section,
+      NodeType.Tags,
       vscode.TreeItemCollapsibleState.Collapsed,
     );
     tagsItem.iconPath = new vscode.ThemeIcon("tag");
 
-    return [localBranchesItem, remoteBranchesItem, changesItem, tagsItem];
+    const stashItem = new TreeItemModel(
+      { label: Constants.STASH_LABEL },
+      NodeType.Stash,
+      vscode.TreeItemCollapsibleState.Collapsed,
+    );
+    stashItem.iconPath = new vscode.ThemeIcon("save");
+
+    return [localBranchesItem, remoteBranchesItem, changesItem, tagsItem, stashItem];
   }
 
   refresh(node?: GitTreeNode): void {
