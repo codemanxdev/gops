@@ -5,6 +5,7 @@ export const COMMANDS = {
   RENAME_BRANCH: "gops.renameBranch",
   PUSH: "gops.push",
   PULL: "gops.pull",
+  CREATE_BRANCH_FROM_CURRENT: "gops.branch.current",
   CREATE_BRANCH: "gops.branch",
   CREATE_TAG: "gops.tag",
 } as const;

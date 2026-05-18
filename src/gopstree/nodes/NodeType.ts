@@ -1,9 +1,18 @@
 export enum NodeType {
+  //Root level
   Repository = "repository",
-  Section = "section",
-  Branch = "branch",
+
+  //Main sections
   Local = "local",
   Remote = "remote",
+  Changes = "changes",
+  Tags = "tags",
+  Stash = "stash",
+
+  //Changes section
   File = "file",
-  Stash = "stash"
+
+  //Unused
+  Section = "section",
+  Branch = "branch",
 }

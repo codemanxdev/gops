@@ -3,7 +3,8 @@
 Git Operations - Visual Git Toolkit for VS Code
 
 ## Build Status
-[![CI](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml/badge.svg)](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml)
+
+[![CI Builds](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml)
 
 ## Features
 
@@ -23,21 +24,15 @@ Git Operations - Visual Git Toolkit for VS Code
 - Local Changes
 - Tags
 
-
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Git should be installed
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-- `myExtension.enable`: Enable/disable this extension.
-- `myExtension.thing`: Set to `blah` to do something.
+- N/A
 
 ## Known Issues
 
@@ -47,19 +42,9 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 Users appreciate release notes as you update your extension.
 
-### 1.0.0
+### 0.0.1
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
+Initial release of Gops
 
 ## Following extension guidelines
 
@@ -69,5 +54,26 @@ Ensure that you've read through the extensions guidelines and follow the best pr
 
 ## Build Process
 
+#### Install Dependences
+
 - npm install
+
+#### Compile
+
 - npm run compile
+
+#### Build
+
+- npm run build
+
+#### Check the files that will be packaged
+
+- vsce ls
+
+#### Package
+
+- vsce package --no-dependencies
+
+#### Publish
+
+- vsce publish --no-dependencies

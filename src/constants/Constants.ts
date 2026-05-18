@@ -4,6 +4,7 @@ export class Constants {
   static readonly REMOTE_BRANCHES_LABEL = 'Remote Branches';
   static readonly CHANGES_LABEL = 'Changes';
   static readonly TAGS_LABEL = 'Tags';
+  static readonly STASH_LABEL = 'Stash';
 
   //Logging
   static readonly LOGGER_CHANNEL = "Gops";

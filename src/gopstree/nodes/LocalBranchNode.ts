@@ -20,7 +20,7 @@ export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
       NodeType.Local,
       vscode.TreeItemCollapsibleState.None,
     );
-    this.contextValue = ContextValue.LocalBranches.toString();
+    this.contextValue = isCurrent ? ContextValue.LocalBranchesCurrent : ContextValue.LocalBranches;
 
     if (isCurrent) {
       this.iconPath = new vscode.ThemeIcon("check");
