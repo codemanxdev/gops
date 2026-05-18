@@ -2,7 +2,7 @@
   "name": "gops",
   "displayName": "Gops - Visual Git Toolkit",
   "description": "Visual Git Toolkit for VS Code",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "codemanxdev",
   "repository": {
     "type": "git",

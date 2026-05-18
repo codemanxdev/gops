@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+permissions:
+  contents: write
 
 jobs:
   publish:
@@ -13,12 +15,28 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npm install -g @vscode/vsce
+
+      - name: List packaged files
+        run: npx vsce ls
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"        
+
+      - name: Version bump
+        run: |
+          npm version patch
+          git push
+          git push --tags
 
       - name: Publish to VS Code Marketplace
-        run: npx vsce publish
+        run: npx vsce publish patch
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
