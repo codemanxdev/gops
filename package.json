@@ -1,6 +1,6 @@
 {
   "name": "gops",
-  "displayName": "Gops",
+  "displayName": "Gops - Visual Git Toolkit",
   "description": "Visual Git Toolkit for VS Code",
   "version": "0.0.1",
   "publisher": "codemanxdev",
@@ -12,8 +12,34 @@
     "vscode": "^1.110.0"
   },
   "categories": [
+    "SCM Providers",
     "Other"
   ],
+  "keywords": [
+    "git",
+    "gitops",
+    "git-ui",
+    "git-gui",
+    "visual-git",
+    "source-control",
+    "version-control",
+    "scm",
+    "github",
+    "gitlab",
+    "repository",
+    "commit",
+    "branch",
+    "merge",
+    "rebase",
+    "stash",
+    "cherry-pick",
+    "diff",
+    "history",
+    "workflow",
+    "productivity",
+    "gui"
+  ],
+  "icon": "gops-logo.png",
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
