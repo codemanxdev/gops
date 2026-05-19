@@ -75,3 +75,18 @@ export const createRemoteBranchTooltip = (
     isTracking ? "Tracking enabled" : "Not tracking",
   ].join("\n");
 };
+
+export const formatChangedFileLabel = (
+  fileName: string,
+): LabelWithHighlights => {
+  return {
+    label: fileName,
+    highlights: [],
+  };
+};
+
+export const createChangedFileTooltip = (
+  fileName: string,
+): string => {
+  return `File: ${fileName}`;
+};

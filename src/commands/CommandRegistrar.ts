@@ -4,12 +4,15 @@ import { GitService } from "../services/GitService";
 import { COMMANDS } from "./Commands";
 import { GitTreeNode } from "../gopstree/types";
 import { Logger } from "../logging/Logger";
+import { DiffService } from "../services/DiffService";
+import { ChangedFileNode } from "../gopstree/nodes/ChangedFileNode";
 
 export class CommandRegistrar {
   constructor(
     private context: vscode.ExtensionContext,
     private treeDataProvider: TreeDataProvider,
     private gitService: GitService,
+    private diffService: DiffService,
   ) {}
 
   registerAll() {
@@ -92,7 +95,28 @@ export class CommandRegistrar {
           this.treeDataProvider.refresh(node.parent);
         }
       },
-    );    
+    );
+
+    this.register(COMMANDS.SHOW_DIFF, async (node: GitTreeNode) => {
+      console.debug(`executed command: ${COMMANDS.SHOW_DIFF}`);
+      if (!node || !(node instanceof ChangedFileNode) || !node.fileName) {
+        return;
+      }
+      const repoPath = this.gitService.getRepoPath();
+
+      await this.diffService.openDiff({
+        left: {
+          repositoryPath: repoPath,
+          fileName: node.fileName,
+          ref: "HEAD",
+        },
+        right: {
+          repositoryPath: repoPath,
+          fileName: node.fileName,
+        },
+        title: `Diff: ${node.fileName}`,
+      });
+    });
   }
 
   private register(

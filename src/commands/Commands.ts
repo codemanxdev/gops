@@ -8,4 +8,5 @@ export const COMMANDS = {
   CREATE_BRANCH_FROM_CURRENT: "gops.branch.current",
   CREATE_BRANCH: "gops.branch",
   CREATE_TAG: "gops.tag",
+  SHOW_DIFF: "gops.showDiff",
 } as const;
