@@ -3,9 +3,9 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { Logger } from "../logging/Logger";
 import { Notifications } from "../notifications/Notifications";
-import { LocalBranchModel } from "./LocalBranchModel";
-import { RemoteBranchModel } from "./RemoteBranchModel";
-import { AheadBehindModel } from "./AheadBehindModel";
+import { LocalBranchModel } from "../models/LocalBranchModel";
+import { RemoteBranchModel } from "../models/RemoteBranchModel";
+import { AheadBehindModel } from "../models/AheadBehindModel";
 
 export class GitService {
   private git: SimpleGit;
@@ -72,6 +72,10 @@ export class GitService {
   async getLog(): Promise<readonly (DefaultLogFields & ListLogLine)[]> {
     const log = await this.git.log();
     return log.all;
+  }
+
+  public async getFileContent(ref: string, filePath: string): Promise<string> {
+    return await this.git.show([`${ref}:${filePath}`]);
   }
 
   // #region [Branch Operations]

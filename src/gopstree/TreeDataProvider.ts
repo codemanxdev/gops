@@ -8,6 +8,7 @@ import { RemoteBranchNode } from "./nodes/RemoteBranchNode";
 import { Constants } from "../constants/Constants";
 import { GitTreeNode } from "./types";
 import { Notifications } from "../notifications/Notifications";
+import { ChangedFileNode } from "./nodes/ChangedFileNode";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<
@@ -81,9 +82,13 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       ...status.renamed.map((f) => f.to),
     ];
 
-    return changedFiles.map(
-      (f) => new TreeItemModel({ label: f }, NodeType.File, vscode.TreeItemCollapsibleState.None)
-    );
+    const allChangedFiles = changedFiles.map((f) => {
+      const node = new ChangedFileNode(f);
+      console.debug(node.toString());
+      return node;
+    });
+    
+    return allChangedFiles;
   }
 
   private async getTags(): Promise<TreeItemModel[]> {

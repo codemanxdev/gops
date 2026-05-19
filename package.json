@@ -92,6 +92,11 @@
         "command": "gops.tag",
         "title": "Create Tag",
         "icon": "$(tag)"
+      },
+      {
+        "command": "gops.showDiff",
+        "title": "Show Diff",
+        "icon": "$(diff)"
       }
     ],
     "viewsContainers": {
@@ -167,7 +172,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
+    "@types/node": "^22.19.19",
     "@types/vscode": "^1.110.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
