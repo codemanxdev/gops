@@ -29,6 +29,19 @@ jobs:
         run: npm run test:unit
       - name: Generate unit coverage reports
         run: npm run coverage:unit
+      - name: Debug test files
+        run: |
+          echo "PWD:"
+          pwd
+
+          echo "Compiled JS tests:"
+          find . -name "*.test.js"
+
+          echo "TS tests:"
+          find . -name "*.test.ts"
+
+          echo "Out directory:"
+          find out -type f || true
       - name: Run integration tests
         run: xvfb-run -a npm run test:integration
       - name: Generate integration coverage reports
