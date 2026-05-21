@@ -172,14 +172,14 @@
     "test:unit": "vitest run",
     "test:integration": "vscode-test",
     "coverage:unit": "vitest run --coverage --coverage.reporter=lcov --coverage.reportsDirectory=coverage/unit",
-    "coverage:integration": "vscode-test --coverage"
+    "coverage:integration": "vscode-test --coverage --coverage-output ./coverage/integration"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.19.19",
     "@types/vscode": "^1.110.0",
     "@vitest/coverage-v8": "^4.1.7",
-    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.27.3",
     "eslint": "^9.39.3",
