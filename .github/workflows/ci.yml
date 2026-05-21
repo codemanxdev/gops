@@ -27,7 +27,7 @@ jobs:
         run: npm run compile
       - name: Run unit tests
         run: npm run test:unit
-      - name: Run extension tests
+      - name: Run integration tests
         run: xvfb-run -a npm run test:integration
       - name: Generate unit coverage reports
         run: npm run coverage:unit
