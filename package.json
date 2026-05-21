@@ -169,18 +169,18 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
+    "test:unit": "vitest run",
     "test:integration": "vscode-test",
-    "test:unit": "vitest",
-    "coverage:integration": "c8 npm run test:integration",
-    "coverage:unit": "c8 npm run test:unit"
+    "coverage:unit": "vitest run --coverage --coverage.reporter=lcov --coverage.reportsDirectory=coverage/unit",
+    "coverage:integration": "vscode-test --coverage"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.19.19",
     "@types/vscode": "^1.110.0",
+    "@vitest/coverage-v8": "^4.1.7",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
-    "c8": "^11.0.0",
     "esbuild": "^0.27.3",
     "eslint": "^9.39.3",
     "mocha": "^11.7.5",
