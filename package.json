@@ -169,8 +169,10 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vscode-test",
-    "test:unit": "vitest"
+    "test:integration": "vscode-test",
+    "test:unit": "vitest",
+    "coverage:integration": "c8 npm run test:integration",
+    "coverage:unit": "c8 npm run test:unit"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -178,6 +180,7 @@
     "@types/vscode": "^1.110.0",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2",
+    "c8": "^11.0.0",
     "esbuild": "^0.27.3",
     "eslint": "^9.39.3",
     "mocha": "^11.7.5",
@@ -188,5 +191,17 @@
   },
   "dependencies": {
     "simple-git": "^3.36.0"
+  },
+  "c8": {
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.test.ts"
+    ]
   }
 }
