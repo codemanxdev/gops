@@ -33,7 +33,15 @@ jobs:
         run: npm run coverage:unit
       - name: Generate integration coverage reports
         run: xvfb-run -a npm run coverage:integration
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Upload unit coverage
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/unit/lcov.info
+          flags: unit
+      - name: Upload integration coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/integration/lcov.info
+          flags: integration
