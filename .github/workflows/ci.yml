@@ -29,9 +29,11 @@ jobs:
         run: npm run test:unit
       - name: Run extension tests
         run: xvfb-run -a npm run test:integration
-      - name: Generate coverage reports
-        run: npm run coverage:unit && npm run coverage:integration
+      - name: Generate unit coverage reports
+        run: npm run coverage:unit
+      - name: Generate integration coverage reports
+        run: xvfb-run -a npm run coverage:integration
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}        
+          token: ${{ secrets.CODECOV_TOKEN }}
