@@ -26,6 +26,6 @@ jobs:
         run: npm version 0.0.${{ github.run_number }} --no-git-tag-version
 
       - name: Publish to VS Code Marketplace
-        run: npx vsce publish patch
+        run: npx vsce publish
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
