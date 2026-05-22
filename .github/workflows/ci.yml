@@ -47,9 +47,11 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/unit/lcov.info
           flags: unit
+          disable_search: true
       - name: Upload integration coverage
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/integration/lcov.info
           flags: integration
+          disable_search: true
