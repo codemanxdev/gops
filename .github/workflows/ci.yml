@@ -23,9 +23,35 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y xvfb
       - name: Lint
         run: npm run lint
-      - name: Compile TypeScript
+      - name: Compile Extension
         run: npm run compile
+      - name: Compile Integration Tests
+        run: npm run compile:tests
       - name: Run unit tests
         run: npm run test:unit
-      - name: Run extension tests
-        run: xvfb-run -a npm test
+      - name: Generate unit coverage reports
+        run: npm run coverage:unit
+      - name: Run integration tests
+        run: xvfb-run -a npm run test:integration
+      - name: Generate integration coverage reports
+        run: xvfb-run -a npm run coverage:integration
+      - name: List coverage files
+        run: |
+          echo "Unit coverage files:"
+          ls -l ./coverage/unit
+          echo "Integration coverage files:"
+          ls -l ./coverage/integration
+      - name: Upload unit coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/unit/lcov.info
+          flags: unit
+          disable_search: true
+      - name: Upload integration coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/integration/lcov.info
+          flags: integration
+          disable_search: true

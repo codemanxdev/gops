@@ -6,6 +6,10 @@ Git Operations - Visual Git Toolkit for VS Code
 
 [![CI Builds](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml)
 
+[![Unit Coverage](https://codecov.io/gh/codemanxdev/gops/branch/develop/graph/badge.svg?flag=unit)](https://codecov.io/gh/codemanxdev/gops)
+
+[![Integration Coverage](https://codecov.io/gh/codemanxdev/gops/branch/develop/graph/badge.svg?flag=integration)](https://codecov.io/gh/codemanxdev/gops)
+
 ## Features
 
 ### Tree View
