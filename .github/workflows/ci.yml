@@ -40,8 +40,8 @@ jobs:
           echo "TS tests:"
           find . -name "*.test.ts"
 
-          echo "Out directory:"
-          find out -type f || true
+          echo "Dist directory:"
+          find dist -type f || true
       - name: Run integration tests
         run: xvfb-run -a npm run test:integration
       - name: Generate integration coverage reports
