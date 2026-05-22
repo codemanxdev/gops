@@ -23,25 +23,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y xvfb
       - name: Lint
         run: npm run lint
-      - name: Compile TypeScript
+      - name: Compile Extension
         run: npm run compile
+      - name: Compile Integration Tests
+        run: npm run compile:tests
       - name: Run unit tests
         run: npm run test:unit
       - name: Generate unit coverage reports
         run: npm run coverage:unit
-      - name: Debug test files
-        run: |
-          echo "PWD:"
-          pwd
-
-          echo "Compiled JS tests:"
-          find . -name "*.test.js"
-
-          echo "TS tests:"
-          find . -name "*.test.ts"
-
-          echo "Dist directory:"
-          find dist -type f || true
       - name: Run integration tests
         run: xvfb-run -a npm run test:integration
       - name: Generate integration coverage reports
