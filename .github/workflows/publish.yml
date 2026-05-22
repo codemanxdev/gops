@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - master
-permissions:
-  contents: write
-
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -25,16 +22,8 @@ jobs:
       - name: List packaged files
         run: npx vsce ls
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"        
-
-      - name: Version bump
-        run: |
-          npm version patch
-          git push
-          git push --tags
+      - name: Update version
+        run: npm version 0.0.${{ github.run_number }} --no-git-tag-version
 
       - name: Publish to VS Code Marketplace
         run: npx vsce publish patch
