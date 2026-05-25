@@ -5,9 +5,9 @@ export class TreeItemModel<T extends NodeType = NodeType> extends vscode.TreeIte
   readonly type: T;
 
   constructor(
-    public readonly label: vscode.TreeItemLabel,
+    public label: vscode.TreeItemLabel,
     type: T,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+    public collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly command?: vscode.Command,
     public readonly children: TreeItemModel[] = [],
     public parent?: TreeItemModel,

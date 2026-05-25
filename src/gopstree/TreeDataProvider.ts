@@ -126,7 +126,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     const localBranchesItem = new TreeItemModel(
       { label: Constants.LOCAL_BRANCHES_LABEL },
       NodeType.Local,
-      vscode.TreeItemCollapsibleState.Collapsed,
+      this.localBranchesNode?.collapsibleState ||
+        vscode.TreeItemCollapsibleState.Collapsed,
     );
     localBranchesItem.iconPath = new vscode.ThemeIcon("go-to-file");
     this.localBranchesNode = localBranchesItem;
@@ -134,7 +135,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     const remoteBranchesItem = new TreeItemModel(
       { label: Constants.REMOTE_BRANCHES_LABEL },
       NodeType.Remote,
-      vscode.TreeItemCollapsibleState.Collapsed,
+      this.remoteBranchesNode?.collapsibleState ||
+        vscode.TreeItemCollapsibleState.Collapsed,
     );
     remoteBranchesItem.iconPath = new vscode.ThemeIcon("cloud");
     this.remoteBranchesNode = remoteBranchesItem;
@@ -142,7 +144,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     const changesItem = new TreeItemModel(
       { label: Constants.CHANGES_LABEL },
       NodeType.Changes,
-      vscode.TreeItemCollapsibleState.Collapsed,
+      this.changesNode?.collapsibleState ||
+        vscode.TreeItemCollapsibleState.Collapsed,
     );
     changesItem.iconPath = new vscode.ThemeIcon("diff");
     this.changesNode = changesItem;
@@ -150,7 +153,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     const tagsItem = new TreeItemModel(
       { label: Constants.TAGS_LABEL },
       NodeType.Tags,
-      vscode.TreeItemCollapsibleState.Collapsed,
+      this.tagsNode?.collapsibleState ||
+        vscode.TreeItemCollapsibleState.Collapsed,
     );
     tagsItem.iconPath = new vscode.ThemeIcon("tag");
     this.tagsNode = tagsItem;
@@ -158,7 +162,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     const stashItem = new TreeItemModel(
       { label: Constants.STASH_LABEL },
       NodeType.Stash,
-      vscode.TreeItemCollapsibleState.Collapsed,
+      this.stashNode?.collapsibleState ||
+        vscode.TreeItemCollapsibleState.Collapsed,
     );
     stashItem.iconPath = new vscode.ThemeIcon("save");
     this.stashNode = stashItem;
@@ -182,26 +187,35 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   }
 
   async refreshRootNode(): Promise<void> {
-    if (!this.rootNode)
-      {return;}
+    if (!this.rootNode) {
+      return;
+    }
 
     const currentBranch = await this.gitService.getCurrentBranch();
     this.rootNode.updateActiveBranchLabel(currentBranch);
     this._onDidChangeTreeData.fire(this.rootNode);
   }
 
-  refreshLocalBranchesNode(): void {
-    if (!this.localBranchesNode) {return;}
+  async refreshLocalBranchesNode(): Promise<void> {
+    if (!this.localBranchesNode) {
+      return;
+    }
+    this.localBranchesNode.collapsibleState =
+      vscode.TreeItemCollapsibleState.Expanded;
     this._onDidChangeTreeData.fire(this.localBranchesNode);
   }
 
   refreshRemoteBranchesNode(): void {
-    if (!this.remoteBranchesNode) {return;}
+    if (!this.remoteBranchesNode) {
+      return;
+    }
     this._onDidChangeTreeData.fire(this.remoteBranchesNode);
   }
 
   refreshChangesNode(): void {
-    if (!this.changesNode) {return;}
+    if (!this.changesNode) {
+      return;
+    }
     this._onDidChangeTreeData.fire(this.changesNode);
   }
 }

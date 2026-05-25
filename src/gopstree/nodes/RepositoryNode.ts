@@ -1,14 +1,12 @@
 import { ContextValue } from "../ContextValue";
 import { NodeType } from "./NodeType";
 import { TreeItemModel } from "../TreeItemModel";
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export class RepositoryNode extends TreeItemModel {
-  declare label: vscode.TreeItemLabel;
-
   constructor(
     public readonly repoName: string,
-    public readonly branch: string,
+    branch: string,
   ) {
     super(
       { label: `${repoName} (${branch})` },
@@ -19,7 +17,7 @@ export class RepositoryNode extends TreeItemModel {
     this.iconPath = new vscode.ThemeIcon("repo");
   }
 
-  updateActiveBranchLabel(branchLabel: string): void {
-    this.label.label = `${this.repoName} (${branchLabel})`;
+  updateActiveBranchLabel(branch: string): void {
+    this.label = { label: `${this.repoName} (${branch})` };
   }
 }
