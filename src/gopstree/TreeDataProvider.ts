@@ -16,6 +16,12 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   >();
 
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+  private rootNode: RepositoryNode | undefined;
+  private localBranchesNode: TreeItemModel | undefined;
+  private remoteBranchesNode: TreeItemModel | undefined;
+  private changesNode: TreeItemModel | undefined;
+  private tagsNode: TreeItemModel | undefined;
+  private stashNode: TreeItemModel | undefined;
 
   constructor(private readonly gitService: GitService) {}
 
@@ -28,7 +34,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     if (!element) {
       const repoName = this.gitService.getRepoName();
       const currentBranch = await this.gitService.getCurrentBranch();
-      return [new RepositoryNode(repoName, currentBranch)];
+      this.rootNode = new RepositoryNode(repoName, currentBranch);
+      return [this.rootNode];
     }
 
     //Routing based on node type
@@ -50,15 +57,15 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     }
   }
 
-  private async getLocalBranches(parent: TreeItemModel): Promise<TreeItemModel[]> {
+  private async getLocalBranches(
+    parent: TreeItemModel,
+  ): Promise<TreeItemModel[]> {
     const branches = await this.gitService.getLocalBranches();
-    const allLocalBranches = branches.map(
-      (b) => {
-        const node = new LocalBranchNode(b.name, b.current, b.ahead, b.behind);
-        node.parent = parent;
-        return node;
-      }
-    );
+    const allLocalBranches = branches.map((b) => {
+      const node = new LocalBranchNode(b.name, b.current, b.ahead, b.behind);
+      node.parent = parent;
+      return node;
+    });
     for (const branch of allLocalBranches) {
       console.debug(branch.toString());
     }
@@ -87,18 +94,32 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       console.debug(node.toString());
       return node;
     });
-    
+
     return allChangedFiles;
   }
 
   private async getTags(): Promise<TreeItemModel[]> {
     const tags = await this.gitService.getTags();
-    return tags.map((t) => new TreeItemModel({ label: t }, NodeType.Tags, vscode.TreeItemCollapsibleState.None));
+    return tags.map(
+      (t) =>
+        new TreeItemModel(
+          { label: t },
+          NodeType.Tags,
+          vscode.TreeItemCollapsibleState.None,
+        ),
+    );
   }
 
   private async getStash(): Promise<TreeItemModel[]> {
     const stash = await this.gitService.getStash();
-    return stash.map((s) => new TreeItemModel({ label: s }, NodeType.Stash, vscode.TreeItemCollapsibleState.None));
+    return stash.map(
+      (s) =>
+        new TreeItemModel(
+          { label: s },
+          NodeType.Stash,
+          vscode.TreeItemCollapsibleState.None,
+        ),
+    );
   }
 
   private getRepositoryChildren(): TreeItemModel[] {
@@ -108,6 +129,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       vscode.TreeItemCollapsibleState.Collapsed,
     );
     localBranchesItem.iconPath = new vscode.ThemeIcon("go-to-file");
+    this.localBranchesNode = localBranchesItem;
 
     const remoteBranchesItem = new TreeItemModel(
       { label: Constants.REMOTE_BRANCHES_LABEL },
@@ -115,6 +137,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       vscode.TreeItemCollapsibleState.Collapsed,
     );
     remoteBranchesItem.iconPath = new vscode.ThemeIcon("cloud");
+    this.remoteBranchesNode = remoteBranchesItem;
 
     const changesItem = new TreeItemModel(
       { label: Constants.CHANGES_LABEL },
@@ -122,6 +145,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       vscode.TreeItemCollapsibleState.Collapsed,
     );
     changesItem.iconPath = new vscode.ThemeIcon("diff");
+    this.changesNode = changesItem;
 
     const tagsItem = new TreeItemModel(
       { label: Constants.TAGS_LABEL },
@@ -129,6 +153,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       vscode.TreeItemCollapsibleState.Collapsed,
     );
     tagsItem.iconPath = new vscode.ThemeIcon("tag");
+    this.tagsNode = tagsItem;
 
     const stashItem = new TreeItemModel(
       { label: Constants.STASH_LABEL },
@@ -136,8 +161,15 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       vscode.TreeItemCollapsibleState.Collapsed,
     );
     stashItem.iconPath = new vscode.ThemeIcon("save");
+    this.stashNode = stashItem;
 
-    return [localBranchesItem, remoteBranchesItem, changesItem, tagsItem, stashItem];
+    return [
+      localBranchesItem,
+      remoteBranchesItem,
+      changesItem,
+      tagsItem,
+      stashItem,
+    ];
   }
 
   refresh(node?: GitTreeNode): void {
@@ -147,5 +179,29 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     if (node === undefined) {
       Notifications.info("Git Ops tree view refreshed");
     }
+  }
+
+  async refreshRootNode(): Promise<void> {
+    if (!this.rootNode)
+      {return;}
+
+    const currentBranch = await this.gitService.getCurrentBranch();
+    this.rootNode.updateActiveBranchLabel(currentBranch);
+    this._onDidChangeTreeData.fire(this.rootNode);
+  }
+
+  refreshLocalBranchesNode(): void {
+    if (!this.localBranchesNode) {return;}
+    this._onDidChangeTreeData.fire(this.localBranchesNode);
+  }
+
+  refreshRemoteBranchesNode(): void {
+    if (!this.remoteBranchesNode) {return;}
+    this._onDidChangeTreeData.fire(this.remoteBranchesNode);
+  }
+
+  refreshChangesNode(): void {
+    if (!this.changesNode) {return;}
+    this._onDidChangeTreeData.fire(this.changesNode);
   }
 }
