@@ -28,6 +28,22 @@ export class GitService {
     return this.git.status();
   }
 
+  async getChangedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    const allChangedFiles = [
+      ...status.modified,
+      ...status.created,
+      ...status.deleted,
+      ...status.renamed.map((f) => f.to),
+    ];
+    return allChangedFiles;
+  }
+
+  async getStagedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.staged;
+  }
+
   async getBranches(): Promise<BranchSummary> {
     return this.git.branch();
   }

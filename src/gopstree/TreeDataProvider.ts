@@ -9,6 +9,7 @@ import { Constants } from "../constants/Constants";
 import { GitTreeNode } from "./types";
 import { Notifications } from "../notifications/Notifications";
 import { ChangedFileNode } from "./nodes/ChangedFileNode";
+import { StagedChangesFileNode } from "./nodes/StagedChangesFileNode";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<
@@ -48,6 +49,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
         return this.getRemoteBranches();
       case NodeType.Changes:
         return this.getChanges();
+      case NodeType.StagedChanges:
+        return this.getStagedChanges();
       case NodeType.Tags:
         return this.getTags();
       case NodeType.Stash:
@@ -80,15 +83,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   }
 
   private async getChanges(): Promise<TreeItemModel[]> {
-    const status = await this.gitService.getStatus();
-    const changedFiles = [
-      ...status.modified,
-      ...status.not_added,
-      ...status.created,
-      ...status.deleted,
-      ...status.renamed.map((f) => f.to),
-    ];
-
+    const changedFiles = await this.gitService.getChangedFiles();
     const allChangedFiles = changedFiles.map((f) => {
       const node = new ChangedFileNode(f);
       console.debug(node.toString());
@@ -96,6 +91,15 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     });
 
     return allChangedFiles;
+  }
+
+  private async getStagedChanges(): Promise<TreeItemModel[]> {
+    const stagedFiles = await this.gitService.getStagedFiles();
+    return stagedFiles.map((f) => {
+      const node = new StagedChangesFileNode(f);
+      console.debug(node.toString());
+      return node;
+    });
   }
 
   private async getTags(): Promise<TreeItemModel[]> {

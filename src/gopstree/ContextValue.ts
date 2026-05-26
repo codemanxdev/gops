@@ -1,6 +1,7 @@
 export enum ContextValue {
   Repository = "repository",
   Changes = "changes",
+  StagedChanges = "stagedChanges",
   LocalBranches = "localBranches",
   LocalBranchesCurrent = "localBranches.current",
   RemoteBranches = "remoteBranches",
