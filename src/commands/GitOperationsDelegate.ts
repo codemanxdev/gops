@@ -18,7 +18,9 @@ export class GitOperationsDelegate {
   }
 
   async checkoutBranch(node: GitTreeNode): Promise<void> {
-    if (!node || !("branchName" in node)) {return;}
+    if (!node || !("branchName" in node)) {
+      return;
+    }
 
     await this.gitService.checkout(node.branchName);
     await this.treeDataProvider.refreshRootNode();
@@ -26,12 +28,16 @@ export class GitOperationsDelegate {
   }
 
   async deleteBranch(node: GitTreeNode): Promise<void> {
-    if (!node || !("branchName" in node)) {return;}
+    if (!node || !("branchName" in node)) {
+      return;
+    }
     // TODO: implement
   }
 
   async renameBranch(node: GitTreeNode): Promise<void> {
-    if (!node || !("branchName" in node)) {return;}
+    if (!node || !("branchName" in node)) {
+      return;
+    }
     // TODO: implement
   }
 
@@ -52,28 +58,36 @@ export class GitOperationsDelegate {
       placeHolder: "feature/my-new-feature",
       ignoreFocusOut: true,
     });
-    if (!branchName) {return;}
+    if (!branchName) {
+      return;
+    }
 
     await this.gitService.checkoutLocalBranch(branchName);
     this.treeDataProvider.refreshLocalBranchesNode();
   }
 
   async createBranchFrom(node: GitTreeNode): Promise<void> {
-    if (!node || !("branchName" in node)) {return;}
+    if (!node || !("branchName" in node)) {
+      return;
+    }
 
     const branchName = await vscode.window.showInputBox({
       prompt: `Enter new branch name to create from ${node.branchName}`,
       placeHolder: "feature/my-new-feature",
       ignoreFocusOut: true,
     });
-    if (!branchName) {return;}
+    if (!branchName) {
+      return;
+    }
 
     await this.gitService.checkoutBranch(branchName, node.branchName);
     this.treeDataProvider.refreshLocalBranchesNode();
   }
 
   async showDiff(node: GitTreeNode): Promise<void> {
-    if (!node || !(node instanceof ChangedFileNode) || !node.fileName) {return;}
+    if (!node || !(node instanceof ChangedFileNode) || !node.fileName) {
+      return;
+    }
 
     const repoPath = this.gitService.getRepoPath();
     await this.diffService.openDiff({
@@ -81,5 +95,15 @@ export class GitOperationsDelegate {
       right: { repositoryPath: repoPath, fileName: node.fileName },
       title: `Diff: ${node.fileName}`,
     });
+  }
+
+  async stageFile(node: GitTreeNode): Promise<void> {
+    if (!node || !(node instanceof ChangedFileNode) || !node.fileName) {
+      return;
+    }
+
+    await this.gitService.stageFile(node.fileName);
+    this.treeDataProvider.refreshChangesNode();
+    this.treeDataProvider.refreshStagedNode();
   }
 }

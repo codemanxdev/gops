@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 import { createChangedFileTooltip, formatChangedFileLabel } from "./utils/nodeUtils";
 import { COMMANDS } from "../../commands/Commands";
 
-export class StagedChangesFileNode extends TreeItemModel<NodeType.StagedChanges> {
+export class StagedFileNode extends TreeItemModel<NodeType.StagedChanges> {
   public override command?: vscode.Command;
   constructor(
     public readonly fileName: string,

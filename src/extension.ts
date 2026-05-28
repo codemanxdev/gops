@@ -24,6 +24,17 @@ export function activate(context: vscode.ExtensionContext) {
   const registrar = new CommandRegistrar(context, delegate);
   registrar.registerAll();
 
-  context.subscriptions.push(treeView);
+  const onSave = vscode.workspace.onDidSaveTextDocument(() => {
+    treeDataProvider.refreshChangesNode();
+    treeDataProvider.refreshStagedNode();
+  });
+
+  const gitWatcher = vscode.workspace.createFileSystemWatcher("**/.git/index");
+  gitWatcher.onDidChange(() => {
+    treeDataProvider.refreshChangesNode();
+    treeDataProvider.refreshStagedNode();
+  });
+
+  context.subscriptions.push(treeView, onSave, gitWatcher);
   console.log("Gops extension activated.");
 }

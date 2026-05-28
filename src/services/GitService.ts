@@ -30,18 +30,24 @@ export class GitService {
 
   async getChangedFiles(): Promise<string[]> {
     const status = await this.git.status();
-    const allChangedFiles = [
-      ...status.modified,
-      ...status.created,
-      ...status.deleted,
-      ...status.renamed.map((f) => f.to),
-    ];
-    return allChangedFiles;
+    return status.files
+      .filter((f) => f.working_dir !== " " && f.working_dir !== "?")
+      .map((f) => f.path);
   }
 
   async getStagedFiles(): Promise<string[]> {
     const status = await this.git.status();
-    return status.staged;
+    return status.files
+      .filter((f) => f.index !== " " && f.index !== "?")
+      .map((f) => f.path);
+  }
+
+  async stageFile(filePath: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.add(filePath),
+      `Staged file ${filePath} successfully`,
+      `Failed to stage file ${filePath}`,
+    );
   }
 
   async getBranches(): Promise<BranchSummary> {

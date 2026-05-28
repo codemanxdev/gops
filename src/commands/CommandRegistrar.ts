@@ -29,6 +29,7 @@ export class CommandRegistrar {
       this.delegate.createBranchFrom(node),
     );
     this.register(COMMANDS.SHOW_DIFF, (node) => this.delegate.showDiff(node));
+    this.register(COMMANDS.STAGE_FILE, (node) => this.delegate.stageFile(node));
   }
 
   private register(

@@ -9,7 +9,7 @@ import { Constants } from "../constants/Constants";
 import { GitTreeNode } from "./types";
 import { Notifications } from "../notifications/Notifications";
 import { ChangedFileNode } from "./nodes/ChangedFileNode";
-import { StagedChangesFileNode } from "./nodes/StagedChangesFileNode";
+import { StagedFileNode } from "./nodes/StagedFileNode";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<
@@ -21,6 +21,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private localBranchesNode: TreeItemModel | undefined;
   private remoteBranchesNode: TreeItemModel | undefined;
   private changesNode: TreeItemModel | undefined;
+  private stagedNode: TreeItemModel | undefined;
   private tagsNode: TreeItemModel | undefined;
   private stashNode: TreeItemModel | undefined;
 
@@ -96,7 +97,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private async getStagedChanges(): Promise<TreeItemModel[]> {
     const stagedFiles = await this.gitService.getStagedFiles();
     return stagedFiles.map((f) => {
-      const node = new StagedChangesFileNode(f);
+      const node = new StagedFileNode(f);
       console.debug(node.toString());
       return node;
     });
@@ -154,6 +155,15 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     changesItem.iconPath = new vscode.ThemeIcon("diff");
     this.changesNode = changesItem;
 
+    const stagedItem = new TreeItemModel(
+      { label: Constants.STAGED_LABEL },
+      NodeType.StagedChanges,
+      this.stagedNode?.collapsibleState ||
+        vscode.TreeItemCollapsibleState.Collapsed,
+    );
+    stagedItem.iconPath = new vscode.ThemeIcon("diff-added");
+    this.stagedNode = stagedItem;
+
     const tagsItem = new TreeItemModel(
       { label: Constants.TAGS_LABEL },
       NodeType.Tags,
@@ -176,6 +186,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       localBranchesItem,
       remoteBranchesItem,
       changesItem,
+      stagedItem,
       tagsItem,
       stashItem,
     ];
@@ -221,5 +232,12 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       return;
     }
     this._onDidChangeTreeData.fire(this.changesNode);
+  }
+
+  refreshStagedNode(): void {
+    if (!this.stagedNode) {
+      return;
+    }
+    this._onDidChangeTreeData.fire(this.stagedNode);
   }
 }

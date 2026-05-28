@@ -97,6 +97,11 @@
         "command": "gops.showDiff",
         "title": "Show Diff",
         "icon": "$(diff)"
+      },
+      {
+        "command": "gops.stageFile",
+        "title": "Stage File",
+        "icon": "$(add)"
       }
     ],
     "viewsContainers": {
@@ -143,13 +148,21 @@
       "view/item/context": [
         {
           "command": "gops.branch",
+          "title": "New Branch",
           "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.current)",
           "group": "navigation"
         },
         {
           "command": "gops.checkout",
+          "title": "Checkout Branch",
           "when": "view == gitOpsTreeview && viewItem == localBranches",
           "group": "navigation"
+        },
+        {
+          "command": "gops.stageFile",
+          "title": "Stage File",
+          "when": "view == gitOpsTreeview && viewItem == changedFile",
+          "group": "inline"
         }
       ]
     }
