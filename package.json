@@ -102,6 +102,16 @@
         "command": "gops.stageFile",
         "title": "Stage File",
         "icon": "$(add)"
+      },
+      {
+        "command": "gops.unstageFile",
+        "title": "Unstage File",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "gops.commit",
+        "title": "Commit",
+        "icon": "$(check)"
       }
     ],
     "viewsContainers": {
@@ -124,6 +134,11 @@
     },
     "menus": {
       "view/title": [
+        {
+          "command": "gops.commit",
+          "when": "view == gitOpsTreeview && gops.hasStagedFiles == true",
+          "group": "navigation"
+        },
         {
           "command": "gops.refresh",
           "when": "view == gitOpsTreeview",
@@ -162,6 +177,12 @@
           "command": "gops.stageFile",
           "title": "Stage File",
           "when": "view == gitOpsTreeview && viewItem == changedFile",
+          "group": "inline"
+        },
+        {
+          "command": "gops.unstageFile",
+          "title": "Unstage File",
+          "when": "view == gitOpsTreeview && viewItem == stagedFile",
           "group": "inline"
         }
       ]

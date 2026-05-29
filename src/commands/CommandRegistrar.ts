@@ -10,6 +10,7 @@ export class CommandRegistrar {
   ) {}
 
   registerAll() {
+    vscode.commands.executeCommand("setContext", "gops.hasStagedFiles", false); 
     this.register(COMMANDS.REFRESH, () => this.delegate.refresh());
     this.register(COMMANDS.CHECKOUT_BRANCH, (node) =>
       this.delegate.checkoutBranch(node),
@@ -30,6 +31,10 @@ export class CommandRegistrar {
     );
     this.register(COMMANDS.SHOW_DIFF, (node) => this.delegate.showDiff(node));
     this.register(COMMANDS.STAGE_FILE, (node) => this.delegate.stageFile(node));
+    this.register(COMMANDS.UNSTAGE_FILE, (node) =>
+      this.delegate.unstageFile(node),
+    );
+    this.register(COMMANDS.COMMIT, () => this.delegate.commit());
   }
 
   private register(

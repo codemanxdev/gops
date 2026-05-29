@@ -4,6 +4,7 @@ import { DiffService } from "../services/DiffService";
 import { TreeDataProvider } from "../gopstree/TreeDataProvider";
 import { GitTreeNode } from "../gopstree/types";
 import { ChangedFileNode } from "../gopstree/nodes/ChangedFileNode";
+import { StagedFileNode } from "../gopstree/nodes/StagedFileNode";
 
 export class GitOperationsDelegate {
   constructor(
@@ -103,7 +104,32 @@ export class GitOperationsDelegate {
     }
 
     await this.gitService.stageFile(node.fileName);
+    await this.treeDataProvider.refreshChangesNode();
+    await this.treeDataProvider.refreshStagedNode();
+  }
+
+  async unstageFile(node: GitTreeNode): Promise<void> {
+    if (!node || !(node instanceof StagedFileNode) || !node.fileName) {
+      return;
+    }
+
+    await this.gitService.unstageFile(node.fileName);
+    await this.treeDataProvider.refreshChangesNode();
+    await this.treeDataProvider.refreshStagedNode();
+  }
+
+  async commit(): Promise<void> {
+    const message = await vscode.window.showInputBox({
+      prompt: "Enter commit message",
+      placeHolder: "feat: my changes",
+      ignoreFocusOut: true,
+    });
+    if (!message) {
+      return;
+    }
+
+    await this.gitService.commit(message);
     this.treeDataProvider.refreshChangesNode();
-    this.treeDataProvider.refreshStagedNode();
+    await this.treeDataProvider.refreshStagedNode();
   }
 }

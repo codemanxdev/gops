@@ -227,17 +227,23 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     this._onDidChangeTreeData.fire(this.remoteBranchesNode);
   }
 
-  refreshChangesNode(): void {
+  async refreshChangesNode(): Promise<void> {
     if (!this.changesNode) {
       return;
     }
     this._onDidChangeTreeData.fire(this.changesNode);
   }
 
-  refreshStagedNode(): void {
+  async refreshStagedNode(): Promise<void> {
     if (!this.stagedNode) {
       return;
     }
+    const stagedFiles = await this.gitService.getStagedFiles();
+    await vscode.commands.executeCommand(
+      "setContext",
+      "gops.hasStagedFiles",
+      stagedFiles.length > 0,
+    );
     this._onDidChangeTreeData.fire(this.stagedNode);
   }
 }
