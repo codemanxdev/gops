@@ -10,6 +10,13 @@ import { GitTreeNode } from "./types";
 import { Notifications } from "../notifications/Notifications";
 import { ChangedFileNode } from "./nodes/ChangedFileNode";
 import { StagedFileNode } from "./nodes/StagedFileNode";
+import { LocalBranchesSection } from "./nodes/LocalBranchesSection";
+import { RemoteBranchesSection } from "./nodes/RemoteBranchesSection";
+import { ChangesSection } from "./nodes/ChangesSection";
+import { StagedChangesSection } from "./nodes/StagedChangesSection";
+import { TagsSection } from "./nodes/TagsSection";
+import { StashSection } from "./nodes/StashSection";
+import { ContextValue } from "./ContextValue";
 
 export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<
@@ -18,12 +25,12 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
 
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   private rootNode: RepositoryNode | undefined;
-  private localBranchesNode: TreeItemModel | undefined;
-  private remoteBranchesNode: TreeItemModel | undefined;
-  private changesNode: TreeItemModel | undefined;
-  private stagedNode: TreeItemModel | undefined;
-  private tagsNode: TreeItemModel | undefined;
-  private stashNode: TreeItemModel | undefined;
+  private localBranchesNode: LocalBranchesSection | undefined;
+  private remoteBranchesNode: RemoteBranchesSection | undefined;
+  private changesNode: ChangesSection | undefined;
+  private stagedNode: StagedChangesSection | undefined;
+  private tagsNode: TagsSection | undefined;
+  private stashNode: StashSection | undefined;
 
   constructor(private readonly gitService: GitService) {}
 
@@ -43,19 +50,19 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     //Routing based on node type
     switch (element.type) {
       case NodeType.Repository:
-        return this.getRepositoryChildren();
+        return await this.getRepositoryChildren();
       case NodeType.Local:
-        return this.getLocalBranches(element);
+        return await this.getLocalBranches(element);
       case NodeType.Remote:
-        return this.getRemoteBranches();
+        return await this.getRemoteBranches();
       case NodeType.Changes:
-        return this.getChanges();
+        return await this.getChanges();
       case NodeType.StagedChanges:
-        return this.getStagedChanges();
+        return await this.getStagedChanges();
       case NodeType.Tags:
-        return this.getTags();
+        return await this.getTags();
       case NodeType.Stash:
-        return this.getStash();
+        return await this.getStash();
       default:
         return [];
     }
@@ -127,59 +134,49 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     );
   }
 
-  private getRepositoryChildren(): TreeItemModel[] {
-    const localBranchesItem = new TreeItemModel(
-      { label: Constants.LOCAL_BRANCHES_LABEL },
-      NodeType.Local,
+  private async getRepositoryChildren(): Promise<TreeItemModel[]> {
+    const stagedFiles = await this.gitService.getStagedFiles();
+    const hasStagedFiles = stagedFiles.length > 0;
+    await vscode.commands.executeCommand(
+      "setContext",
+      "gops.hasStagedFiles",
+      hasStagedFiles,
+    );
+
+    const localBranchesItem = new LocalBranchesSection(
       this.localBranchesNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
-    localBranchesItem.iconPath = new vscode.ThemeIcon("go-to-file");
     this.localBranchesNode = localBranchesItem;
 
-    const remoteBranchesItem = new TreeItemModel(
-      { label: Constants.REMOTE_BRANCHES_LABEL },
-      NodeType.Remote,
+    const remoteBranchesItem = new RemoteBranchesSection(
       this.remoteBranchesNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
-    remoteBranchesItem.iconPath = new vscode.ThemeIcon("cloud");
     this.remoteBranchesNode = remoteBranchesItem;
 
-    const changesItem = new TreeItemModel(
-      { label: Constants.CHANGES_LABEL },
-      NodeType.Changes,
+    const changesItem = new ChangesSection(
       this.changesNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
-    changesItem.iconPath = new vscode.ThemeIcon("diff");
     this.changesNode = changesItem;
 
-    const stagedItem = new TreeItemModel(
-      { label: Constants.STAGED_LABEL },
-      NodeType.StagedChanges,
+    const stagedItem = new StagedChangesSection(
       this.stagedNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
-    stagedItem.iconPath = new vscode.ThemeIcon("diff-added");
     this.stagedNode = stagedItem;
 
-    const tagsItem = new TreeItemModel(
-      { label: Constants.TAGS_LABEL },
-      NodeType.Tags,
+    const tagsItem = new TagsSection(
       this.tagsNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
-    tagsItem.iconPath = new vscode.ThemeIcon("tag");
     this.tagsNode = tagsItem;
 
-    const stashItem = new TreeItemModel(
-      { label: Constants.STASH_LABEL },
-      NodeType.Stash,
+    const stashItem = new StashSection(
       this.stashNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
-    stashItem.iconPath = new vscode.ThemeIcon("save");
     this.stashNode = stashItem;
 
     return [
@@ -239,11 +236,15 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       return;
     }
     const stagedFiles = await this.gitService.getStagedFiles();
+    const hasStagedFiles = stagedFiles.length > 0;
     await vscode.commands.executeCommand(
       "setContext",
       "gops.hasStagedFiles",
-      stagedFiles.length > 0,
+      hasStagedFiles,
     );
+    this.stagedNode.contextValue = hasStagedFiles
+      ? ContextValue.StagedChangesSection
+      : ContextValue.StagedChangesSectionEmpty;
     this._onDidChangeTreeData.fire(this.stagedNode);
   }
 }

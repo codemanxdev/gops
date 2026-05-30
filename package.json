@@ -111,7 +111,12 @@
       {
         "command": "gops.commit",
         "title": "Commit",
-        "icon": "$(check)"
+        "icon": "$(save)"
+      },
+      {
+        "command": "gops.unstageAllFiles",
+        "title": "Unstage All Files",
+        "icon": "$(collapse-all)"
       }
     ],
     "viewsContainers": {
@@ -183,6 +188,12 @@
           "command": "gops.unstageFile",
           "title": "Unstage File",
           "when": "view == gitOpsTreeview && viewItem == stagedFile",
+          "group": "inline"
+        },
+        {
+          "command": "gops.unstageAllFiles",
+          "title": "Unstage All Files",
+          "when": "view == gitOpsTreeview && viewItem == stagedChangesSection",
           "group": "inline"
         }
       ]

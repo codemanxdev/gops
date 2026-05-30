@@ -9,4 +9,11 @@ export enum ContextValue {
   File = "file",
   Stash = "stash",
   Commit = "commit",
+  LocalBranchesSection = "localBranchesSection",
+  RemoteBranchesSection = "remoteBranchesSection",
+  ChangesSection = "changesSection",
+  StagedChangesSection = "stagedChangesSection",
+  StagedChangesSectionEmpty = "stagedChangesSectionEmpty",
+  TagsSection = "tagsSection",
+  StashSection = "stashSection",
 }

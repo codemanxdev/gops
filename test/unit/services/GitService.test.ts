@@ -15,7 +15,11 @@ vi.mock("vscode", () => ({
     ],
   },
   window: {
-    createOutputChannel: vi.fn(() => ({ appendLine: vi.fn(), show: vi.fn(), dispose: vi.fn() })),
+    createOutputChannel: vi.fn(() => ({
+      appendLine: vi.fn(),
+      show: vi.fn(),
+      dispose: vi.fn(),
+    })),
     showInformationMessage: vi.fn(),
     showWarningMessage: vi.fn(),
     showErrorMessage: vi.fn(),
@@ -43,6 +47,8 @@ const mockGit = {
   commit: vi.fn(),
   pull: vi.fn(),
   checkoutLocalBranch: vi.fn(),
+  add: vi.fn(),
+  reset: vi.fn(),
 };
 
 vi.mock("simple-git", () => ({
@@ -103,8 +109,12 @@ describe("GitService", () => {
     const result = await service.checkout("feature");
 
     expect(result).toBe("ok");
-    expect(infoSpy).toHaveBeenCalledWith("Checked out branch feature successfully");
-    expect(notifySpy).toHaveBeenCalledWith("Checked out branch feature successfully");
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Checked out branch feature successfully",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Checked out branch feature successfully",
+    );
   });
 
   it("returns git status from the repository", async () => {
@@ -152,7 +162,9 @@ describe("GitService", () => {
   it("returns file content from a git ref", async () => {
     mockGit.show.mockResolvedValue("file contents");
 
-    expect(await service.getFileContent("HEAD", "README.md")).toBe("file contents");
+    expect(await service.getFileContent("HEAD", "README.md")).toBe(
+      "file contents",
+    );
     expect(mockGit.show).toHaveBeenCalledWith(["HEAD:README.md"]);
   });
 
@@ -175,6 +187,7 @@ describe("GitService", () => {
   });
 
   it("logs and notifies on successful commit", async () => {
+    mockGit.status.mockResolvedValue({ staged: [], files: [] });
     mockGit.commit.mockResolvedValue("commit-ok");
     const infoSpy = vi.spyOn(Logger, "info");
     const notifySpy = vi.spyOn(Notifications, "info");
@@ -182,10 +195,11 @@ describe("GitService", () => {
     const result = await service.commit("message");
 
     expect(result).toBe("commit-ok");
+    expect(mockGit.commit).toHaveBeenCalledWith("message", []);
     expect(infoSpy).toHaveBeenCalledWith("Commit successful");
     expect(notifySpy).toHaveBeenCalledWith("Commit successful");
   });
-
+  
   it("logs and notifies on successful pull", async () => {
     mockGit.pull.mockResolvedValue("ok");
     const infoSpy = vi.spyOn(Logger, "info");
@@ -203,11 +217,15 @@ describe("GitService", () => {
     const infoSpy = vi.spyOn(Logger, "info");
     const notifySpy = vi.spyOn(Notifications, "info");
 
-    const result = await service.checkoutBranch("feature","main");
+    const result = await service.checkoutBranch("feature", "main");
 
     expect(result).toBe("ok");
-    expect(infoSpy).toHaveBeenCalledWith("Checked out branch feature successfully");
-    expect(notifySpy).toHaveBeenCalledWith("Checked out branch feature successfully");
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Checked out branch feature successfully",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Checked out branch feature successfully",
+    );
   });
 
   it("logs and notifies on successful checkoutLocalBranch", async () => {
@@ -219,7 +237,9 @@ describe("GitService", () => {
 
     expect(result).toBe("ok");
     expect(infoSpy).toHaveBeenCalledWith("Branch feature created successfully");
-    expect(notifySpy).toHaveBeenCalledWith("Branch feature created successfully");
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Branch feature created successfully",
+    );
   });
 
   it("logs error and rethrows when checkout fails", async () => {

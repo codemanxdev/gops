@@ -34,16 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
     treeDataProvider.refreshChangesNode();
     treeDataProvider.refreshStagedNode();
   });
-
-  // Set initial context
-  gitService.getStagedFiles().then((files) => {
-    vscode.commands.executeCommand(
-      "setContext",
-      "gops.hasStagedFiles",
-      files.length > 0,
-    );
-  });
-
+  
   context.subscriptions.push(treeView, onSave, gitWatcher);
   console.log("Gops extension activated.");
 }

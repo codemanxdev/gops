@@ -65,6 +65,14 @@ export class GitService {
     );
   }
 
+  async unstageAllFiles(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.reset(["HEAD"]),
+      "Unstaged all files successfully",
+      "Failed to unstage all files",
+    );
+  }
+
   async getBranches(): Promise<BranchSummary> {
     return this.git.branch();
   }

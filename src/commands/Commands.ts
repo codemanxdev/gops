@@ -11,5 +11,6 @@ export const COMMANDS = {
   SHOW_DIFF: "gops.showDiff",
   STAGE_FILE: "gops.stageFile",
   UNSTAGE_FILE: "gops.unstageFile",
+  UNSTAGE_ALL_FILES: "gops.unstageAllFiles",
   COMMIT: "gops.commit",
 } as const;
