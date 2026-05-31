@@ -81,6 +81,22 @@ export class GitService {
     );
   }
 
+  async deleteBranch(branchName: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.deleteLocalBranch(branchName),
+      `Branch ${branchName} deleted successfully`,
+      `Failed to delete branch ${branchName}`,
+    );
+  }
+
+  async renameBranch(oldName: string, newName: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.raw(["branch", "-m", oldName, newName]),
+      `Branch renamed to ${newName} successfully`,
+      `Failed to rename branch ${oldName}`,
+    );
+  }
+
   async getBranches(): Promise<BranchSummary> {
     return this.git.branch();
   }

@@ -203,8 +203,21 @@
         },
         {
           "command": "gops.stageAllFiles",
+          "title": "Stage All Files",
           "when": "view == gitOpsTreeview && viewItem == changesSection",
           "group": "inline"
+        },
+        {
+          "command": "gops.deleteBranch",
+          "title": "Delete Branch",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.renameBranch",
+          "title": "Rename Branch",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
         }
       ]
     }

@@ -32,14 +32,39 @@ export class GitOperationsDelegate {
     if (!node || !("branchName" in node)) {
       return;
     }
-    // TODO: implement
+
+    const confirm = await vscode.window.showWarningMessage(
+      `Are you sure you want to delete branch "${node.branchName}"?`,
+      { modal: true },
+      "Delete",
+    );
+
+    if (confirm !== "Delete") {
+      return;
+    }
+
+    await this.gitService.deleteBranch(node.branchName);
+    await this.treeDataProvider.refreshLocalBranchesNode();
   }
 
   async renameBranch(node: GitTreeNode): Promise<void> {
     if (!node || !("branchName" in node)) {
       return;
     }
-    // TODO: implement
+
+    const newName = await vscode.window.showInputBox({
+      prompt: `Enter new name for branch "${node.branchName}"`,
+      placeHolder: "feature/my-new-name",
+      value: node.branchName,
+      ignoreFocusOut: true,
+    });
+
+    if (!newName || newName === node.branchName) {
+      return;
+    }
+
+    await this.gitService.renameBranch(node.branchName, newName);
+    await this.treeDataProvider.refreshLocalBranchesNode();
   }
 
   async push(): Promise<void> {
