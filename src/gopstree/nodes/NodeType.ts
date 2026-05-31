@@ -6,6 +6,7 @@ export enum NodeType {
   Local = "local",
   Remote = "remote",
   Changes = "changes",
+  StagedChanges = "stagedChanges",
   Tags = "tags",
   Stash = "stash",
 

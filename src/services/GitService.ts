@@ -1,4 +1,11 @@
-import simpleGit, { BranchSummary, DefaultLogFields, ListLogLine, RemoteWithoutRefs, SimpleGit, StatusResult } from "simple-git";
+import simpleGit, {
+  BranchSummary,
+  DefaultLogFields,
+  ListLogLine,
+  RemoteWithoutRefs,
+  SimpleGit,
+  StatusResult,
+} from "simple-git";
 import * as vscode from "vscode";
 import * as path from "path";
 import { Logger } from "../logging/Logger";
@@ -26,6 +33,44 @@ export class GitService {
 
   async getStatus(): Promise<StatusResult> {
     return this.git.status();
+  }
+
+  async getChangedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.files
+      .filter((f) => f.working_dir !== " " && f.working_dir !== "?")
+      .map((f) => f.path);
+  }
+
+  async getStagedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.files
+      .filter((f) => f.index !== " " && f.index !== "?")
+      .map((f) => f.path);
+  }
+
+  async stageFile(filePath: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.add(filePath),
+      `Staged file ${filePath} successfully`,
+      `Failed to stage file ${filePath}`,
+    );
+  }
+
+  async unstageFile(filePath: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.reset(["HEAD", filePath]),
+      `Unstaged file ${filePath} successfully`,
+      `Failed to unstage file ${filePath}`,
+    );
+  }
+
+  async unstageAllFiles(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.reset(["HEAD"]),
+      "Unstaged all files successfully",
+      "Failed to unstage all files",
+    );
   }
 
   async getBranches(): Promise<BranchSummary> {
@@ -105,8 +150,11 @@ export class GitService {
   }
 
   async commit(message: string) {
+    const status = await this.git.status();
+    Logger.info(`Staged files before commit: ${JSON.stringify(status.staged)}`);
+    Logger.info(`All files: ${JSON.stringify(status.files)}`);
     return this.executeGitAction(
-      () => this.git.commit(message),
+      () => this.git.commit(message, []),
       "Commit successful",
       "Commit failed",
     );

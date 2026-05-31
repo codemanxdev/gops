@@ -9,4 +9,8 @@ export const COMMANDS = {
   CREATE_BRANCH: "gops.branch",
   CREATE_TAG: "gops.tag",
   SHOW_DIFF: "gops.showDiff",
+  STAGE_FILE: "gops.stageFile",
+  UNSTAGE_FILE: "gops.unstageFile",
+  UNSTAGE_ALL_FILES: "gops.unstageAllFiles",
+  COMMIT: "gops.commit",
 } as const;
