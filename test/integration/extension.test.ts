@@ -1,5 +1,6 @@
 import * as assert from "node:assert";
 import * as vscode from "vscode";
+import { COMMANDS } from "../../src/commands/Commands";
 
 suite("Extension", function () {
   this.timeout(30000);
@@ -19,8 +20,8 @@ suite("Extension", function () {
 
     assert.strictEqual(extension.isActive, true, "Extension must be active");
 
-    await vscode.commands.executeCommand("gops.refresh");
-    assert.ok(true, "gops.refresh must complete without error");
+    await vscode.commands.executeCommand(COMMANDS.REFRESH);
+    assert.ok(true, `${COMMANDS.REFRESH} must complete without error`);
   });
 
   test("should register the Git Ops tree view", async function () {

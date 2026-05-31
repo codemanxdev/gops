@@ -15,18 +15,21 @@ Git Operations - Visual Git Toolkit for VS Code
 ### Tree View
 
 - Toolbar with following options
-  - Refresh treeview
-  - Push
+  - Commit
+  - Create Branch from Current
   - Pull
+  - Push
+  - Refresh treeview
+- Local Branches
+  - Checkout
+  - Delete
   - New Branch
-- Local and Remote branches
-- Ability to interact and perform the following operations
-  - Checkout branch
-  - Create tag
-  - Delete branch
-  - Rename branch
+  - Rename Branch
+- Remote Branches
 - Local Changes
+- Staged Changes
 - Tags
+- Stash
 
 ## Requirements
 

@@ -2,6 +2,7 @@ import * as assert from "node:assert";
 import * as vscode from "vscode";
 import * as path from "node:path";
 import * as fs from "node:fs/promises";
+import { COMMANDS } from "../../src/commands/Commands";
 
 suite("Stage/Unstage", function () {
   this.timeout(30000);
@@ -30,14 +31,14 @@ suite("Stage/Unstage", function () {
     await new Promise((resolve) => setTimeout(resolve, 200));
   });
 
-  test("gops.unstageAllFiles should execute without error", async function () {
-    await vscode.commands.executeCommand("gops.unstageAllFiles");
-    assert.ok(true, "gops.unstageAllFiles completed without error");
+  test(`${COMMANDS.UNSTAGE_ALL_FILES} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.UNSTAGE_ALL_FILES);
+    assert.ok(true, `${COMMANDS.UNSTAGE_ALL_FILES} completed without error`);
   });
 
-  test("gops.refresh should reflect file changes", async function () {
-    await vscode.commands.executeCommand("gops.refresh");
+  test(`${COMMANDS.REFRESH} should reflect file changes`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.REFRESH);
     await new Promise((resolve) => setTimeout(resolve, 500));
-    assert.ok(true, "gops.refresh completed after file change");
+    assert.ok(true, `${COMMANDS.REFRESH} completed after file change`);
   });
 });

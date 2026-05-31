@@ -111,12 +111,17 @@
       {
         "command": "gops.commit",
         "title": "Commit",
-        "icon": "$(save)"
+        "icon": "$(git-commit)"
       },
       {
         "command": "gops.unstageAllFiles",
         "title": "Unstage All Files",
         "icon": "$(collapse-all)"
+      },
+      {
+        "command": "gops.stageAllFiles",
+        "title": "Stage All Files",
+        "icon": "$(expand-all)"
       }
     ],
     "viewsContainers": {
@@ -195,6 +200,24 @@
           "title": "Unstage All Files",
           "when": "view == gitOpsTreeview && viewItem == stagedChangesSection",
           "group": "inline"
+        },
+        {
+          "command": "gops.stageAllFiles",
+          "title": "Stage All Files",
+          "when": "view == gitOpsTreeview && viewItem == changesSection",
+          "group": "inline"
+        },
+        {
+          "command": "gops.deleteBranch",
+          "title": "Delete Branch",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.renameBranch",
+          "title": "Rename Branch",
+          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "group": "navigation"
         }
       ]
     }

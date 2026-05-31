@@ -10,6 +10,7 @@ export const COMMANDS = {
   CREATE_TAG: "gops.tag",
   SHOW_DIFF: "gops.showDiff",
   STAGE_FILE: "gops.stageFile",
+  STAGE_ALL_FILES: "gops.stageAllFiles",
   UNSTAGE_FILE: "gops.unstageFile",
   UNSTAGE_ALL_FILES: "gops.unstageAllFiles",
   COMMIT: "gops.commit",

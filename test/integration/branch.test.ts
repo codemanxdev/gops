@@ -1,5 +1,6 @@
 import * as assert from "node:assert";
 import * as vscode from "vscode";
+import { COMMANDS } from "../../src/commands/Commands";
 
 suite("Branch", function () {
   this.timeout(30000);
@@ -11,29 +12,29 @@ suite("Branch", function () {
     }
   });
 
-  test("gops.branch.current should execute without error", async function () {
+  test(`${COMMANDS.CREATE_BRANCH_FROM_CURRENT} should execute without error`, async function () {
     // Mock input box to simulate cancel
     const stub = vscode.window.showInputBox;
     (vscode.window as any).showInputBox = async () => undefined;
 
-    await vscode.commands.executeCommand("gops.branch.current");
+    await vscode.commands.executeCommand(COMMANDS.CREATE_BRANCH_FROM_CURRENT);
 
     (vscode.window as any).showInputBox = stub;
-    assert.ok(true, "gops.branch.current completed without error");
+    assert.ok(true, `${COMMANDS.CREATE_BRANCH_FROM_CURRENT} completed without error`);
   });
 
-  test("gops.deleteBranch should execute without error", async function () {
-    await vscode.commands.executeCommand("gops.deleteBranch");
-    assert.ok(true, "gops.deleteBranch completed without error");
+  test(`${COMMANDS.DELETE_BRANCH} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.DELETE_BRANCH);
+    assert.ok(true, `${COMMANDS.DELETE_BRANCH} completed without error`);
   });
 
-  test("gops.renameBranch should execute without error", async function () {
-    await vscode.commands.executeCommand("gops.renameBranch");
-    assert.ok(true, "gops.renameBranch completed without error");
+  test(`${COMMANDS.RENAME_BRANCH} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.RENAME_BRANCH);
+    assert.ok(true, `${COMMANDS.RENAME_BRANCH} completed without error`);
   });
 
-  test("gops.checkout should execute without error", async function () {
-    await vscode.commands.executeCommand("gops.checkout");
-    assert.ok(true, "gops.checkout completed without error");
+  test(`${COMMANDS.CHECKOUT_BRANCH} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.CHECKOUT_BRANCH);
+    assert.ok(true, `${COMMANDS.CHECKOUT_BRANCH} completed without error`);
   });
 });

@@ -1,5 +1,6 @@
 import * as assert from "node:assert";
 import * as vscode from "vscode";
+import { COMMANDS } from "../../src/commands/Commands";
 
 suite("Commands", function () {
   this.timeout(30000);
@@ -14,20 +15,20 @@ suite("Commands", function () {
   test("should register all commands", async function () {
     const commands = await vscode.commands.getCommands(true);
     const expectedCommands = [
-      "gops.refresh",
-      "gops.pull",
-      "gops.push",
-      "gops.checkout",
-      "gops.deleteBranch",
-      "gops.renameBranch",
-      "gops.branch",
-      "gops.branch.current",
-      "gops.tag",
-      "gops.showDiff",
-      "gops.stageFile",
-      "gops.unstageFile",
-      "gops.unstageAllFiles",
-      "gops.commit",
+      COMMANDS.REFRESH,
+      COMMANDS.PULL,
+      COMMANDS.PUSH,
+      COMMANDS.CHECKOUT_BRANCH,
+      COMMANDS.DELETE_BRANCH,
+      COMMANDS.RENAME_BRANCH,
+      COMMANDS.CREATE_BRANCH,
+      COMMANDS.CREATE_BRANCH_FROM_CURRENT,
+      COMMANDS.CREATE_TAG,
+      COMMANDS.SHOW_DIFF,
+      COMMANDS.STAGE_FILE,
+      COMMANDS.UNSTAGE_FILE,
+      COMMANDS.UNSTAGE_ALL_FILES,
+      COMMANDS.COMMIT,
     ];
 
     for (const command of expectedCommands) {
@@ -38,31 +39,31 @@ suite("Commands", function () {
     }
   });
 
-  test("gops.refresh should execute without error", async function () {
-    await vscode.commands.executeCommand("gops.refresh");
-    assert.ok(true, "gops.refresh completed without error");
+  test(`${COMMANDS.REFRESH} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.REFRESH);
+    assert.ok(true, "${COMMANDS.REFRESH} completed without error");
   });
 
-  test("gops.pull should execute without error", async function () {
+  test(`${COMMANDS.PULL} should execute without error`, async function () {
     try {
-      await vscode.commands.executeCommand("gops.pull");
-      assert.ok(true, "gops.pull completed without error");
+      await vscode.commands.executeCommand(COMMANDS.PULL);
+      assert.ok(true, `${COMMANDS.PULL} completed without error`);
     } catch (err: any) {
       assert.ok(
         err.message.includes("remote") || err.message.includes("origin"),
-        `gops.pull failed with unexpected error: ${err.message}`,
+        `${COMMANDS.PULL} failed with unexpected error: ${err.message}`,
       );
     }
   });
 
-  test("gops.push should execute without error", async function () {
+  test(`${COMMANDS.PUSH} should execute without error`, async function () {
     try {
-      await vscode.commands.executeCommand("gops.push");
-      assert.ok(true, "gops.push completed without error");
+      await vscode.commands.executeCommand(COMMANDS.PUSH);
+      assert.ok(true, `${COMMANDS.PUSH} completed without error`);
     } catch (err: any) {
       assert.ok(
         err.message.includes("remote") || err.message.includes("origin"),
-        `gops.push failed with unexpected error: ${err.message}`,
+        `${COMMANDS.PUSH} failed with unexpected error: ${err.message}`,
       );
     }
   });

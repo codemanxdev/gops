@@ -36,6 +36,9 @@ export class CommandRegistrar {
     this.register(COMMANDS.UNSTAGE_ALL_FILES, () =>
       this.delegate.unstageAllFiles(),
     );
+    this.register(COMMANDS.STAGE_ALL_FILES, () =>
+      this.delegate.stageAllFiles(),
+    );
     this.register(COMMANDS.COMMIT, () => this.delegate.commit());
     this.register(COMMANDS.CREATE_TAG, () => this.delegate.createTag());
   }
