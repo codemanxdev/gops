@@ -14,4 +14,5 @@ export const COMMANDS = {
   UNSTAGE_FILE: "gops.unstageFile",
   UNSTAGE_ALL_FILES: "gops.unstageAllFiles",
   COMMIT: "gops.commit",
+  SHOW_GIT_GRAPH: "gops.showGitGraph",
 } as const;
