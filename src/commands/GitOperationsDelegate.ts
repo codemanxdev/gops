@@ -138,4 +138,8 @@ export class GitOperationsDelegate {
     this.treeDataProvider.refreshChangesNode();
     await this.treeDataProvider.refreshStagedNode();
   }
+
+  async createTag(): Promise<void> {
+    // TODO: implement
+  }
 }

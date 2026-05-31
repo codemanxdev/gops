@@ -199,7 +199,7 @@ describe("GitService", () => {
     expect(infoSpy).toHaveBeenCalledWith("Commit successful");
     expect(notifySpy).toHaveBeenCalledWith("Commit successful");
   });
-  
+
   it("logs and notifies on successful pull", async () => {
     mockGit.pull.mockResolvedValue("ok");
     const infoSpy = vi.spyOn(Logger, "info");
@@ -255,5 +255,142 @@ describe("GitService", () => {
     expect(notifySpy).toHaveBeenCalledWith(
       "Checkout failed for branch feature. See details in output",
     );
+  });
+
+  it("logs and notifies on successful stageFile", async () => {
+    mockGit.add.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.stageFile("src/file.ts");
+
+    expect(mockGit.add).toHaveBeenCalledWith("src/file.ts");
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Staged file src/file.ts successfully",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Staged file src/file.ts successfully",
+    );
+  });
+
+  it("logs error and rethrows when stageFile fails", async () => {
+    const error = new Error("stage failed");
+    mockGit.add.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.stageFile("src/file.ts")).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to stage file src/file.ts: stage failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to stage file src/file.ts. See details in output",
+    );
+  });
+
+  it("logs and notifies on successful unstageFile", async () => {
+    mockGit.reset.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.unstageFile("src/file.ts");
+
+    expect(mockGit.reset).toHaveBeenCalledWith(["HEAD", "src/file.ts"]);
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Unstaged file src/file.ts successfully",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Unstaged file src/file.ts successfully",
+    );
+  });
+
+  it("logs error and rethrows when unstageFile fails", async () => {
+    const error = new Error("unstage failed");
+    mockGit.reset.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.unstageFile("src/file.ts")).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to unstage file src/file.ts: unstage failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to unstage file src/file.ts. See details in output",
+    );
+  });
+
+  it("logs and notifies on successful unstageAllFiles", async () => {
+    mockGit.reset.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.unstageAllFiles();
+
+    expect(mockGit.reset).toHaveBeenCalledWith(["HEAD"]);
+    expect(infoSpy).toHaveBeenCalledWith("Unstaged all files successfully");
+    expect(notifySpy).toHaveBeenCalledWith("Unstaged all files successfully");
+  });
+
+  it("logs error and rethrows when unstageAllFiles fails", async () => {
+    const error = new Error("unstage all failed");
+    mockGit.reset.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.unstageAllFiles()).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to unstage all files: unstage all failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to unstage all files. See details in output",
+    );
+  });
+
+  it("returns only unstaged changed files", async () => {
+    mockGit.status.mockResolvedValue({
+      files: [
+        { path: "src/modified.ts", index: " ", working_dir: "M" },
+        { path: "src/staged.ts", index: "M", working_dir: " " },
+        { path: "src/untracked.ts", index: "?", working_dir: "?" },
+      ],
+    });
+
+    const result = await service.getChangedFiles();
+
+    expect(result).toEqual(["src/modified.ts"]);
+  });
+
+  it("returns empty array when no unstaged files", async () => {
+    mockGit.status.mockResolvedValue({
+      files: [{ path: "src/staged.ts", index: "M", working_dir: " " }],
+    });
+
+    const result = await service.getChangedFiles();
+
+    expect(result).toEqual([]);
+  });
+
+  it("returns only staged files", async () => {
+    mockGit.status.mockResolvedValue({
+      files: [
+        { path: "src/modified.ts", index: " ", working_dir: "M" },
+        { path: "src/staged.ts", index: "M", working_dir: " " },
+        { path: "src/untracked.ts", index: "?", working_dir: "?" },
+      ],
+    });
+
+    const result = await service.getStagedFiles();
+
+    expect(result).toEqual(["src/staged.ts"]);
+  });
+
+  it("returns empty array when no staged files", async () => {
+    mockGit.status.mockResolvedValue({
+      files: [{ path: "src/modified.ts", index: " ", working_dir: "M" }],
+    });
+
+    const result = await service.getStagedFiles();
+
+    expect(result).toEqual([]);
   });
 });

@@ -215,7 +215,7 @@
     "check:types": "tsc --noEmit",
     "lint": "eslint src",
     "test:unit": "vitest run",
-    "test:integration": "vscode-test",
+    "test:integration": "npm run compile && npm run compile:tests && vscode-test",
     "coverage:unit": "vitest run --coverage --coverage.reporter=lcov --coverage.reportsDirectory=coverage/unit",
     "coverage:integration": "vscode-test --coverage --coverage-reporter lcov --coverage-output ./coverage/integration"
   },
