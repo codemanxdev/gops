@@ -45,10 +45,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "gops.helloWorld",
-        "title": "Gops Hello World"
-      },
-      {
         "command": "gops.refresh",
         "title": "Refresh Git Ops View",
         "icon": "$(refresh)"
