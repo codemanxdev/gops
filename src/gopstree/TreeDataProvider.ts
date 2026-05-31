@@ -144,8 +144,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     const hasChangedFiles = changedFiles.length > 0;
 
     await Promise.all([
-      this.setContext("gops.hasStagedFiles", hasStagedFiles),
-      this.setContext("gops.hasChangedFiles", hasChangedFiles),
+      this.setContext(CONTEXT_KEYS.HAS_STAGED_FILES, hasStagedFiles),
+      this.setContext(CONTEXT_KEYS.HAS_CHANGED_FILES, hasChangedFiles),
     ]);
 
     const localBranchesItem = new LocalBranchesSection(
