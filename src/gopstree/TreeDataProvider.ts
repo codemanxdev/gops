@@ -143,6 +143,14 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       hasStagedFiles,
     );
 
+    const changedFiles = await this.gitService.getChangedFiles();
+    const hasChangedFiles = changedFiles.length > 0;
+    await vscode.commands.executeCommand(
+      "setContext",
+      "gops.hasChangedFiles",
+      hasChangedFiles,
+    );
+
     const localBranchesItem = new LocalBranchesSection(
       this.localBranchesNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
@@ -159,12 +167,18 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       this.changesNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
+    changesItem.contextValue = hasChangedFiles
+      ? ContextValue.ChangesSection
+      : ContextValue.ChangesSectionEmpty;
     this.changesNode = changesItem;
 
     const stagedItem = new StagedChangesSection(
       this.stagedNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
     );
+    stagedItem.contextValue = hasStagedFiles
+      ? ContextValue.StagedChangesSection
+      : ContextValue.StagedChangesSectionEmpty;
     this.stagedNode = stagedItem;
 
     const tagsItem = new TagsSection(
@@ -228,6 +242,16 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     if (!this.changesNode) {
       return;
     }
+    const changedFiles = await this.gitService.getChangedFiles();
+    const hasChangedFiles = changedFiles.length > 0;
+    await vscode.commands.executeCommand(
+      "setContext",
+      "gops.hasChangedFiles",
+      hasChangedFiles,
+    );
+    this.changesNode.contextValue = hasChangedFiles
+      ? ContextValue.ChangesSection
+      : ContextValue.ChangesSectionEmpty;
     this._onDidChangeTreeData.fire(this.changesNode);
   }
 

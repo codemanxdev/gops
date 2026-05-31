@@ -124,6 +124,12 @@ export class GitOperationsDelegate {
     await this.treeDataProvider.refreshStagedNode();
   }
 
+  async stageAllFiles(): Promise<void> {
+    await this.gitService.stageAllFiles();
+    await this.treeDataProvider.refreshChangesNode();
+    await this.treeDataProvider.refreshStagedNode();
+  }
+
   async commit(): Promise<void> {
     const message = await vscode.window.showInputBox({
       prompt: "Enter commit message",

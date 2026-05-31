@@ -12,6 +12,7 @@ export enum ContextValue {
   LocalBranchesSection = "localBranchesSection",
   RemoteBranchesSection = "remoteBranchesSection",
   ChangesSection = "changesSection",
+  ChangesSectionEmpty = "changesSectionEmpty",
   StagedChangesSection = "stagedChangesSection",
   StagedChangesSectionEmpty = "stagedChangesSectionEmpty",
   TagsSection = "tagsSection",

@@ -73,6 +73,14 @@ export class GitService {
     );
   }
 
+  async stageAllFiles(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.add("."),
+      "Staged all files successfully",
+      "Failed to stage all files",
+    );
+  }
+
   async getBranches(): Promise<BranchSummary> {
     return this.git.branch();
   }
