@@ -5,6 +5,7 @@ import { TreeDataProvider } from "../gopstree/TreeDataProvider";
 import { GitTreeNode } from "../gopstree/types";
 import { ChangedFileNode } from "../gopstree/nodes/ChangedFileNode";
 import { StagedFileNode } from "../gopstree/nodes/StagedFileNode";
+import { GitGraphPanel } from "../gopswebpanel/GitGraphPanel";
 
 export class GitOperationsDelegate {
   constructor(
@@ -172,5 +173,9 @@ export class GitOperationsDelegate {
 
   async createTag(): Promise<void> {
     // TODO: implement
+  }
+
+  async showGitGraph(branchName: string): Promise<void> {
+    await GitGraphPanel.createOrShow(branchName, this.gitService);
   }
 }

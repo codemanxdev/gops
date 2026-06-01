@@ -45,10 +45,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "gops.helloWorld",
-        "title": "Gops Hello World"
-      },
-      {
         "command": "gops.refresh",
         "title": "Refresh Git Ops View",
         "icon": "$(refresh)"
@@ -122,6 +118,11 @@
         "command": "gops.stageAllFiles",
         "title": "Stage All Files",
         "icon": "$(expand-all)"
+      },
+      {
+        "command": "gops.showGitGraph",
+        "title": "Show Git Graph",
+        "icon": "$(graph)"
       }
     ],
     "viewsContainers": {

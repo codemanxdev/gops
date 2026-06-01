@@ -199,6 +199,29 @@ export class GitService {
       `Failed to create branch ${branchName}`,
     );
   }
+
+  async getBranchCommits(branchName: string): Promise<
+    {
+      hash: string;
+      message: string;
+      author: string;
+      date: string;
+    }[]
+  > {
+    return this.executeGitAction(
+      async () => {
+        const log = await this.git.log([branchName]);
+        return log.all.map((c) => ({
+          hash: c.hash.substring(0, 7),
+          message: c.message,
+          author: c.author_name,
+          date: c.date,
+        }));
+      },
+      `Loaded commits for branch ${branchName}`,
+      `Failed to load commits for branch ${branchName}`,
+    );
+  }
   // #endregion
 
   getRepoName(): string {
