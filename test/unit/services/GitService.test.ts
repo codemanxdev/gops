@@ -49,6 +49,8 @@ const mockGit = {
   checkoutLocalBranch: vi.fn(),
   add: vi.fn(),
   reset: vi.fn(),
+  deleteLocalBranch: vi.fn(),
+  raw: vi.fn(),
 };
 
 vi.mock("simple-git", () => ({
@@ -392,5 +394,103 @@ describe("GitService", () => {
     const result = await service.getStagedFiles();
 
     expect(result).toEqual([]);
+  });
+
+  it("logs and notifies on successful stageAllFiles", async () => {
+    mockGit.add.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.stageAllFiles();
+
+    expect(mockGit.add).toHaveBeenCalledWith(".");
+    expect(infoSpy).toHaveBeenCalledWith("Staged all files successfully");
+    expect(notifySpy).toHaveBeenCalledWith("Staged all files successfully");
+  });
+
+  it("logs error and rethrows when stageAllFiles fails", async () => {
+    const error = new Error("stage all failed");
+    mockGit.add.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.stageAllFiles()).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to stage all files: stage all failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to stage all files. See details in output",
+    );
+  });
+
+  it("logs and notifies on successful deleteBranch", async () => {
+    mockGit.deleteLocalBranch.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.deleteBranch("feature/my-branch");
+
+    expect(mockGit.deleteLocalBranch).toHaveBeenCalledWith("feature/my-branch");
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Branch feature/my-branch deleted successfully",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Branch feature/my-branch deleted successfully",
+    );
+  });
+
+  it("logs error and rethrows when deleteBranch fails", async () => {
+    const error = new Error("delete failed");
+    mockGit.deleteLocalBranch.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.deleteBranch("feature/my-branch")).rejects.toThrow(
+      error,
+    );
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to delete branch feature/my-branch: delete failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to delete branch feature/my-branch. See details in output",
+    );
+  });
+
+  it("logs and notifies on successful renameBranch", async () => {
+    mockGit.raw.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.renameBranch("old-branch", "new-branch");
+
+    expect(mockGit.raw).toHaveBeenCalledWith([
+      "branch",
+      "-m",
+      "old-branch",
+      "new-branch",
+    ]);
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Branch renamed to new-branch successfully",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Branch renamed to new-branch successfully",
+    );
+  });
+
+  it("logs error and rethrows when renameBranch fails", async () => {
+    const error = new Error("rename failed");
+    mockGit.raw.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(
+      service.renameBranch("old-branch", "new-branch"),
+    ).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to rename branch old-branch: rename failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to rename branch old-branch. See details in output",
+    );
   });
 });
