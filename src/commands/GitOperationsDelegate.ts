@@ -112,7 +112,12 @@ export class GitOperationsDelegate {
   }
 
   async showDiff(node: GitTreeNode): Promise<void> {
-    if (!node || !(node instanceof ChangedFileNode) || !node.fileName) {
+    if (
+      !node ||
+      (!(node instanceof ChangedFileNode) &&
+        !(node instanceof StagedFileNode)) ||
+      !node.fileName
+    ) {
       return;
     }
 
