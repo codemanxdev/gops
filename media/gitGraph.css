@@ -1,0 +1,147 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-editor-font-family, "Courier New", monospace);
+  font-size: 13px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--vscode-sideBarSectionHeader-background);
+}
+
+#header h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vscode-sideBarSectionHeader-foreground);
+  font-family: var(--vscode-font-family);
+  letter-spacing: 0.5px;
+}
+
+#header .branch-badge {
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+#header .commit-count {
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+  margin-left: auto;
+}
+
+#table-container {
+  overflow-y: auto;
+  height: calc(100vh - 49px);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--vscode-editor-background);
+}
+
+thead tr {
+  border-bottom: 2px solid var(--vscode-panel-border);
+  background: var(--vscode-sideBarSectionHeader-background);
+}
+
+th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--vscode-sideBarSectionHeader-foreground);
+  white-space: nowrap;
+  border-right: 1px solid var(--vscode-panel-border);
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+th:last-child {
+  border-right: none;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.05));
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+tbody tr:nth-child(even) {
+  background: var(
+    --vscode-list-inactiveSelectionBackground,
+    rgba(255, 255, 255, 0.02)
+  );
+}
+
+tbody tr:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+td {
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.graph-cell {
+  width: 40px;
+  padding: 0 8px;
+}
+
+.hash {
+  font-family: monospace;
+  color: var(--vscode-textLink-foreground);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.message {
+  color: var(--vscode-editor-foreground);
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.author {
+  color: var(--vscode-terminal-ansiGreen);
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.date {
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+svg.graph {
+  display: block;
+  overflow: visible;
+}
