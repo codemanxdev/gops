@@ -176,6 +176,6 @@ export class GitOperationsDelegate {
   }
 
   async showGitGraph(branchName: string): Promise<void> {
-    await GitGraphPanel.createOrShow(vscode.Uri.file(this.gitService.getRepoPath()), branchName);
+    await GitGraphPanel.createOrShow(branchName, this.gitService);
   }
 }
