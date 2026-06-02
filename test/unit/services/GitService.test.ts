@@ -67,21 +67,21 @@ describe("GitService", () => {
     service = new GitService("/workspace/gops");
   });
 
-  it("parses ahead/behind values for local branches", async () => {
-    mockGit.branchLocal.mockResolvedValue({
+  it("parses branch info for local branches", async () => {
+    mockGit.branch.mockResolvedValue({
       all: ["main", "feature"],
       current: "main",
       branches: {
-        main: { label: "behind 3" },
-        feature: { label: "ahead 2" },
+        main: { label: "[origin/main: behind 3]" },
+        feature: { label: "[origin/feature: ahead 2]" },
       },
     });
 
     const branches = await service.getLocalBranches();
 
     expect(branches).toEqual([
-      { name: "main", current: true, ahead: 0, behind: 3 },
-      { name: "feature", current: false, ahead: 2, behind: 0 },
+      { name: "main", current: true, ahead: 0, behind: 3, hasUpstream: true },
+      { name: "feature", current: false, ahead: 2, behind: 0, hasUpstream: true },
     ]);
   });
 

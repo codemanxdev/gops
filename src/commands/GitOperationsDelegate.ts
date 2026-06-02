@@ -183,4 +183,13 @@ export class GitOperationsDelegate {
   async showGitGraph(branchName: string): Promise<void> {
     await GitGraphPanel.createOrShow(branchName, this.gitService);
   }
+
+  async publishBranch(node: GitTreeNode): Promise<void> {
+    if (!node || !("branchName" in node)) {
+      return;
+    }
+
+    await this.gitService.publishBranch(node.branchName);
+    await this.treeDataProvider.refreshLocalBranchesNode();
+  }
 }

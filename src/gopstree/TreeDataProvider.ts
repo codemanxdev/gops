@@ -73,7 +73,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   ): Promise<TreeItemModel[]> {
     const branches = await this.gitService.getLocalBranches();
     const allLocalBranches = branches.map((b) => {
-      const node = new LocalBranchNode(b.name, b.current, b.ahead, b.behind);
+      const node = new LocalBranchNode(b.name, b.current, b.ahead, b.behind, b.hasUpstream);
       node.parent = parent;
       return node;
     });

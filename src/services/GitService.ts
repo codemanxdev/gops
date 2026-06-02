@@ -12,7 +12,7 @@ import { Logger } from "../logging/Logger";
 import { Notifications } from "../notifications/Notifications";
 import { LocalBranchModel } from "../models/LocalBranchModel";
 import { RemoteBranchModel } from "../models/RemoteBranchModel";
-import { AheadBehindModel } from "../models/AheadBehindModel";
+import { BranchInfoModel } from "../models/BranchInfoModel";
 
 export class GitService {
   private git: SimpleGit;
@@ -102,15 +102,15 @@ export class GitService {
   }
 
   async getLocalBranches(): Promise<LocalBranchModel[]> {
-    const branches = await this.git.branchLocal();
+    const raw = await this.git.branch(["-vv"]);
 
-    return branches.all.map((name) => {
-      const branch = branches.branches[name];
+    return raw.all.map((name) => {
+      const branch = raw.branches[name];
 
       return {
         name,
-        current: name === branches.current,
-        ...this.parseAheadBehind(branch.label),
+        current: name === raw.current,
+        ...this.parseBranchInfo(branch.label),
       };
     });
   }
@@ -222,6 +222,14 @@ export class GitService {
       `Failed to load commits for branch ${branchName}`,
     );
   }
+
+  async publishBranch(branchName: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.push(["--set-upstream", "origin", branchName]),
+      `Branch ${branchName} published to origin`,
+      `Failed to publish branch ${branchName}`,
+    );
+  }
   // #endregion
 
   getRepoName(): string {
@@ -261,13 +269,15 @@ export class GitService {
     }
   }
 
-  private parseAheadBehind(label: string): AheadBehindModel {
+  private parseBranchInfo(label: string): BranchInfoModel {
     const aheadMatch = label.match(/ahead (\d+)/);
     const behindMatch = label.match(/behind (\d+)/);
+    const hasUpstream = /^\[[^\]]+\]/.test(label);
 
     return {
       ahead: aheadMatch ? parseInt(aheadMatch[1], 10) : 0,
       behind: behindMatch ? parseInt(behindMatch[1], 10) : 0,
+      hasUpstream,
     };
   }
 }

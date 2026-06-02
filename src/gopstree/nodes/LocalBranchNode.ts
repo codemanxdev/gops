@@ -9,12 +9,13 @@ import {
 import { COMMANDS } from "../../commands/Commands";
 
 export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
-  public override command?: vscode.Command;  
+  public override command?: vscode.Command;
   constructor(
     public readonly branchName: string,
     public readonly isCurrent: boolean,
-    public readonly ahead?: number,
-    public readonly behind?: number,
+    public readonly ahead: number,
+    public readonly behind: number,
+    public readonly hasUpstream: boolean,
   ) {
     const fomatted = formatLocalBranchLabel(
       branchName,
@@ -30,10 +31,16 @@ export class LocalBranchNode extends TreeItemModel<NodeType.Local> {
       NodeType.Local,
       vscode.TreeItemCollapsibleState.None,
     );
-    this.contextValue = isCurrent
-      ? ContextValue.LocalBranchesCurrent
-      : ContextValue.LocalBranches;
-    
+
+    // Set context value based on upstream status
+    if (!hasUpstream) {
+      this.contextValue = ContextValue.LocalBranchesNoUpstream;
+    } else if (isCurrent) {
+      this.contextValue = ContextValue.LocalBranchesCurrent;
+    } else {
+      this.contextValue = ContextValue.LocalBranches;
+    }
+
     this.command = {
       command: COMMANDS.SHOW_GIT_GRAPH,
       title: "Open Git Graph",

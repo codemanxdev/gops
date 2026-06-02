@@ -3,4 +3,5 @@ export interface LocalBranchModel {
   current: boolean;
   ahead: number;
   behind: number;
+  hasUpstream: boolean;
 }

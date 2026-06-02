@@ -123,6 +123,11 @@
         "command": "gops.showGitGraph",
         "title": "Show Git Graph",
         "icon": "$(graph)"
+      },
+      {
+        "command": "gops.publishBranch",
+        "title": "Publish Branch",
+        "icon": "$(cloud-upload)"
       }
     ],
     "viewsContainers": {
@@ -181,7 +186,7 @@
         {
           "command": "gops.checkout",
           "title": "Checkout Branch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.noUpstream)",
           "group": "navigation"
         },
         {
@@ -211,14 +216,20 @@
         {
           "command": "gops.deleteBranch",
           "title": "Delete Branch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.noUpstream)",
           "group": "navigation"
         },
         {
           "command": "gops.renameBranch",
           "title": "Rename Branch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.noUpstream)",
           "group": "navigation"
+        },
+        {
+          "command": "gops.publishBranch",
+          "title": "Publish Branch",
+          "when": "viewItem == localBranches.noUpstream",
+          "group": "inline"
         }
       ]
     }
