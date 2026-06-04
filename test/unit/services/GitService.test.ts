@@ -493,4 +493,41 @@ describe("GitService", () => {
       "Failed to rename branch old-branch. See details in output",
     );
   });
+
+it("logs and notifies on successful publishBranch", async () => {
+  mockGit.push.mockResolvedValue("ok");
+  const infoSpy = vi.spyOn(Logger, "info");
+  const notifySpy = vi.spyOn(Notifications, "info");
+
+  await service.publishBranch("feature/my-branch");
+
+  expect(mockGit.push).toHaveBeenCalledWith([
+    "--set-upstream",
+    "origin",
+    "feature/my-branch",
+  ]);
+  expect(infoSpy).toHaveBeenCalledWith(
+    "Branch feature/my-branch published to origin",
+  );
+  expect(notifySpy).toHaveBeenCalledWith(
+    "Branch feature/my-branch published to origin",
+  );
+});
+
+it("logs error and rethrows when publishBranch fails", async () => {
+  const error = new Error("publish failed");
+  mockGit.push.mockRejectedValue(error);
+  const errorSpy = vi.spyOn(Logger, "error");
+  const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+  await expect(service.publishBranch("feature/my-branch")).rejects.toThrow(
+    error,
+  );
+  expect(errorSpy).toHaveBeenCalledWith(
+    "Failed to publish branch feature/my-branch: publish failed",
+  );
+  expect(notifySpy).toHaveBeenCalledWith(
+    "Failed to publish branch feature/my-branch. See details in output",
+  );
+});  
 });

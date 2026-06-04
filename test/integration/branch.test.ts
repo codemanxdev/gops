@@ -20,7 +20,10 @@ suite("Branch", function () {
     await vscode.commands.executeCommand(COMMANDS.CREATE_BRANCH_FROM_CURRENT);
 
     (vscode.window as any).showInputBox = stub;
-    assert.ok(true, `${COMMANDS.CREATE_BRANCH_FROM_CURRENT} completed without error`);
+    assert.ok(
+      true,
+      `${COMMANDS.CREATE_BRANCH_FROM_CURRENT} completed without error`,
+    );
   });
 
   test(`${COMMANDS.DELETE_BRANCH} should execute without error`, async function () {
@@ -36,5 +39,10 @@ suite("Branch", function () {
   test(`${COMMANDS.CHECKOUT_BRANCH} should execute without error`, async function () {
     await vscode.commands.executeCommand(COMMANDS.CHECKOUT_BRANCH);
     assert.ok(true, `${COMMANDS.CHECKOUT_BRANCH} completed without error`);
+  });
+
+  test(`${COMMANDS.PUBLISH_BRANCH} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.PUBLISH_BRANCH);
+    assert.ok(true, `${COMMANDS.PUBLISH_BRANCH} completed without error`);
   });
 });

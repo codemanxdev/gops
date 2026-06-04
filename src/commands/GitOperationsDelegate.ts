@@ -191,5 +191,6 @@ export class GitOperationsDelegate {
 
     await this.gitService.publishBranch(node.branchName);
     await this.treeDataProvider.refreshLocalBranchesNode();
+    await this.treeDataProvider.refreshRemoteBranchesNode();
   }
 }

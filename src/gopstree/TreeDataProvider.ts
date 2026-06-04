@@ -232,7 +232,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     this._onDidChangeTreeData.fire(this.localBranchesNode);
   }
 
-  refreshRemoteBranchesNode(): void {
+  async refreshRemoteBranchesNode(): Promise<void> {
     if (!this.remoteBranchesNode) {
       return;
     }
