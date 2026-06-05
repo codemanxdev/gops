@@ -145,3 +145,13 @@ svg.graph {
   display: block;
   overflow: visible;
 }
+
+.refs {
+  color: var(--vscode-terminal-ansiGreen);
+  font-size: 10px;
+  background: var(--vscode-badge-background);
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-left: 4px;
+}

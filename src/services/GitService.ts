@@ -13,6 +13,7 @@ import { Notifications } from "../notifications/Notifications";
 import { LocalBranchModel } from "../models/LocalBranchModel";
 import { RemoteBranchModel } from "../models/RemoteBranchModel";
 import { BranchInfoModel } from "../models/BranchInfoModel";
+import { GitCommitModel } from "../models/GitCommitModel";
 
 export class GitService {
   private git: SimpleGit;
@@ -229,22 +230,27 @@ export class GitService {
     );
   }
 
-  async getBranchCommits(branchName: string): Promise<
-    {
-      hash: string;
-      message: string;
-      author: string;
-      date: string;
-    }[]
-  > {
+  async getBranchCommits(branchName: string): Promise<GitCommitModel[]> {
     return this.executeGitAction(
       async () => {
-        const log = await this.git.log([branchName]);
-        return log.all.map((c) => ({
-          hash: c.hash.substring(0, 7),
+        const log = await this.git.log({
+          [branchName]: null,
+          format: {
+            hash: "%h",
+            message: "%s",
+            author: "%an",
+            date: "%ai",
+            parentCount: "%P",
+            refs: "%D",
+          },
+        });
+        return log.all.map((c: any) => ({
+          hash: c.hash,
           message: c.message,
-          author: c.author_name,
+          author: c.author,
           date: c.date,
+          isMergeCommit: c.parentCount.split(" ").length > 1,
+          refs: c.refs || "",
         }));
       },
       `Loaded commits for branch ${branchName}`,
