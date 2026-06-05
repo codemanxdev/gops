@@ -41,8 +41,15 @@ export class CommandRegistrar {
     );
     this.register(COMMANDS.COMMIT, () => this.delegate.commit());
     this.register(COMMANDS.CREATE_TAG, () => this.delegate.createTag());
-    this.register(COMMANDS.SHOW_GIT_GRAPH, (node) => this.delegate.showGitGraph(node)
+    this.register(COMMANDS.SHOW_GIT_GRAPH, (node) =>
+      this.delegate.showGitGraph(node),
     );
+    this.register(COMMANDS.PUBLISH_BRANCH, (node) =>
+      this.delegate.publishBranch(node),
+    );
+    this.register(COMMANDS.FETCH, () => this.delegate.fetch());
+    this.register(COMMANDS.POP_STASH, (node) => this.delegate.popStash(node));
+    this.register(COMMANDS.STASH_CHANGES, () => this.delegate.stashChanges());
   }
 
   private register(

@@ -123,6 +123,26 @@
         "command": "gops.showGitGraph",
         "title": "Show Git Graph",
         "icon": "$(graph)"
+      },
+      {
+        "command": "gops.publishBranch",
+        "title": "Publish Branch",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "gops.fetch",
+        "title": "Fetch",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "gops.stashChanges",
+        "title": "Stash Changes",
+        "icon": "$(save)"
+      },
+      {
+        "command": "gops.popStash",
+        "title": "Pop Stash",
+        "icon": "$(remove)"
       }
     ],
     "viewsContainers": {
@@ -169,6 +189,16 @@
           "command": "gops.branch.current",
           "when": "view == gitOpsTreeview",
           "group": "navigation"
+        },
+        {
+          "command": "gops.fetch",
+          "when": "view == gitOpsTreeview",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.stashChanges",
+          "when": "view == gitOpsTreeview && gops.hasChangedFiles == true",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -181,7 +211,7 @@
         {
           "command": "gops.checkout",
           "title": "Checkout Branch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.noUpstream)",
           "group": "navigation"
         },
         {
@@ -211,14 +241,25 @@
         {
           "command": "gops.deleteBranch",
           "title": "Delete Branch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.noUpstream)",
           "group": "navigation"
         },
         {
           "command": "gops.renameBranch",
           "title": "Rename Branch",
-          "when": "view == gitOpsTreeview && viewItem == localBranches",
+          "when": "view == gitOpsTreeview && (viewItem == localBranches || viewItem == localBranches.noUpstream)",
           "group": "navigation"
+        },
+        {
+          "command": "gops.publishBranch",
+          "title": "Publish Branch",
+          "when": "viewItem == localBranches.noUpstream",
+          "group": "inline"
+        },
+        {
+          "command": "gops.popStash",
+          "when": "view == gitOpsTreeview && viewItem == stash",
+          "group": "inline"
         }
       ]
     }

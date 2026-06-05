@@ -51,6 +51,9 @@ const mockGit = {
   reset: vi.fn(),
   deleteLocalBranch: vi.fn(),
   raw: vi.fn(),
+  fetch: vi.fn(),
+  version: vi.fn(),
+  stash: vi.fn(),
 };
 
 vi.mock("simple-git", () => ({
@@ -67,21 +70,27 @@ describe("GitService", () => {
     service = new GitService("/workspace/gops");
   });
 
-  it("parses ahead/behind values for local branches", async () => {
-    mockGit.branchLocal.mockResolvedValue({
+  it("parses branch info for local branches", async () => {
+    mockGit.branch.mockResolvedValue({
       all: ["main", "feature"],
       current: "main",
       branches: {
-        main: { label: "behind 3" },
-        feature: { label: "ahead 2" },
+        main: { label: "[origin/main: behind 3]" },
+        feature: { label: "[origin/feature: ahead 2]" },
       },
     });
 
     const branches = await service.getLocalBranches();
 
     expect(branches).toEqual([
-      { name: "main", current: true, ahead: 0, behind: 3 },
-      { name: "feature", current: false, ahead: 2, behind: 0 },
+      { name: "main", current: true, ahead: 0, behind: 3, hasUpstream: true },
+      {
+        name: "feature",
+        current: false,
+        ahead: 2,
+        behind: 0,
+        hasUpstream: true,
+      },
     ]);
   });
 
@@ -149,9 +158,13 @@ describe("GitService", () => {
   });
 
   it("returns stash messages from stash list", async () => {
-    mockGit.stashList.mockResolvedValue({ all: [{ message: "WIP" }] } as any);
+    mockGit.stashList.mockResolvedValue({
+      all: [{ message: "WIP" }],
+    });
 
-    expect(await service.getStash()).toEqual(["WIP"]);
+    const result = await service.getStash();
+
+    expect(result).toEqual([{ ref: "stash@{0}", message: "WIP" }]);
   });
 
   it("returns commit log entries", async () => {
@@ -492,5 +505,201 @@ describe("GitService", () => {
     expect(notifySpy).toHaveBeenCalledWith(
       "Failed to rename branch old-branch. See details in output",
     );
+  });
+
+  it("logs and notifies on successful publishBranch", async () => {
+    mockGit.push.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.publishBranch("feature/my-branch");
+
+    expect(mockGit.push).toHaveBeenCalledWith([
+      "--set-upstream",
+      "origin",
+      "feature/my-branch",
+    ]);
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Branch feature/my-branch published to origin",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Branch feature/my-branch published to origin",
+    );
+  });
+
+  it("logs error and rethrows when publishBranch fails", async () => {
+    const error = new Error("publish failed");
+    mockGit.push.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.publishBranch("feature/my-branch")).rejects.toThrow(
+      error,
+    );
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to publish branch feature/my-branch: publish failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to publish branch feature/my-branch. See details in output",
+    );
+  });
+
+  it("logs and notifies on successful fetch", async () => {
+    mockGit.fetch.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.fetch();
+
+    expect(mockGit.fetch).toHaveBeenCalled();
+    expect(infoSpy).toHaveBeenCalledWith("Fetched latest changes");
+    expect(notifySpy).toHaveBeenCalledWith("Fetched latest changes");
+  });
+
+  it("logs error and rethrows when fetch fails", async () => {
+    const error = new Error("fetch failed");
+    mockGit.fetch.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.fetch()).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to fetch changes: fetch failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to fetch changes. See details in output",
+    );
+  });
+
+  describe("isGitAvailable", () => {
+    it("should return true when git is available", async () => {
+      mockGit.version.mockResolvedValue("2.40.0");
+
+      const result = await GitService.isGitAvailable();
+
+      expect(result).toBe(true);
+    });
+
+    it("should return false when git is not available", async () => {
+      mockGit.version.mockRejectedValue(new Error("git not found"));
+
+      const result = await GitService.isGitAvailable();
+
+      expect(result).toBe(false);
+    });
+  });
+
+  it("logs and notifies on successful popStash", async () => {
+    mockGit.stash.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.popStash("stash@{0}");
+
+    expect(mockGit.stash).toHaveBeenCalledWith(["pop", "stash@{0}"]);
+    expect(infoSpy).toHaveBeenCalledWith("Popped stash stash@{0}");
+    expect(notifySpy).toHaveBeenCalledWith("Popped stash stash@{0}");
+  });
+
+  it("logs error and rethrows when popStash fails", async () => {
+    const error = new Error("pop failed");
+    mockGit.stash.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.popStash("stash@{0}")).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to pop stash stash@{0}: pop failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to pop stash stash@{0}. See details in output",
+    );
+  });
+
+  describe("stashChanges", () => {
+    it("logs and notifies on successful stashChanges", async () => {
+      mockGit.stash.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.stashChanges();
+
+      expect(mockGit.stash).toHaveBeenCalledWith();
+      expect(infoSpy).toHaveBeenCalledWith("Changes stashed successfully");
+      expect(notifySpy).toHaveBeenCalledWith("Changes stashed successfully");
+    });
+
+    it("logs error and rethrows when stashChanges fails", async () => {
+      const error = new Error("stash failed");
+      mockGit.stash.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.stashChanges()).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to stash changes: stash failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to stash changes. See details in output",
+      );
+    });
+  });
+
+  describe("popStash", () => {
+    it("logs and notifies on successful popStash", async () => {
+      mockGit.stash.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.popStash("stash@{0}");
+
+      expect(mockGit.stash).toHaveBeenCalledWith(["pop", "stash@{0}"]);
+      expect(infoSpy).toHaveBeenCalledWith("Popped stash stash@{0}");
+      expect(notifySpy).toHaveBeenCalledWith("Popped stash stash@{0}");
+    });
+
+    it("logs error and rethrows when popStash fails", async () => {
+      const error = new Error("pop failed");
+      mockGit.stash.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.popStash("stash@{0}")).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to pop stash stash@{0}: pop failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to pop stash stash@{0}. See details in output",
+      );
+    });
+  });
+
+  describe("getStash", () => {
+    it("returns stashes with ref and message", async () => {
+      mockGit.stashList.mockResolvedValue({
+        all: [
+          { message: "WIP on main: 6079950 Delete .localenv" },
+          { message: "WIP on feature: abc1234 Add new feature" },
+        ],
+      });
+
+      const result = await service.getStash();
+
+      expect(result).toEqual([
+        { ref: "stash@{0}", message: "WIP on main: 6079950 Delete .localenv" },
+        {
+          ref: "stash@{1}",
+          message: "WIP on feature: abc1234 Add new feature",
+        },
+      ]);
+    });
+
+    it("returns empty array when no stashes exist", async () => {
+      mockGit.stashList.mockResolvedValue({ all: [] });
+
+      const result = await service.getStash();
+
+      expect(result).toEqual([]);
+    });
   });
 });

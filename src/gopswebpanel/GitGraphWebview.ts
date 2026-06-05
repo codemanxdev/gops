@@ -13,12 +13,12 @@ export function renderGitGraph(
       <link rel="stylesheet" href="${cssUri}">
     </head>
     <body>
-    <div id="header">
-      <span style="font-size: 16px;">⎇</span>
-      <h2>Git Graph</h2>
-      <span class="branch-badge">${branchName}</span>
-      <span class="commit-count">${commits.length} commits</span>
-    </div>
+      <div id="header">
+        <span style="font-size: 16px;">⎇</span>
+        <h2>Git Graph</h2>
+        <span class="branch-badge">${branchName}</span>
+        <span class="commit-count">${commits.length} commits</span>
+      </div>
       <div id="table-container">
         <table>
           <thead>
@@ -86,9 +86,16 @@ export function renderGitGraph(
           tr.appendChild(hashTd);
 
           const msgTd = document.createElement('td');
+          let msgText = commit.message;
+          if (commit.isMergeCommit) {
+            msgText = '[MERGE] ' + msgText;
+          }
           msgTd.innerHTML = '<span class="message" title="' + commit.message + '">' + 
-            (commit.message.length > 60 ? commit.message.substring(0, 60) + '...' : commit.message) + 
+            (msgText.length > 60 ? msgText.substring(0, 60) + '...' : msgText) + 
             '</span>';
+          if (commit.refs) {
+            msgTd.innerHTML += ' <span class="refs">' + commit.refs + '</span>';
+          }
           tr.appendChild(msgTd);
 
           const authorTd = document.createElement('td');

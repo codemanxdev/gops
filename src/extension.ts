@@ -5,9 +5,21 @@ import { GitService } from "./services/GitService";
 import { FileService } from "./services/FileService";
 import { DiffService } from "./services/DiffService";
 import { TreeDataProvider } from "./gopstree/TreeDataProvider";
+import { Notifications } from "./notifications/Notifications";
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   const gitService = new GitService();
+
+  // Check git availability
+  const isGitAvailable = await GitService.isGitAvailable();
+  if (!isGitAvailable) {
+    Notifications.error(
+      "Gops requires Git to be installed and available in PATH. Please install Git and restart VS Code.",
+      true,
+    );
+    return;
+  }
+
   const fileService = new FileService(context.globalStorageUri.fsPath);
   const diffService = new DiffService(fileService, gitService);
   const treeDataProvider = new TreeDataProvider(gitService);
@@ -34,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
     treeDataProvider.refreshChangesNode();
     treeDataProvider.refreshStagedNode();
   });
-  
+
   context.subscriptions.push(treeView, onSave, gitWatcher);
   console.log("Gops extension activated.");
 }

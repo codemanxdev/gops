@@ -12,7 +12,8 @@ import { Logger } from "../logging/Logger";
 import { Notifications } from "../notifications/Notifications";
 import { LocalBranchModel } from "../models/LocalBranchModel";
 import { RemoteBranchModel } from "../models/RemoteBranchModel";
-import { AheadBehindModel } from "../models/AheadBehindModel";
+import { BranchInfoModel } from "../models/BranchInfoModel";
+import { GitCommitModel } from "../models/GitCommitModel";
 
 export class GitService {
   private git: SimpleGit;
@@ -29,6 +30,16 @@ export class GitService {
     }
 
     this.git = simpleGit(finalPath);
+  }
+
+  static async isGitAvailable(): Promise<boolean> {
+    try {
+      const git = simpleGit();
+      await git.version();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async getStatus(): Promise<StatusResult> {
@@ -102,17 +113,33 @@ export class GitService {
   }
 
   async getLocalBranches(): Promise<LocalBranchModel[]> {
-    const branches = await this.git.branchLocal();
+    const raw = await this.git.branch(["-vv"]);
 
-    return branches.all.map((name) => {
-      const branch = branches.branches[name];
+    return raw.all.map((name) => {
+      const branch = raw.branches[name];
 
       return {
         name,
-        current: name === branches.current,
-        ...this.parseAheadBehind(branch.label),
+        current: name === raw.current,
+        ...this.parseBranchInfo(branch.label),
       };
     });
+  }
+
+  async popStash(stashId: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.stash(["pop", stashId]),
+      `Popped stash ${stashId}`,
+      `Failed to pop stash ${stashId}`,
+    );
+  }
+
+  async stashChanges(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.stash(),
+      "Changes stashed successfully",
+      "Failed to stash changes",
+    );
   }
 
   async getRemotes(): Promise<RemoteWithoutRefs[]> {
@@ -133,9 +160,12 @@ export class GitService {
     return (await this.git.tags()).all;
   }
 
-  async getStash(): Promise<string[]> {
+  async getStash(): Promise<{ ref: string; message: string }[]> {
     const stashList = await this.git.stashList();
-    return stashList.all.map((s) => s.message);
+    return stashList.all.map((s, index) => ({
+      ref: `stash@{${index}}`,
+      message: s.message,
+    }));
   }
 
   async getLog(): Promise<readonly (DefaultLogFields & ListLogLine)[]> {
@@ -200,26 +230,47 @@ export class GitService {
     );
   }
 
-  async getBranchCommits(branchName: string): Promise<
-    {
-      hash: string;
-      message: string;
-      author: string;
-      date: string;
-    }[]
-  > {
+  async getBranchCommits(branchName: string): Promise<GitCommitModel[]> {
     return this.executeGitAction(
       async () => {
-        const log = await this.git.log([branchName]);
-        return log.all.map((c) => ({
-          hash: c.hash.substring(0, 7),
+        const log = await this.git.log({
+          [branchName]: null,
+          format: {
+            hash: "%h",
+            message: "%s",
+            author: "%an",
+            date: "%ai",
+            parentCount: "%P",
+            refs: "%D",
+          },
+        });
+        return log.all.map((c: any) => ({
+          hash: c.hash,
           message: c.message,
-          author: c.author_name,
+          author: c.author,
           date: c.date,
+          isMergeCommit: c.parentCount.split(" ").length > 1,
+          refs: c.refs || "",
         }));
       },
       `Loaded commits for branch ${branchName}`,
       `Failed to load commits for branch ${branchName}`,
+    );
+  }
+
+  async publishBranch(branchName: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.push(["--set-upstream", "origin", branchName]),
+      `Branch ${branchName} published to origin`,
+      `Failed to publish branch ${branchName}`,
+    );
+  }
+
+  async fetch(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.fetch(["--prune"]),
+      "Fetched latest changes",
+      "Failed to fetch changes",
     );
   }
   // #endregion
@@ -261,13 +312,15 @@ export class GitService {
     }
   }
 
-  private parseAheadBehind(label: string): AheadBehindModel {
+  private parseBranchInfo(label: string): BranchInfoModel {
     const aheadMatch = label.match(/ahead (\d+)/);
     const behindMatch = label.match(/behind (\d+)/);
+    const hasUpstream = /^\[[^\]]+\]/.test(label) && !/: gone/.test(label);
 
     return {
       ahead: aheadMatch ? parseInt(aheadMatch[1], 10) : 0,
       behind: behindMatch ? parseInt(behindMatch[1], 10) : 0,
+      hasUpstream,
     };
   }
 }
