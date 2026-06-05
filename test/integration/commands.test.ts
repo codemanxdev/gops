@@ -29,6 +29,9 @@ suite("Commands", function () {
       COMMANDS.UNSTAGE_FILE,
       COMMANDS.UNSTAGE_ALL_FILES,
       COMMANDS.COMMIT,
+      COMMANDS.SHOW_GIT_GRAPH,
+      COMMANDS.PUBLISH_BRANCH,
+      COMMANDS.FETCH,
     ];
 
     for (const command of expectedCommands) {
@@ -66,5 +69,10 @@ suite("Commands", function () {
         `${COMMANDS.PUSH} failed with unexpected error: ${err.message}`,
       );
     }
+  });
+
+  test("gops.fetch should execute without error", async function () {
+    await vscode.commands.executeCommand("gops.fetch");
+    assert.ok(true, "gops.fetch completed without error");
   });
 });

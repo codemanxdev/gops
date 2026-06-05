@@ -47,6 +47,7 @@ export class CommandRegistrar {
     this.register(COMMANDS.PUBLISH_BRANCH, (node) =>
       this.delegate.publishBranch(node),
     );
+    this.register(COMMANDS.FETCH, () => this.delegate.fetch());
   }
 
   private register(

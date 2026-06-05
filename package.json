@@ -128,6 +128,11 @@
         "command": "gops.publishBranch",
         "title": "Publish Branch",
         "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "gops.fetch",
+        "title": "Fetch",
+        "icon": "$(cloud-download)"
       }
     ],
     "viewsContainers": {
@@ -172,6 +177,11 @@
         },
         {
           "command": "gops.branch.current",
+          "when": "view == gitOpsTreeview",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.fetch",
           "when": "view == gitOpsTreeview",
           "group": "navigation"
         }

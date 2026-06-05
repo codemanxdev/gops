@@ -31,6 +31,16 @@ export class GitService {
     this.git = simpleGit(finalPath);
   }
 
+  static async isGitAvailable(): Promise<boolean> {
+    try {
+      const git = simpleGit();
+      await git.version();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async getStatus(): Promise<StatusResult> {
     return this.git.status();
   }
@@ -230,6 +240,14 @@ export class GitService {
       `Failed to publish branch ${branchName}`,
     );
   }
+
+  async fetch(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.fetch(["--prune"]),
+      "Fetched latest changes",
+      "Failed to fetch changes",
+    );
+  }
   // #endregion
 
   getRepoName(): string {
@@ -272,7 +290,7 @@ export class GitService {
   private parseBranchInfo(label: string): BranchInfoModel {
     const aheadMatch = label.match(/ahead (\d+)/);
     const behindMatch = label.match(/behind (\d+)/);
-    const hasUpstream = /^\[[^\]]+\]/.test(label);
+    const hasUpstream = /^\[[^\]]+\]/.test(label) && !/: gone/.test(label);
 
     return {
       ahead: aheadMatch ? parseInt(aheadMatch[1], 10) : 0,

@@ -12,24 +12,35 @@ Git Operations - Visual Git Toolkit for VS Code
 
 ## Features
 
-### Tree View
+**Branch Management**
+- Create, checkout, delete, and rename branches
+- Publish local branches to remote with upstream tracking
+- Visual git graph showing commit history per branch
+- Ahead/behind tracking for local branches
 
-- Toolbar with following options
-  - Commit
-  - Create Branch from Current
-  - Pull
-  - Push
-  - Refresh treeview
-- Local Branches
-  - Checkout
-  - Delete
-  - New Branch
-  - Rename Branch
-- Remote Branches
-- Local Changes
-- Staged Changes
-- Tags
-- Stash
+**File Operations**
+- Stage and unstage files individually or all at once
+- View diffs for changed files
+- Auto-refresh on file save
+
+**Remote Operations**
+- Push, pull, and fetch changes
+- Fetch with automatic pruning of deleted remote branches
+
+**Commit Workflow**
+- Commit staged files with custom messages
+- Commit button only appears when files are staged
+
+**User Interface**
+- Clean tree view with organized sections (branches, changes, staged, tags, stash)
+- Context-aware inline buttons and menus
+- Modal dialogs for confirmations
+- Syntax highlighting and VSCode theme integration
+
+**Developer Features**
+- Comprehensive logging and error reporting
+- 80+ unit and integration tests
+- Auto-refresh watchers for git state changes
 
 ## Requirements
 

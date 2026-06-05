@@ -16,4 +16,5 @@ export const COMMANDS = {
   COMMIT: "gops.commit",
   SHOW_GIT_GRAPH: "gops.showGitGraph",
   PUBLISH_BRANCH: "gops.publishBranch",
+  FETCH: "gops.fetch",
 } as const;

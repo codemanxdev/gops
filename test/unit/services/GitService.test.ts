@@ -51,6 +51,8 @@ const mockGit = {
   reset: vi.fn(),
   deleteLocalBranch: vi.fn(),
   raw: vi.fn(),
+  fetch: vi.fn(),
+  version: vi.fn(),
 };
 
 vi.mock("simple-git", () => ({
@@ -81,7 +83,13 @@ describe("GitService", () => {
 
     expect(branches).toEqual([
       { name: "main", current: true, ahead: 0, behind: 3, hasUpstream: true },
-      { name: "feature", current: false, ahead: 2, behind: 0, hasUpstream: true },
+      {
+        name: "feature",
+        current: false,
+        ahead: 2,
+        behind: 0,
+        hasUpstream: true,
+      },
     ]);
   });
 
@@ -494,40 +502,85 @@ describe("GitService", () => {
     );
   });
 
-it("logs and notifies on successful publishBranch", async () => {
-  mockGit.push.mockResolvedValue("ok");
-  const infoSpy = vi.spyOn(Logger, "info");
-  const notifySpy = vi.spyOn(Notifications, "info");
+  it("logs and notifies on successful publishBranch", async () => {
+    mockGit.push.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
 
-  await service.publishBranch("feature/my-branch");
+    await service.publishBranch("feature/my-branch");
 
-  expect(mockGit.push).toHaveBeenCalledWith([
-    "--set-upstream",
-    "origin",
-    "feature/my-branch",
-  ]);
-  expect(infoSpy).toHaveBeenCalledWith(
-    "Branch feature/my-branch published to origin",
-  );
-  expect(notifySpy).toHaveBeenCalledWith(
-    "Branch feature/my-branch published to origin",
-  );
-});
+    expect(mockGit.push).toHaveBeenCalledWith([
+      "--set-upstream",
+      "origin",
+      "feature/my-branch",
+    ]);
+    expect(infoSpy).toHaveBeenCalledWith(
+      "Branch feature/my-branch published to origin",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Branch feature/my-branch published to origin",
+    );
+  });
 
-it("logs error and rethrows when publishBranch fails", async () => {
-  const error = new Error("publish failed");
-  mockGit.push.mockRejectedValue(error);
-  const errorSpy = vi.spyOn(Logger, "error");
-  const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+  it("logs error and rethrows when publishBranch fails", async () => {
+    const error = new Error("publish failed");
+    mockGit.push.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
 
-  await expect(service.publishBranch("feature/my-branch")).rejects.toThrow(
-    error,
-  );
-  expect(errorSpy).toHaveBeenCalledWith(
-    "Failed to publish branch feature/my-branch: publish failed",
-  );
-  expect(notifySpy).toHaveBeenCalledWith(
-    "Failed to publish branch feature/my-branch. See details in output",
-  );
-});  
+    await expect(service.publishBranch("feature/my-branch")).rejects.toThrow(
+      error,
+    );
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to publish branch feature/my-branch: publish failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to publish branch feature/my-branch. See details in output",
+    );
+  });
+
+  it("logs and notifies on successful fetch", async () => {
+    mockGit.fetch.mockResolvedValue("ok");
+    const infoSpy = vi.spyOn(Logger, "info");
+    const notifySpy = vi.spyOn(Notifications, "info");
+
+    await service.fetch();
+
+    expect(mockGit.fetch).toHaveBeenCalled();
+    expect(infoSpy).toHaveBeenCalledWith("Fetched latest changes");
+    expect(notifySpy).toHaveBeenCalledWith("Fetched latest changes");
+  });
+
+  it("logs error and rethrows when fetch fails", async () => {
+    const error = new Error("fetch failed");
+    mockGit.fetch.mockRejectedValue(error);
+    const errorSpy = vi.spyOn(Logger, "error");
+    const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+    await expect(service.fetch()).rejects.toThrow(error);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "Failed to fetch changes: fetch failed",
+    );
+    expect(notifySpy).toHaveBeenCalledWith(
+      "Failed to fetch changes. See details in output",
+    );
+  });
+
+  describe("isGitAvailable", () => {
+    it("should return true when git is available", async () => {
+      mockGit.version.mockResolvedValue("2.40.0");
+
+      const result = await GitService.isGitAvailable();
+
+      expect(result).toBe(true);
+    });
+
+    it("should return false when git is not available", async () => {
+      mockGit.version.mockRejectedValue(new Error("git not found"));
+
+      const result = await GitService.isGitAvailable();
+
+      expect(result).toBe(false);
+    });
+  });
 });

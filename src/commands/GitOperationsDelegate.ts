@@ -6,6 +6,8 @@ import { GitTreeNode } from "../gopstree/types";
 import { ChangedFileNode } from "../gopstree/nodes/ChangedFileNode";
 import { StagedFileNode } from "../gopstree/nodes/StagedFileNode";
 import { GitGraphPanel } from "../gopswebpanel/GitGraphPanel";
+import { LocalBranchNode } from "../gopstree/nodes/LocalBranchNode";
+import { Notifications } from "../notifications/Notifications";
 
 export class GitOperationsDelegate {
   constructor(
@@ -30,14 +32,18 @@ export class GitOperationsDelegate {
   }
 
   async deleteBranch(node: GitTreeNode): Promise<void> {
-    if (!node || !("branchName" in node)) {
+    if (!node || !(node instanceof LocalBranchNode)) {
       return;
     }
 
-    const confirm = await vscode.window.showWarningMessage(
+    if (node.isCurrent) {
+      Notifications.error(`Switch to another branch before deleting.`);
+      return;
+    }
+
+    const confirm = await Notifications.choice(
       `Are you sure you want to delete branch "${node.branchName}"?`,
-      { modal: true },
-      "Delete",
+      ["Delete"],
     );
 
     if (confirm !== "Delete") {
@@ -192,5 +198,11 @@ export class GitOperationsDelegate {
     await this.gitService.publishBranch(node.branchName);
     await this.treeDataProvider.refreshLocalBranchesNode();
     await this.treeDataProvider.refreshRemoteBranchesNode();
+  }
+
+  async fetch(): Promise<void> {
+    await this.gitService.fetch();
+    await this.treeDataProvider.refreshLocalBranchesNode();
+    this.treeDataProvider.refreshRemoteBranchesNode();
   }
 }
