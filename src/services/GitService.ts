@@ -125,6 +125,22 @@ export class GitService {
     });
   }
 
+  async popStash(stashId: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.stash(["pop", stashId]),
+      `Popped stash ${stashId}`,
+      `Failed to pop stash ${stashId}`,
+    );
+  }
+
+  async stashChanges(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.stash(),
+      "Changes stashed successfully",
+      "Failed to stash changes",
+    );
+  }
+
   async getRemotes(): Promise<RemoteWithoutRefs[]> {
     return this.git.getRemotes();
   }
@@ -143,9 +159,12 @@ export class GitService {
     return (await this.git.tags()).all;
   }
 
-  async getStash(): Promise<string[]> {
+  async getStash(): Promise<{ ref: string; message: string }[]> {
     const stashList = await this.git.stashList();
-    return stashList.all.map((s) => s.message);
+    return stashList.all.map((s, index) => ({
+      ref: `stash@{${index}}`,
+      message: s.message,
+    }));
   }
 
   async getLog(): Promise<readonly (DefaultLogFields & ListLogLine)[]> {

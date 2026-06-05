@@ -32,6 +32,7 @@ suite("Commands", function () {
       COMMANDS.SHOW_GIT_GRAPH,
       COMMANDS.PUBLISH_BRANCH,
       COMMANDS.FETCH,
+      COMMANDS.POP_STASH,
     ];
 
     for (const command of expectedCommands) {
@@ -74,5 +75,20 @@ suite("Commands", function () {
   test("gops.fetch should execute without error", async function () {
     await vscode.commands.executeCommand("gops.fetch");
     assert.ok(true, "gops.fetch completed without error");
+  });
+
+  test("gops.popStash should execute without error", async function () {
+    await vscode.commands.executeCommand(COMMANDS.POP_STASH);
+    assert.ok(true, "gops.popStash completed without error");
+  });
+
+  test(`${COMMANDS.STASH_CHANGES} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.STASH_CHANGES);
+    assert.ok(true, `${COMMANDS.STASH_CHANGES} completed without error`);
+  });
+
+  test(`${COMMANDS.POP_STASH} should execute without error`, async function () {
+    await vscode.commands.executeCommand(COMMANDS.POP_STASH);
+    assert.ok(true, `${COMMANDS.POP_STASH} completed without error`);
   });
 });

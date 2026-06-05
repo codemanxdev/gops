@@ -133,6 +133,16 @@
         "command": "gops.fetch",
         "title": "Fetch",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "gops.stashChanges",
+        "title": "Stash Changes",
+        "icon": "$(save)"
+      },
+      {
+        "command": "gops.popStash",
+        "title": "Pop Stash",
+        "icon": "$(remove)"
       }
     ],
     "viewsContainers": {
@@ -183,6 +193,11 @@
         {
           "command": "gops.fetch",
           "when": "view == gitOpsTreeview",
+          "group": "navigation"
+        },
+        {
+          "command": "gops.stashChanges",
+          "when": "view == gitOpsTreeview && gops.hasChangedFiles == true",
           "group": "navigation"
         }
       ],
@@ -239,6 +254,11 @@
           "command": "gops.publishBranch",
           "title": "Publish Branch",
           "when": "viewItem == localBranches.noUpstream",
+          "group": "inline"
+        },
+        {
+          "command": "gops.popStash",
+          "when": "view == gitOpsTreeview && viewItem == stash",
           "group": "inline"
         }
       ]

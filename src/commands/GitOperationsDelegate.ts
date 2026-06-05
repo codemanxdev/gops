@@ -8,6 +8,7 @@ import { StagedFileNode } from "../gopstree/nodes/StagedFileNode";
 import { GitGraphPanel } from "../gopswebpanel/GitGraphPanel";
 import { LocalBranchNode } from "../gopstree/nodes/LocalBranchNode";
 import { Notifications } from "../notifications/Notifications";
+import { StashNode } from "../gopstree/nodes/StashNode";
 
 export class GitOperationsDelegate {
   constructor(
@@ -204,5 +205,19 @@ export class GitOperationsDelegate {
     await this.gitService.fetch();
     await this.treeDataProvider.refreshLocalBranchesNode();
     this.treeDataProvider.refreshRemoteBranchesNode();
+  }
+
+  async popStash(node: GitTreeNode): Promise<void> {
+    if (!node || !(node instanceof StashNode)) {
+      return;
+    }
+
+    await this.gitService.popStash(node.stashRef);
+    this.treeDataProvider.refresh();
+  }
+
+  async stashChanges(): Promise<void> {
+    await this.gitService.stashChanges();
+    this.treeDataProvider.refresh();
   }
 }

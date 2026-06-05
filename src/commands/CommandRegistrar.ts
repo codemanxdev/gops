@@ -48,6 +48,8 @@ export class CommandRegistrar {
       this.delegate.publishBranch(node),
     );
     this.register(COMMANDS.FETCH, () => this.delegate.fetch());
+    this.register(COMMANDS.POP_STASH, (node) => this.delegate.popStash(node));
+    this.register(COMMANDS.STASH_CHANGES, () => this.delegate.stashChanges());
   }
 
   private register(
