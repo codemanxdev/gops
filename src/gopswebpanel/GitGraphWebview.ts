@@ -19,33 +19,32 @@ export function renderGitGraph(
         <span class="branch-badge">${branchName}</span>
         <span class="commit-count">${commits.length} commits</span>
       </div>
-      <div id="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th class="graph-cell"></th>
-              <th>Hash</th>
-              <th>Message</th>
-              <th>Author</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="commits">
-          </tbody>
-        </table>
+
+      <div id="column-headers">
+        <div class="col-graph"></div>
+        <div class="col-hash">Hash</div>
+        <div class="col-message">Message</div>
+        <div class="col-author">Author</div>
+        <div class="col-date">Date</div>
       </div>
+
+      <div id="commits-container">
+      </div>
+
       <script>
         const commits = ${JSON.stringify(commits)};
-        const tbody = document.getElementById('commits');
+        const container = document.getElementById('commits-container');
         const ROW_HEIGHT = 37;
         const CX = 12;
         const CR = 5;
 
         commits.forEach((commit, i) => {
-          const tr = document.createElement('tr');
+          const row = document.createElement('div');
+          row.className = 'commit-row' + (i % 2 === 0 ? '' : ' commit-row-alt');
 
-          const graphTd = document.createElement('td');
-          graphTd.className = 'graph-cell';
+          // Graph cell
+          const graphDiv = document.createElement('div');
+          graphDiv.className = 'col-graph';
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           svg.setAttribute('class', 'graph');
           svg.setAttribute('width', '24');
@@ -78,36 +77,44 @@ export function renderGitGraph(
           circle.setAttribute('stroke-width', '1.5');
           svg.appendChild(circle);
 
-          graphTd.appendChild(svg);
-          tr.appendChild(graphTd);
+          graphDiv.appendChild(svg);
+          row.appendChild(graphDiv);
 
-          const hashTd = document.createElement('td');
-          hashTd.innerHTML = '<span class="hash">' + commit.hash + '</span>';
-          tr.appendChild(hashTd);
+          // Hash cell
+          const hashDiv = document.createElement('div');
+          hashDiv.className = 'col-hash';
+          hashDiv.innerHTML = '<span class="hash">' + commit.hash + '</span>';
+          row.appendChild(hashDiv);
 
-          const msgTd = document.createElement('td');
+          // Message cell
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'col-message';
           let msgText = commit.message;
           if (commit.isMergeCommit) {
             msgText = '[MERGE] ' + msgText;
           }
-          msgTd.innerHTML = '<span class="message" title="' + commit.message + '">' + 
-            (msgText.length > 60 ? msgText.substring(0, 60) + '...' : msgText) + 
+          msgDiv.innerHTML = '<span class="message" title="' + commit.message + '">' +
+            (msgText.length > 60 ? msgText.substring(0, 60) + '...' : msgText) +
             '</span>';
           if (commit.refs) {
-            msgTd.innerHTML += ' <span class="refs">' + commit.refs + '</span>';
+            msgDiv.innerHTML += ' <span class="refs">' + commit.refs + '</span>';
           }
-          tr.appendChild(msgTd);
+          row.appendChild(msgDiv);
 
-          const authorTd = document.createElement('td');
-          authorTd.innerHTML = '<span class="author">' + commit.author + '</span>';
-          tr.appendChild(authorTd);
+          // Author cell
+          const authorDiv = document.createElement('div');
+          authorDiv.className = 'col-author';
+          authorDiv.innerHTML = '<span class="author">' + commit.author + '</span>';
+          row.appendChild(authorDiv);
 
-          const dateTd = document.createElement('td');
+          // Date cell
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'col-date';
           const d = new Date(commit.date);
-          dateTd.innerHTML = '<span class="date">' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + '</span>';
-          tr.appendChild(dateTd);
+          dateDiv.innerHTML = '<span class="date">' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + '</span>';
+          row.appendChild(dateDiv);
 
-          tbody.appendChild(tr);
+          container.appendChild(row);
         });
       </script>
     </body>
