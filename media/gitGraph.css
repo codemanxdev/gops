@@ -1,3 +1,19 @@
+:root {
+  --color-1: #f0883e;
+  --color-2: #6a9955;
+  --color-3: #569cd6;
+  --color-4: #c586c0;
+  --color-5: #ce9178;
+  --color-6: #9cdcfe;
+  --color-7: #4ec9b0;
+  --color-8: #dcdcaa;
+
+  --col-graph-width: 50px;
+  --col-hash-width: 90px;
+  --col-author-width: 160px;
+  --col-date-width: 160px;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,6 +27,8 @@ body {
   font-size: 13px;
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 #header {
@@ -20,6 +38,7 @@ body {
   align-items: center;
   gap: 8px;
   background: var(--vscode-sideBarSectionHeader-background);
+  flex-shrink: 0;
 }
 
 #header h2 {
@@ -44,31 +63,44 @@ body {
   margin-left: auto;
 }
 
-#table-container {
-  overflow-y: auto;
-  height: calc(100vh - 49px);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-thead {
+#column-headers {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 2px solid var(--vscode-panel-border);
+  background: var(--vscode-sideBarSectionHeader-background);
+  flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--vscode-editor-background);
 }
 
-thead tr {
-  border-bottom: 2px solid var(--vscode-panel-border);
-  background: var(--vscode-sideBarSectionHeader-background);
+#column-headers .col-graph {
+  width: var(--col-graph-width);
+  flex-shrink: 0;
 }
 
-th {
-  padding: 8px 12px;
-  text-align: left;
+#column-headers .col-hash {
+  width: var(--col-hash-width);
+  flex-shrink: 0;
+}
+
+#column-headers .col-message {
+  flex: 1;
+}
+
+#column-headers .col-author {
+  width: var(--col-author-width);
+  flex-shrink: 0;
+}
+
+#column-headers .col-date {
+  width: var(--col-date-width);
+  flex-shrink: 0;
+}
+
+#column-headers div {
+  padding: 0 12px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -83,35 +115,65 @@ th {
     sans-serif;
 }
 
-th:last-child {
+#column-headers div:last-child {
   border-right: none;
 }
 
-tbody tr {
+#commits-container {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.commit-row {
+  display: flex;
+  align-items: center;
   border-bottom: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.05));
   cursor: pointer;
   transition: background 0.1s;
+  min-height: 37px;
 }
 
-tbody tr:nth-child(even) {
+.commit-row-alt {
   background: var(
     --vscode-list-inactiveSelectionBackground,
     rgba(255, 255, 255, 0.02)
   );
 }
 
-tbody tr:hover {
+.commit-row:hover {
   background: var(--vscode-list-hoverBackground);
 }
 
-td {
-  padding: 8px 12px;
-  vertical-align: middle;
+.col-graph {
+  width: var(--col-graph-width);
+  flex-shrink: 0;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
 }
 
-.graph-cell {
-  width: 40px;
-  padding: 0 8px;
+.col-hash {
+  width: var(--col-hash-width);
+  flex-shrink: 0;
+  padding: 8px 12px;
+}
+
+.col-message {
+  flex: 1;
+  padding: 8px 12px;
+  overflow: hidden;
+}
+
+.col-author {
+  width: var(--col-author-width);
+  flex-shrink: 0;
+  padding: 8px 12px;
+}
+
+.col-date {
+  width: var(--col-date-width);
+  flex-shrink: 0;
+  padding: 8px 12px;
 }
 
 .hash {
@@ -123,10 +185,10 @@ td {
 
 .message {
   color: var(--vscode-editor-foreground);
-  max-width: 400px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: block;
 }
 
 .author {
@@ -154,4 +216,5 @@ svg.graph {
   border-radius: 3px;
   display: inline-block;
   margin-left: 4px;
+  white-space: nowrap;
 }
