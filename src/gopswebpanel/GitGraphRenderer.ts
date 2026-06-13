@@ -118,8 +118,23 @@ export const GitGraphRenderer = {
     const cy = HALF;
     let svgContent = "";
 
+    // Determine if THIS commit's own lane has a diagonal edge
+    // (either it diagonally connects to a parent, or a diagonal
+    // edge comes into it from below)
+    const ownLaneIsDiagonal =
+      cl.edges.some(
+        (edge) => edge.fromLane === cl.lane && edge.toLane !== cl.lane,
+      ) ||
+      incoming.some(
+        (edge) => edge.toLane === cl.lane && edge.fromLane !== cl.lane,
+      );
+
     // Draw pass-through lines first (full height — bottom layer)
+    // Skip only this commit's own lane if it's diagonal here
     cl.passThroughs.forEach((pt: PassThrough) => {
+      if (pt.lane === cl.lane && ownLaneIsDiagonal) {
+        return;
+      }
       const x = this.laneX(pt.lane);
       svgContent += this.makePath(x, 0, x, ROW_HEIGHT, pt.color);
     });
@@ -130,7 +145,7 @@ export const GitGraphRenderer = {
       incoming.some((edge) => edge.toLane === cl.lane) ||
       cl.edges.some((edge) => edge.fromLane === cl.lane);
 
-    if (!isFirst && laneContinues) {
+    if (!isFirst && laneContinues && !ownLaneIsDiagonal) {
       svgContent += this.makePath(cx, 0, cx, cy, cl.color);
     }
 
@@ -139,7 +154,7 @@ export const GitGraphRenderer = {
       cl.passThroughs.some((pt) => pt.lane === cl.lane) ||
       cl.edges.some((edge) => edge.fromLane === cl.lane);
 
-    if (laneContinuesDown) {
+    if (laneContinuesDown && !ownLaneIsDiagonal) {
       svgContent += this.makePath(cx, cy, cx, ROW_HEIGHT, cl.color);
     }
 
