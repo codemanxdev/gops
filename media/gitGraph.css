@@ -124,44 +124,10 @@ body {
   flex: 1;
 }
 
-.commit-row {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--vscode-panel-border, rgba(255, 255, 255, 0.05));
-  cursor: pointer;
-  transition: background 0.1s;
-  min-height: 37px;
-}
-
-.commit-row-alt {
-  background: var(
-    --vscode-list-inactiveSelectionBackground,
-    rgba(255, 255, 255, 0.02)
-  );
-}
-
-.commit-row:hover {
-  background: var(--vscode-list-hoverBackground);
-}
-
-.col-graph {
-  width: var(--col-graph-width);
-  flex-shrink: 0;
-  padding: 0 8px;
-  display: flex;
-  align-items: center;
-}
-
 .col-hash {
   width: var(--col-hash-width);
   flex-shrink: 0;
   padding: 8px 12px;
-}
-
-.col-message {
-  flex: 1;
-  padding: 8px 12px;
-  overflow: hidden;
 }
 
 .col-author {
@@ -183,14 +149,6 @@ body {
   white-space: nowrap;
 }
 
-.message {
-  color: var(--vscode-editor-foreground);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
-}
-
 .author {
   color: var(--vscode-terminal-ansiGreen);
   white-space: nowrap;
@@ -203,9 +161,56 @@ body {
   font-size: 12px;
 }
 
+.commit-row {
+  display: flex;
+  align-items: stretch;
+  min-height: 40px;
+}
+
+.commit-row-alt {
+  background: var(
+    --vscode-list-inactiveSelectionBackground,
+    rgba(255, 255, 255, 0.02)
+  );
+}
+
+.commit-row:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.col-graph {
+  width: var(--col-graph-width);
+  flex: 0 0 var(--col-graph-width); /* fixed width */
+  padding: 0 8px;
+  display: flex;
+  align-items: stretch;
+}
+
 svg.graph {
+  height: 100%;
+  width: 100%;
   display: block;
   overflow: visible;
+}
+
+.col-message {
+  flex: 1;
+  padding: 8px 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.message {
+  color: var(--vscode-editor-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .refs {
@@ -215,6 +220,6 @@ svg.graph {
   padding: 2px 6px;
   border-radius: 3px;
   display: inline-block;
-  margin-left: 4px;
   white-space: nowrap;
+  flex-shrink: 0;
 }

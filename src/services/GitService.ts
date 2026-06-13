@@ -234,13 +234,15 @@ export class GitService {
     return this.executeGitAction(
       async () => {
         const log = await this.git.log({
-          [branchName]: null,
+          "--all": null,
+          "--topo-order": null,
+          maxCount: 20,
           format: {
             hash: "%h",
             message: "%s",
             author: "%an",
             date: "%ai",
-            parentCount: "%P",
+            parents: "%P",
             refs: "%D",
           },
         });
@@ -249,8 +251,17 @@ export class GitService {
           message: c.message,
           author: c.author,
           date: c.date,
-          isMergeCommit: c.parentCount.split(" ").length > 1,
+          isMergeCommit: c.parents
+            ? c.parents.trim().split(" ").filter(Boolean).length > 1
+            : false,
           refs: c.refs || "",
+          parents: c.parents
+            ? c.parents
+                .trim()
+                .split(" ")
+                .filter(Boolean)
+                .map((p: string) => p.substring(0, 7))
+            : [],
         }));
       },
       `Loaded commits for branch ${branchName}`,
