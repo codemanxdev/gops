@@ -5,4 +5,5 @@ export interface GitCommitModel {
   date: string;
   isMergeCommit: boolean;
   refs: string;
+  parents: string[];
 }
