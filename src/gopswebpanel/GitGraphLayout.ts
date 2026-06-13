@@ -25,29 +25,31 @@ export function computeLayout(
 
   const lanes: (string | null)[] = [];
 
+  // Reserve lane 0 for the primary branch from the start
+  if (commits.length > 0) {
+    lanes[0] = commits[0].hash;
+  }
+
   const occupyLane = (hash: string): number => {
     const existing = lanes.indexOf(hash);
     if (existing !== -1) {
-      console.log("REUSE EXISTING", hash, "lane", existing);
       return existing;
     }
 
-    const free = lanes.indexOf(null);
+    // Skip lane 0 — reserved for the primary branch
+    const free = lanes.indexOf(null, 1);
     if (free !== -1) {
-      console.log("OCCUPY FREE", hash, "lane", free);
       lanes[free] = hash;
       return free;
     }
 
     lanes.push(hash);
-    console.log("NEW LANE", hash, "lane", lanes.length - 1);
     return lanes.length - 1;
   };
 
   const releaseLane = (hash: string) => {
     const idx = lanes.indexOf(hash);
-    if (idx !== -1) {
-      console.log("RELEASE", hash, "lane", idx);
+    if (idx !== -1 && idx !== 0) {
       lanes[idx] = null;
     }
   };
@@ -70,32 +72,39 @@ export function computeLayout(
 
   for (let i = 0; i < commits.length; i++) {
     const commit = commits[i];
-    console.log("LAYOUT STEP", i, commit.hash, "LANES BEFORE =", [...lanes]);
     const edges: Edge[] = [];
 
     const lane = occupyLane(commit.hash);
     const color = getColor(lane);
 
     if (commit.parents.length === 0) {
-      releaseLane(commit.hash);
+      // Root commit — keep the lane occupied so the line connects
+      // all the way down to this commit (don't release it)
     } else if (commit.parents.length === 1) {
       const parentHash = commit.parents[0];
       const parentIndex = hashToIndex.get(parentHash);
 
       if (parentIndex !== undefined) {
         const existingParentLane = lanes.indexOf(parentHash);
-        if (existingParentLane !== -1 && existingParentLane !== lane) {
-          console.log(
-            "DIAGONAL",
-            commit.hash,
-            "lane",
-            lane,
-            "->",
-            parentHash,
-            "parentLane",
-            existingParentLane,
-          );
 
+        if (lane === 0) {
+          // Primary lane always keeps the parent on lane 0,
+          // even if another lane already tracks this hash
+          transferLane(commit.hash, parentHash);
+          // Clear stale duplicate references to this commit's hash in other lanes
+          for (let li = 1; li < lanes.length; li++) {
+            if (lanes[li] === commit.hash) {
+              lanes[li] = null;
+            }
+          }
+          edges.push({
+            fromLane: lane,
+            toLane: lane,
+            fromHash: commit.hash,
+            toHash: parentHash,
+            color,
+          });
+        } else if (existingParentLane !== -1 && existingParentLane !== lane) {
           edges.push({
             fromLane: lane,
             toLane: existingParentLane,
@@ -121,17 +130,23 @@ export function computeLayout(
       const firstParent = commit.parents[0];
       const firstParentLane = lanes.indexOf(firstParent);
 
-      if (firstParentLane !== -1 && firstParentLane !== lane) {
-        console.log(
-          "MERGE DIAGONAL",
-          commit.hash,
-          "lane",
-          lane,
-          "->",
-          firstParent,
-          "parentLane",
-          firstParentLane,
-        );
+      if (lane === 0) {
+        // Primary lane always keeps the first parent on lane 0
+        transferLane(commit.hash, firstParent);
+        // Clear stale duplicate references to this commit's hash in other lanes
+        for (let li = 1; li < lanes.length; li++) {
+          if (lanes[li] === commit.hash) {
+            lanes[li] = null;
+          }
+        }
+        edges.push({
+          fromLane: lane,
+          toLane: lane,
+          fromHash: commit.hash,
+          toHash: firstParent,
+          color,
+        });
+      } else if (firstParentLane !== -1 && firstParentLane !== lane) {
         edges.push({
           fromLane: lane,
           toLane: firstParentLane,
@@ -154,9 +169,6 @@ export function computeLayout(
       for (let p = 1; p < commit.parents.length; p++) {
         const parentHash = commit.parents[p];
         const existingLane = lanes.indexOf(parentHash);
-        console.log(
-          `MERGE ${commit.hash} parent[${p}]=${parentHash} lane=${lane} existingLane=${existingLane}`,
-        );
 
         if (existingLane !== -1) {
           // Parent already has a lane — connect to that lane
@@ -168,20 +180,19 @@ export function computeLayout(
             color: getColor(existingLane),
           });
         } else {
-          // Parent not yet seen — do NOT assign a lane yet.
-          // Draw a temporary straight-down edge; real lane will be assigned when parent appears.
+          // Parent not yet seen — assign it a new lane now so the
+          // edge is diagonal and the lane is reserved for when it appears
+          const parentLane = occupyLane(parentHash);
           edges.push({
             fromLane: lane,
-            toLane: lane,
+            toLane: parentLane,
             fromHash: commit.hash,
             toHash: parentHash,
-            color,
+            color: getColor(parentLane),
           });
         }
       }
     }
-
-    console.log("SNAPSHOT", commit.hash, "lane", lane, "active", [...lanes]);
 
     rawLayouts.push({
       hash: commit.hash,
@@ -239,14 +250,7 @@ export function computeLayout(
     }
 
     console.log(
-      "LAYOUT",
-      current.hash,
-      "lane",
-      current.lane,
-      "passThroughs",
-      passThroughs.map((p) => p.lane),
-      "edges",
-      current.edges.map((e) => `${e.fromLane}->${e.toLane}`),
+      `[${i}] ${current.hash} lane=${current.lane} edges=[${current.edges.map((e) => `${e.fromLane}->${e.toLane}(${e.toHash.substring(0, 7)})`).join(", ")}] passThroughs=[${passThroughs.map((p) => p.lane).join(",")}] snapshot=[${current.lanesSnapshot.map((h, idx) => (h ? `${idx}:${h.substring(0, 7)}` : `${idx}:null`)).join(", ")}]`,
     );
 
     layout.set(current.hash, {
