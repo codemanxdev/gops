@@ -39,7 +39,7 @@ export class GitGraphLayout {
 
     for (let i = 0; i < commits.length; i++) {
       const commit = commits[i];
-      const lane = laneManager.occupy(commit.hash);
+      const lane = laneManager.findLaneForCommit(commit.hash);
       const color = getColor(lane);
       const parent = commit.parents[0] || null;
 
@@ -47,7 +47,7 @@ export class GitGraphLayout {
         `Commit ${commit.hash} parents=${commit.parents.length} ${commit.parents.join(", ")}`,
       );
 
-      laneManager.next(lane, commit.parents[0]);
+      laneManager.next(lane, parent);
 
       const commitLayout: CommitLayout = {
         hash: commit.hash,
