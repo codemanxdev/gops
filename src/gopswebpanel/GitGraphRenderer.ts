@@ -112,58 +112,104 @@ export const GitGraphRenderer = {
     incoming: Edge[],
     svgWidth: number,
     isFirst: boolean,
-    isMergeCommit: boolean,
   ): string {
+    console.log("Drawing graph cell for commit", cl.hash, "with layout", cl);
+    const isMergeCommit = cl.edges.length > 1;
     const cx = this.laneX(cl.lane);
     const cy = HALF;
     let svgContent = "";
 
-    // Determine if THIS commit's own lane has a diagonal edge
-    // (either it diagonally connects to a parent, or a diagonal
-    // edge comes into it from below)
-    const ownLaneIsDiagonal =
-      cl.edges.some(
-        (edge) => edge.fromLane === cl.lane && edge.toLane !== cl.lane,
-      ) ||
-      incoming.some(
-        (edge) => edge.toLane === cl.lane && edge.fromLane !== cl.lane,
-      );
+    const commitHasIncomingBranch = incoming.some(
+      (edge) => edge.toLane === cl.lane,
+    );
 
-    // Draw pass-through lines first (full height — bottom layer)
-    // Skip only this commit's own lane if it's diagonal here
+    const commitHasOutgoingBranch = cl.edges.some(
+      (edge) => edge.fromLane === cl.lane,
+    );
+
+    const commitHasPassingBranch = cl.passThroughs.some(
+      (pt) => pt.lane === cl.lane,
+    );
+
+    const commitHasConnectionAbove =
+      commitHasPassingBranch ||
+      commitHasIncomingBranch ||
+      commitHasOutgoingBranch;
+
+    const commitHasConnectionBelow =
+      commitHasPassingBranch || commitHasOutgoingBranch;
+
+    // A non-merge commit whose single edge diagonally moves to a
+    // different lane: render this row's own lane as a normal
+    // straight commit (top connector + circle + bottom connector,
+    // all in this lane). The diagonal "bend" is drawn once, by the
+    // destination row's incoming-edge curve — avoiding a duplicate
+    // bend being drawn in both rows.
+    const singleDiagonalNonMerge =
+      !isMergeCommit &&
+      cl.edges.length === 1 &&
+      cl.edges[0].fromLane === cl.lane &&
+      cl.edges[0].toLane !== cl.lane;
+
+    const commitBranchesToAnotherLane = cl.edges.some(
+      (edge) => edge.fromLane === cl.lane && edge.toLane !== cl.lane,
+    );
+
+    const commitReceivesBranchFromAnotherLane = incoming.some(
+      (edge) => edge.toLane === cl.lane && edge.fromLane !== cl.lane,
+    );
+
+    const commitHasDiagonalConnection =
+      !singleDiagonalNonMerge &&
+      (commitBranchesToAnotherLane || commitReceivesBranchFromAnotherLane);
+
+    //Draw pass-through lines first (full height — bottom layer).
+    //Skip only this commit's own lane if it's diagonal in the
+    //general/merge case.
     cl.passThroughs.forEach((pt: PassThrough) => {
-      if (pt.lane === cl.lane && ownLaneIsDiagonal) {
+      if (pt.lane === cl.lane && commitHasDiagonalConnection) {
         return;
       }
       const x = this.laneX(pt.lane);
       svgContent += this.makePath(x, 0, x, ROW_HEIGHT, pt.color);
     });
 
-    // Draw top connector only if this lane actually continues
+    // Draw top connector whenever this lane continues from above —
+    // even if a diagonal also arrives here.
     const laneContinues =
       cl.passThroughs.some((pt) => pt.lane === cl.lane) ||
       incoming.some((edge) => edge.toLane === cl.lane) ||
       cl.edges.some((edge) => edge.fromLane === cl.lane);
 
-    if (!isFirst && laneContinues && !ownLaneIsDiagonal) {
+    if (!isFirst && laneContinues) {
       svgContent += this.makePath(cx, 0, cx, cy, cl.color);
     }
 
-    // Draw bottom connector if lane continues downward
+    // Draw bottom connector straight if the lane continues down
+    // normally, or if this is the singleDiagonalNonMerge case
+    // (where the "edge" is drawn straight here, deferring the bend
+    // to the next row's incoming curve).
     const laneContinuesDown =
       cl.passThroughs.some((pt) => pt.lane === cl.lane) ||
       cl.edges.some((edge) => edge.fromLane === cl.lane);
 
-    if (laneContinuesDown && !ownLaneIsDiagonal) {
+    if (
+      laneContinuesDown &&
+      (singleDiagonalNonMerge || !commitHasDiagonalConnection)
+    ) {
       svgContent += this.makePath(cx, cy, cx, ROW_HEIGHT, cl.color);
     }
 
-    // Draw outgoing edges (commit → parents, bottom half)
-    cl.edges.forEach((edge: Edge) => {
-      const fromX = this.laneX(edge.fromLane);
-      const toX = this.laneX(edge.toLane);
-      svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
-    });
+    // Draw outgoing edges (commit → parents, bottom half) — skip
+    // entirely for the singleDiagonalNonMerge case, since it was
+    // already drawn straight above.
+    if (!singleDiagonalNonMerge) {
+      cl.edges.forEach((edge: Edge) => {
+        const fromX = this.laneX(edge.fromLane);
+        const toX = this.laneX(edge.toLane);
+        svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
+      });
+    }
 
     // Draw incoming curved edges (top half)
     incoming.forEach((edge: Edge) => {
@@ -215,13 +261,7 @@ export const GitGraphRenderer = {
     isFirst: boolean,
     isAlt: boolean,
   ): string {
-    const graphCell = this.drawGraphCell(
-      cl,
-      incoming,
-      svgWidth,
-      isFirst,
-      commit.isMergeCommit,
-    );
+    const graphCell = this.drawGraphCell(cl, incoming, svgWidth, isFirst);
 
     let msgText = commit.isMergeCommit
       ? "[MERGE] " + commit.message
