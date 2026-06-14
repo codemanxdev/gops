@@ -35,12 +35,6 @@ export class GitGraphPanel {
     gitService: GitService,
   ) {
     const commits = await gitService.getBranchCommits(branchName);
-
-    console.log(
-      "GRAPH ORDER:",
-      commits.slice(0, 5).map((c) => c.hash),
-    );
-
     const cssUri = this.panel.webview.asWebviewUri(
       vscode.Uri.joinPath(extensionUri, "media", "gitGraph.css"),
     );

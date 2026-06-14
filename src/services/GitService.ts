@@ -246,23 +246,22 @@ export class GitService {
             refs: "%D",
           },
         });
-        return log.all.map((c: any) => ({
-          hash: c.hash,
-          message: c.message,
-          author: c.author,
-          date: c.date,
-          isMergeCommit: c.parents
-            ? c.parents.trim().split(" ").filter(Boolean).length > 1
+        return log.all.map((c: any) => new GitCommitModel(
+          c.hash,
+          c.message,
+          c.author,
+          c.date,
+          c.parents ? c.parents.trim().split(" ").filter(Boolean).length > 1
             : false,
-          refs: c.refs || "",
-          parents: c.parents
+          c.refs || "",
+          c.parents
             ? c.parents
                 .trim()
                 .split(" ")
                 .filter(Boolean)
                 .map((p: string) => p.substring(0, 7))
             : [],
-        }));
+        ));
       },
       `Loaded commits for branch ${branchName}`,
       `Failed to load commits for branch ${branchName}`,
