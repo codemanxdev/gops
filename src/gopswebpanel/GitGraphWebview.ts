@@ -1,22 +1,24 @@
 import * as vscode from "vscode";
 import { GitCommitModel } from "../models/GitCommitModel";
-import { computeLayout } from "./GitGraphLayout";
+import { GitGraphLayout } from "./GitGraphLayout";
 import { GitGraphRenderer } from "./GitGraphRenderer";
+import { CommitLayout } from "../models/CommitLayout";
+import { Edge } from "../models/Edge";
 
 export function renderGitGraph(
   branchName: string,
   commits: GitCommitModel[],
   cssUri: vscode.Uri,
 ): string {
-  const layout = computeLayout(commits);
+  const layout = GitGraphLayout.computeLayout(commits);
 
   // Calculate svg width
   let maxLane = 0;
-  layout.forEach((entry) => {
+  layout.forEach((entry: CommitLayout) => {
     if (entry.lane > maxLane) {
       maxLane = entry.lane;
     }
-    entry.edges.forEach((e) => {
+    entry.edges.forEach((e: Edge) => {
       if (e.fromLane > maxLane) {
         maxLane = e.fromLane;
       }
