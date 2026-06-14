@@ -39,6 +39,8 @@ export class GitGraphLayout {
 
     for (let i = 0; i < commits.length; i++) {
       const commit = commits[i];
+      //snashot lane state before the commit is assigned
+      const snapshot = [...laneManager.getLanes()];
       const lane = laneManager.findLaneForCommit(commit.hash);
       const color = getColor(lane);
       const parent = commit.parents[0] || null;
@@ -49,12 +51,22 @@ export class GitGraphLayout {
 
       laneManager.next(lane, parent);
 
+      // calculate passthroughs for all other lanes that are still occupied
+      // TODO: passthroughs still add a line for cases where the lane is merging back or branching out.
+      // TODO: we should detect this and not add a passthrough in that case
+      const passThroughs: PassThrough[] = [];
+      snapshot.forEach((hash, idx) => {
+        if (idx !== lane && hash !== null) {
+          passThroughs.push({ lane: idx, color: getColor(idx) });
+        }
+      });
+
       const commitLayout: CommitLayout = {
         hash: commit.hash,
         lane: lane,
         color: color,
         edges: [],
-        passThroughs: [],
+        passThroughs: passThroughs,
       };
 
       layout.set(commit.hash, commitLayout);
