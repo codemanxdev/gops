@@ -18,11 +18,45 @@ const LANE_COLORS = [
 const getColor = (lane: number) => LANE_COLORS[lane % LANE_COLORS.length];
 
 export class GitGraphLayout {
+
+  private static computePassThroughs(snapshot: (string | null)[], lane: number, currentHash: string): PassThrough[] {
+    const passThroughs: PassThrough[] = [];
+    snapshot.forEach((hash, idx) => {
+      if (idx !== lane && hash !== null && hash !== currentHash) {
+        passThroughs.push({ lane: idx, color: getColor(idx) });
+      }
+    });
+    return passThroughs;
+  }
+
+  private static hasTopConnector(snapshot: (string | null)[], lane: number): boolean {
+    return lane < snapshot.length;
+  }
+
+  private static hasBottomConnector(parent: string | null): boolean {
+    return parent !== null;
+  }
+
+  private static computeEdges(commit: GitCommitModel, lane: number, snapshot: (string | null)[]): Edge[] {
+    const edges: Edge[] = [];
+    // For each parent, if the parent occupies a different lane in the
+    // snapshot, create an edge from this commit's lane to that lane.
+    commit.parents.forEach((p) => {
+      const toLane = snapshot.indexOf(p);
+      if (toLane !== -1 && toLane !== lane) {
+        edges.push({ fromLane: lane, toLane: toLane, fromHash: commit.hash, toHash: p, color: getColor(toLane) });
+      }
+    });
+    return edges;
+  }
+
   /**
    * Uses the list of commits from git log and computes a layout
    * that assigns each commit to a lane and determines the branching
    * and merging edges between them.
-   * PASSTHROUGHS are used to indicate lanes that are still occupied by commits that haven't been merged yet, so that the graph can render them as continuing lines through the layout.
+   * PASSTHROUGHS: lines that are still occupied by commits that haven't been merged yet.
+   * CONNECTORS: vertical lines that connect a commit to its parent(s) in the same lane.
+   * EDGES: lines that connect commits across different lanes, representing merges and branches.
    */
   public static computeLayout(
     commits: GitCommitModel[],
@@ -52,23 +86,16 @@ export class GitGraphLayout {
 
       laneManager.next(lane, parent);
 
-      // calculate passthroughs for all other lanes that are still occupied
-      const passThroughs: PassThrough[] = [];
-      snapshot.forEach((hash, idx) => {
-        if (idx !== lane && hash !== null && hash !== commit.hash) {
-          passThroughs.push({ lane: idx, color: getColor(idx) });
-        }
-      });
-
-      //calculate top and bottom connectors
-      const hasTopConnector = lane < snapshot.length;
-      const hasBottomConnector = parent !== null;
+      const passThroughs = this.computePassThroughs(snapshot, lane, commit.hash);
+      const hasTopConnector = this.hasTopConnector(snapshot, lane);
+      const hasBottomConnector = this.hasBottomConnector(parent);
+      const edges = this.computeEdges(commit, lane, snapshot);
 
       const commitLayout: CommitLayout = {
         hash: commit.hash,
         lane: lane,
         color: color,
-        edges: [],
+        edges: edges,
         passThroughs: passThroughs,
         hasTopConnector: hasTopConnector,
         hasBottomConnector: hasBottomConnector,
