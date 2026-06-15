@@ -29,8 +29,8 @@ export class GitGraphLayout {
     return passThroughs;
   }
 
-  private static hasTopConnector(snapshot: (string | null)[], lane: number): boolean {
-    return lane < snapshot.length;
+  private static hasTopConnector(snapshot: (string | null)[], lane: number, currentHash: string): boolean {
+    return snapshot[lane] !== null && snapshot[lane] !== undefined && snapshot[lane] !== currentHash;
   }
 
   private static hasBottomConnector(parent: string | null): boolean {
@@ -39,13 +39,18 @@ export class GitGraphLayout {
 
   private static computeEdges(commit: GitCommitModel, lane: number, snapshot: (string | null)[]): Edge[] {
     const edges: Edge[] = [];
-    // For each parent, if the parent occupies a different lane in the
-    // snapshot, create an edge from this commit's lane to that lane.
+    // Create edges only for parents in different lanes. Skip edges to
+    // parents in the same lane—those are handled by connectors.
     commit.parents.forEach((p) => {
       const toLane = snapshot.indexOf(p);
-      if (toLane !== -1 && toLane !== lane) {
+      if (toLane === -1) {
+        // Parent not yet in snapshot — create unresolved edge
+        edges.push({ fromLane: lane, toLane: -1, fromHash: commit.hash, toHash: p, color: getColor(lane) });
+      } else if (toLane !== lane) {
+        // Parent in different lane — create resolved edge
         edges.push({ fromLane: lane, toLane: toLane, fromHash: commit.hash, toHash: p, color: getColor(toLane) });
       }
+      // Else: parent in same lane — don't create edge, handled by connector
     });
     return edges;
   }
@@ -87,7 +92,7 @@ export class GitGraphLayout {
       laneManager.next(lane, parent);
 
       const passThroughs = this.computePassThroughs(snapshot, lane, commit.hash);
-      const hasTopConnector = this.hasTopConnector(snapshot, lane);
+      const hasTopConnector = this.hasTopConnector(snapshot, lane, commit.hash);
       const hasBottomConnector = this.hasBottomConnector(parent);
       const edges = this.computeEdges(commit, lane, snapshot);
 
@@ -104,6 +109,20 @@ export class GitGraphLayout {
       layout.set(commit.hash, commitLayout);
     }
 
+    // Resolve any edges that referenced parents not present in the
+    // snapshot when the edge was created (toLane === -1).
+    layout.forEach((cl) => {
+      cl.edges.forEach((e) => {
+        if (e.toLane === -1) {
+          const target = layout.get(e.toHash);
+          if (target) {
+            e.toLane = target.lane;
+            e.color = getColor(e.toLane);
+          }
+        }
+      });
+    });
+
     console.log("LAYOUT:");
     layout.forEach((cl, hash) => {
       console.log(
@@ -114,3 +133,5 @@ export class GitGraphLayout {
     return layout;
   }
 }
+
+export const computeLayout = GitGraphLayout.computeLayout.bind(GitGraphLayout);
