@@ -35,21 +35,6 @@ export class LaneManager {
     this.lanes[lane] = next;
   }
 
-  public release(hash: string): void {
-    const idx = this.lanes.indexOf(hash);
-    if (idx !== -1 && idx !== 0) {
-      this.lanes[idx] = null;
-    }
-  }
-
-  public transfer(from: string, to: string): void {
-    const idx = this.lanes.indexOf(from);
-    if (idx !== -1) {
-      this.lanes[idx] = to;
-    }
-  }
-
-  // Returns a copy of the current lane assignments.
   public getLanes(): (string | null)[] {
     return this.lanes;
   }
