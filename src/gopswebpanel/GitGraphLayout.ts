@@ -22,6 +22,7 @@ export class GitGraphLayout {
    * Uses the list of commits from git log and computes a layout
    * that assigns each commit to a lane and determines the branching
    * and merging edges between them.
+   * PASSTHROUGHS are used to indicate lanes that are still occupied by commits that haven't been merged yet, so that the graph can render them as continuing lines through the layout.
    */
   public static computeLayout(
     commits: GitCommitModel[],
@@ -52,14 +53,16 @@ export class GitGraphLayout {
       laneManager.next(lane, parent);
 
       // calculate passthroughs for all other lanes that are still occupied
-      // TODO: passthroughs still add a line for cases where the lane is merging back or branching out.
-      // TODO: we should detect this and not add a passthrough in that case
       const passThroughs: PassThrough[] = [];
       snapshot.forEach((hash, idx) => {
-        if (idx !== lane && hash !== null) {
+        if (idx !== lane && hash !== null && hash !== commit.hash) {
           passThroughs.push({ lane: idx, color: getColor(idx) });
         }
       });
+
+      //calculate top and bottom connectors
+      const hasTopConnector = lane < snapshot.length;
+      const hasBottomConnector = parent !== null;
 
       const commitLayout: CommitLayout = {
         hash: commit.hash,
@@ -67,6 +70,8 @@ export class GitGraphLayout {
         color: color,
         edges: [],
         passThroughs: passThroughs,
+        hasTopConnector: hasTopConnector,
+        hasBottomConnector: hasBottomConnector,
       };
 
       layout.set(commit.hash, commitLayout);
