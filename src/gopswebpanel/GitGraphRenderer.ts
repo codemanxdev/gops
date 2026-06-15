@@ -163,6 +163,7 @@ export const GitGraphRenderer = {
       !singleDiagonalNonMerge &&
       (commitBranchesToAnotherLane || commitReceivesBranchFromAnotherLane);
 
+    // HANDLE PASSTHROUGHTS:
     //Draw pass-through lines first (full height — bottom layer).
     //Skip only this commit's own lane if it's diagonal in the
     //general/merge case.
@@ -200,6 +201,18 @@ export const GitGraphRenderer = {
       svgContent += this.makePath(cx, cy, cx, ROW_HEIGHT, cl.color);
     }
 
+    //HANDLE CONNECTORS TO THIS COMMIT:
+    // This commit's own lane — top half connector
+    if (cl.hasTopConnector) {
+      svgContent += this.makePath(cx, 0, cx, cy, cl.color);
+    }
+
+    // This commit's own lane — bottom half connector
+    if (cl.hasBottomConnector) {
+      svgContent += this.makePath(cx, cy, cx, ROW_HEIGHT, cl.color);
+    }
+
+    //HANDLE EDGES TO/FROM THIS COMMIT:
     // Draw outgoing edges (commit → parents, bottom half) — skip
     // entirely for the singleDiagonalNonMerge case, since it was
     // already drawn straight above.
@@ -218,6 +231,7 @@ export const GitGraphRenderer = {
       svgContent += this.makePath(fromX, 0, toX, cy, edge.color);
     });
 
+    //HANDLE COMMIT CIRCLE:
     // Commit circle based on type (merge commits get bigger golden circles, HEAD gets cyan)
     let kind: CommitCircleKind = "commit";
     if (isFirst) {

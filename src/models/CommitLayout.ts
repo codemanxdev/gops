@@ -7,4 +7,6 @@ export interface CommitLayout {
   color: string;
   edges: Edge[];
   passThroughs: PassThrough[];
+  hasTopConnector: boolean;
+  hasBottomConnector: boolean;
 }
