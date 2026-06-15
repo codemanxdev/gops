@@ -93,6 +93,13 @@ export const GitGraphRenderer = {
       if (!cl) {
         return;
       }
+      // Skip edges from merge commits — they're already drawn as outgoing
+      // from the merge row and shouldn't be drawn again as incoming in the
+      // parent rows.
+      const isMergeCommit = cl.edges.length > 1;
+      if (isMergeCommit) {
+        return;
+      }
       cl.edges.forEach((edge: Edge) => {
         // Skip straight edges — covered by pass-throughs
         if (edge.fromLane === edge.toLane) {
@@ -224,12 +231,15 @@ export const GitGraphRenderer = {
       });
     }
 
-    // Draw incoming curved edges (top half)
-    incoming.forEach((edge: Edge) => {
-      const fromX = this.laneX(edge.fromLane);
-      const toX = this.laneX(edge.toLane);
-      svgContent += this.makePath(fromX, 0, toX, cy, edge.color);
-    });
+    // Draw incoming curved edges (top half) — skip for first row
+    // since there are no rows above it to connect from
+    if (!isFirst) {
+      incoming.forEach((edge: Edge) => {
+        const fromX = this.laneX(edge.fromLane);
+        const toX = this.laneX(edge.toLane);
+        svgContent += this.makePath(fromX, 0, toX, cy, edge.color);
+      });
+    }
 
     //HANDLE COMMIT CIRCLE:
     // Commit circle based on type (merge commits get bigger golden circles, HEAD gets cyan)
