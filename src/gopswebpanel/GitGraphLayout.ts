@@ -37,10 +37,14 @@ export class GitGraphLayout {
     lane: number,
     currentHash: string,
   ): boolean {
+    console.log(
+      `hasTopConnector: hash=${currentHash} lane=${lane} snapshot[lane]=${snapshot[lane]}`,
+    );
     return snapshot[lane] === currentHash;
   }
 
   private static hasBottomConnector(parent: string | null): boolean {
+    console.log(`hasBottomConnector: parent=${parent}`);
     return parent !== null;
   }
 
@@ -50,42 +54,40 @@ export class GitGraphLayout {
     snapshot: (string | null)[],
   ): Edge[] {
     const edges: Edge[] = [];
-    // Create edges only for parents in different lanes. Skip edges to
-    // parents in the same lane—those are handled by connectors.
     commit.parents.forEach((p) => {
-      const toLane = snapshot.indexOf(p);
-      if (toLane === -1) {
-        // Parent not yet in snapshot — create unresolved edge
-        edges.push({
-          fromLane: lane,
-          toLane: -1,
-          fromHash: commit.hash,
-          toHash: p,
-          color: getColor(lane),
-        });
-      } else if (toLane !== lane) {
-        // Parent in different lane — create resolved edge
-        edges.push({
-          fromLane: lane,
-          toLane: toLane,
-          fromHash: commit.hash,
-          toHash: p,
-          color: getColor(toLane),
-        });
+      if (snapshot[lane] === p) {
+        return; // same lane — handled by connector
       }
-      // Else: parent in same lane — don't create edge, handled by connector
+      edges.push({
+        fromLane: lane,
+        toLane: -1,
+        fromHash: commit.hash,
+        toHash: p,
+        color: getColor(lane),
+      });
     });
     return edges;
   }
 
-  /**
-   * Uses the list of commits from git log and computes a layout
-   * that assigns each commit to a lane and determines the branching
-   * and merging edges between them.
-   * PASSTHROUGHS: lines that are still occupied by commits that haven't been merged yet.
-   * CONNECTORS: vertical lines that connect a commit to its parent(s) in the same lane.
-   * EDGES: lines that connect commits across different lanes, representing merges and branches.
-   */
+  private static resolveOutgoingEdges(layout: Map<string, CommitLayout>): void {
+    layout.forEach((cl) => {
+      cl.outgoingEdges = cl.outgoingEdges.filter((e) => {
+        if (e.toLane === -1) {
+          const target = layout.get(e.toHash);
+          console.log(
+            `Resolving edge: fromHash=${e.fromHash} toHash=${e.toHash} target lane=${target?.lane}`,
+          );
+          if (target) {
+            e.toLane = target.lane;
+            e.color = getColor(e.toLane);
+          }
+        }
+        // Drop unresolved and same-lane edges
+        return e.toLane !== -1 && e.toLane !== e.fromLane;
+      });
+    });
+  }
+
   public static computeLayout(
     commits: GitCommitModel[],
   ): Map<string, CommitLayout> {
@@ -136,6 +138,8 @@ export class GitGraphLayout {
 
       layout.set(commit.hash, commitLayout);
     }
+
+    this.resolveOutgoingEdges(layout);
 
     console.log("LAYOUT:");
     layout.forEach((cl, hash) => {

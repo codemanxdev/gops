@@ -124,6 +124,8 @@ export const GitGraphRenderer = {
     });
 
     // HANDLE CONNECTORS:
+    // TODO: need to add a scenario to also add top connector where there is an incoming edge
+    // TODO: this needs to be done once we have incoming edges.
     if (cl.hasTopConnector) {
       svgContent += this.makePath(cx, 0, cx, cy, cl.color);
     }
