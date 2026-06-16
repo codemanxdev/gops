@@ -137,20 +137,6 @@ export class GitGraphLayout {
       layout.set(commit.hash, commitLayout);
     }
 
-    // Resolve any edges that referenced parents not present in the
-    // snapshot when the edge was created (toLane === -1).
-    layout.forEach((cl) => {
-      cl.outgoingEdges.forEach((e) => {
-        if (e.toLane === -1) {
-          const target = layout.get(e.toHash);
-          if (target) {
-            e.toLane = target.lane;
-            e.color = getColor(e.toLane);
-          }
-        }
-      });
-    });
-
     console.log("LAYOUT:");
     layout.forEach((cl, hash) => {
       console.log(

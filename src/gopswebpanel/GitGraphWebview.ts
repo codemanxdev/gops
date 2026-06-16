@@ -3,7 +3,6 @@ import { GitCommitModel } from "../models/GitCommitModel";
 import { GitGraphLayout } from "./GitGraphLayout";
 import { GitGraphRenderer } from "./GitGraphRenderer";
 import { CommitLayout } from "../models/CommitLayout";
-import { Edge } from "../models/Edge";
 
 export function renderGitGraph(
   branchName: string,
@@ -18,31 +17,19 @@ export function renderGitGraph(
     if (entry.lane > maxLane) {
       maxLane = entry.lane;
     }
-    entry.outgoingEdges.forEach((e: Edge) => {
-      if (e.fromLane > maxLane) {
-        maxLane = e.fromLane;
-      }
-      if (e.toLane > maxLane) {
-        maxLane = e.toLane;
-      }
-    });
   });
 
   const svgWidth = GitGraphRenderer.laneX(maxLane + 2);
-  const incomingEdges = GitGraphRenderer.buildIncomingEdges(commits, layout);
 
-  // Pre-render all commit rows
   const rows = commits
     .map((commit, i) => {
       const cl = layout.get(commit.hash);
       if (!cl) {
         return "";
       }
-      const incoming = incomingEdges.get(commit.hash) || [];
       return GitGraphRenderer.drawCommitRow(
         commit,
         cl,
-        incoming,
         svgWidth,
         i === 0,
         i % 2 !== 0,
