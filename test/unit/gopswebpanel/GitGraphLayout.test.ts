@@ -1,10 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { computeLayout } from "../../../src/gopswebpanel/GitGraphLayout";
 import { GitGraphRenderer } from "../../../src/gopswebpanel/GitGraphRenderer";
+import { GitCommitModel } from "../../../src/models/GitCommitModel";
+
+const commit = (hash: string, parents: string[] = []): GitCommitModel =>
+  new GitCommitModel(hash, "", "", "", false, "", parents);
 
 describe("computeLayout", () => {
   it("returns a layout map with correct structure", () => {
-    const commits = [{ hash: "a", parents: [] }];
+    const commits = [commit("a")];
     const layout = computeLayout(commits);
 
     expect(layout.size).toBe(1);
@@ -16,11 +20,7 @@ describe("computeLayout", () => {
   });
 
   it("creates edges connecting commits to their parents", () => {
-    // Topological order: root first, then children
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-    ];
+    const commits = [commit("a"), commit("b", ["a"])];
     const layout = computeLayout(commits);
 
     const bLayout = layout.get("b");
@@ -30,7 +30,7 @@ describe("computeLayout", () => {
   });
 
   it("handles root commit with no parents", () => {
-    const commits = [{ hash: "root", parents: [] }];
+    const commits = [commit("root")];
     const layout = computeLayout(commits);
 
     const rootLayout = layout.get("root");
@@ -39,11 +39,7 @@ describe("computeLayout", () => {
   });
 
   it("assigns colors based on lane index", () => {
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["a"] },
-    ];
+    const commits = [commit("a"), commit("b", ["a"]), commit("c", ["a"])];
     const layout = computeLayout(commits);
 
     const bLayout = layout.get("b");
@@ -53,26 +49,19 @@ describe("computeLayout", () => {
   });
 
   it("marks pass-throughs for lanes that continue in linear history", () => {
-    // a -> b -> c (topological order)
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["b"] },
-    ];
+    const commits = [commit("a"), commit("b", ["a"]), commit("c", ["b"])];
     const layout = computeLayout(commits);
 
-    // b should have pass-throughs structure (may be empty depending on
-    // lane reuse semantics); just verify it's present and well-formed.
     const bLayout = layout.get("b");
     expect(bLayout?.passThroughs).toBeDefined();
   });
 
   it("handles merge commits with multiple parents", () => {
     const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["a"] },
-      { hash: "m", parents: ["b", "c"] }, // merge
+      commit("a"),
+      commit("b", ["a"]),
+      commit("c", ["a"]),
+      commit("m", ["b", "c"]),
     ];
     const layout = computeLayout(commits);
 
@@ -85,11 +74,11 @@ describe("computeLayout", () => {
 
   it("lanes are non-negative integers", () => {
     const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["a"] },
-      { hash: "d", parents: ["a"] },
-      { hash: "e", parents: ["b", "c", "d"] },
+      commit("a"),
+      commit("b", ["a"]),
+      commit("c", ["a"]),
+      commit("d", ["a"]),
+      commit("e", ["b", "c", "d"]),
     ];
     const layout = computeLayout(commits);
 
@@ -101,10 +90,10 @@ describe("computeLayout", () => {
 
   it("first commit is always on lane 0", () => {
     const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["b"] },
-      { hash: "d", parents: ["c"] },
+      commit("a"),
+      commit("b", ["a"]),
+      commit("c", ["b"]),
+      commit("d", ["c"]),
     ];
     const layout = computeLayout(commits);
 
@@ -112,10 +101,7 @@ describe("computeLayout", () => {
   });
 
   it("edge fromLane matches the commit's assigned lane", () => {
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-    ];
+    const commits = [commit("a"), commit("b", ["a"])];
     const layout = computeLayout(commits);
 
     const bLayout = layout.get("b");
@@ -124,14 +110,14 @@ describe("computeLayout", () => {
 
   it("every edge points to a valid parent hash", () => {
     const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["b"] },
-      { hash: "d", parents: ["c"] },
-      { hash: "e", parents: ["d"] },
-      { hash: "f", parents: ["e"] },
-      { hash: "g", parents: ["f"] },
-      { hash: "h", parents: ["g"] },
+      commit("a"),
+      commit("b", ["a"]),
+      commit("c", ["b"]),
+      commit("d", ["c"]),
+      commit("e", ["d"]),
+      commit("f", ["e"]),
+      commit("g", ["f"]),
+      commit("h", ["g"]),
     ];
     const layout = computeLayout(commits);
 
@@ -143,15 +129,10 @@ describe("computeLayout", () => {
   });
 
   it("pass-through lanes have valid structure", () => {
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["b"] },
-    ];
+    const commits = [commit("a"), commit("b", ["a"]), commit("c", ["b"])];
     const layout = computeLayout(commits);
 
     const cLayout = layout.get("c");
-    // passThroughs should have valid lane and color
     if (cLayout && cLayout.passThroughs.length > 0) {
       for (const pt of cLayout.passThroughs) {
         expect(pt.lane).toBeGreaterThanOrEqual(0);
@@ -161,21 +142,18 @@ describe("computeLayout", () => {
   });
 
   it("renderer generates valid SVG for layout", () => {
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-    ];
+    const commits = [commit("a"), commit("b", ["a"])];
     const layout = computeLayout(commits);
 
     const incoming = GitGraphRenderer.buildIncomingEdges(
       commits.map((c) => ({ hash: c.hash })),
-      layout
+      layout,
     );
     const svg = GitGraphRenderer.drawGraphCell(
       layout.get("b")!,
       incoming.get("b") || [],
       60,
-      false
+      false,
     );
 
     expect(svg).toContain("<svg");
@@ -185,22 +163,22 @@ describe("computeLayout", () => {
 
   it("renderer handles merge commit cells", () => {
     const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["a"] },
-      { hash: "m", parents: ["b", "c"] },
+      commit("a"),
+      commit("b", ["a"]),
+      commit("c", ["a"]),
+      commit("m", ["b", "c"]),
     ];
     const layout = computeLayout(commits);
 
     const incoming = GitGraphRenderer.buildIncomingEdges(
       commits.map((c) => ({ hash: c.hash })),
-      layout
+      layout,
     );
     const svg = GitGraphRenderer.drawGraphCell(
       layout.get("m")!,
       incoming.get("m") || [],
       80,
-      false
+      false,
     );
 
     expect(svg).toContain("<svg");
@@ -208,18 +186,9 @@ describe("computeLayout", () => {
   });
 
   it("validates linear chain creates straight vertical line", () => {
-    // Reverse order: HEAD first, root last (as git log --topo-order returns with --reverse)
-    const commits = [
-      { hash: "c", parents: ["b"] },
-      { hash: "b", parents: ["a"] },
-      { hash: "a", parents: [] },
-    ];
+    const commits = [commit("c", ["b"]), commit("b", ["a"]), commit("a")];
     const layout = computeLayout(commits);
 
-    // c -> b -> a, after processing:
-    // c gets lane 1, connects to b
-    // b gets transferred to lane 0, connects straight down to a
-    // The result should have valid edges even if diagonal
     const cLayout = layout.get("c");
     const bLayout = layout.get("b");
 
@@ -228,52 +197,39 @@ describe("computeLayout", () => {
   });
 
   it("branches get assigned lanes that may merge", () => {
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["a"] }, // branch from a along with b
-    ];
+    const commits = [commit("a"), commit("b", ["a"]), commit("c", ["a"])];
     const layout = computeLayout(commits);
 
     const bLayout = layout.get("b");
     const cLayout = layout.get("c");
 
-    // Both b and c should have edges to parent a
     expect(bLayout?.edges[0]?.toHash).toBe("a");
     expect(cLayout?.edges[0]?.toHash).toBe("a");
-
-    // Both should be assigned valid lanes
     expect(bLayout?.lane).toBeGreaterThanOrEqual(0);
     expect(cLayout?.lane).toBeGreaterThanOrEqual(0);
   });
 
   it("validates lane assignments form connected graph paths", () => {
-    // Diamond merge: a -> b, a -> c, then both merge at m
     const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: ["a"] },
-      { hash: "c", parents: ["a"] },
-      { hash: "m", parents: ["b", "c"] },
+      commit("a"),
+      commit("b", ["a"]),
+      commit("c", ["a"]),
+      commit("m", ["b", "c"]),
     ];
     const layout = computeLayout(commits);
 
-    // Verify all commits have valid layouts
     commits.forEach((c) => {
       const cl = layout.get(c.hash);
       expect(cl).toBeDefined();
       expect(typeof cl?.lane).toBe("number");
     });
 
-    // Verify m has edges to both parents
     const mEdges = layout.get("m")?.edges;
     expect(mEdges?.length).toBe(2);
   });
 
   it("handles disconnected commits gracefully", () => {
-    const commits = [
-      { hash: "a", parents: [] },
-      { hash: "b", parents: [] }, // orphan commit
-    ];
+    const commits = [commit("a"), commit("b")];
     const layout = computeLayout(commits);
 
     expect(layout.size).toBe(2);
@@ -282,12 +238,9 @@ describe("computeLayout", () => {
   });
 
   it("resolves edges to target lanes when parent appears later", () => {
-    const commits = [
-      { hash: "A", parents: ["B"] },
-      { hash: "B", parents: [] },
-    ];
+    const commits = [commit("A", ["B"]), commit("B")];
 
-    const layout = computeLayout(commits as any);
+    const layout = computeLayout(commits);
     const aLayout = layout.get("A");
     const bLayout = layout.get("B");
 
