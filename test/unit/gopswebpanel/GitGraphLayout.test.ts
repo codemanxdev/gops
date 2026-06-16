@@ -145,13 +145,8 @@ describe("computeLayout", () => {
     const commits = [commit("a"), commit("b", ["a"])];
     const layout = computeLayout(commits);
 
-    const incoming = GitGraphRenderer.buildIncomingEdges(
-      commits.map((c) => ({ hash: c.hash })),
-      layout,
-    );
     const svg = GitGraphRenderer.drawGraphCell(
       layout.get("b")!,
-      incoming.get("b") || [],
       60,
       false,
     );
@@ -169,14 +164,8 @@ describe("computeLayout", () => {
       commit("m", ["b", "c"]),
     ];
     const layout = computeLayout(commits);
-
-    const incoming = GitGraphRenderer.buildIncomingEdges(
-      commits.map((c) => ({ hash: c.hash })),
-      layout,
-    );
     const svg = GitGraphRenderer.drawGraphCell(
       layout.get("m")!,
-      incoming.get("m") || [],
       80,
       false,
     );
