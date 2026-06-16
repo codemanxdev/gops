@@ -5,7 +5,8 @@ export interface CommitLayout {
   hash: string;
   lane: number;
   color: string;
-  edges: Edge[];
+  outgoingEdges: Edge[];
+  incomingEdges: Edge[];
   passThroughs: PassThrough[];
   hasTopConnector: boolean;
   hasBottomConnector: boolean;

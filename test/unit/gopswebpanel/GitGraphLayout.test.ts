@@ -15,7 +15,7 @@ describe("computeLayout", () => {
     const aLayout = layout.get("a");
     expect(aLayout).toBeDefined();
     expect(aLayout?.lane).toBe(0);
-    expect(aLayout?.edges).toEqual([]);
+    expect(aLayout?.outgoingEdges).toEqual([]);
     expect(aLayout?.passThroughs).toBeDefined();
   });
 
@@ -24,9 +24,9 @@ describe("computeLayout", () => {
     const layout = computeLayout(commits);
 
     const bLayout = layout.get("b");
-    expect(bLayout?.edges.length).toBe(1);
-    expect(bLayout?.edges[0]?.toHash).toBe("a");
-    expect(bLayout?.edges[0]?.fromHash).toBe("b");
+    expect(bLayout?.outgoingEdges.length).toBe(1);
+    expect(bLayout?.outgoingEdges[0]?.toHash).toBe("a");
+    expect(bLayout?.outgoingEdges[0]?.fromHash).toBe("b");
   });
 
   it("handles root commit with no parents", () => {
@@ -35,7 +35,7 @@ describe("computeLayout", () => {
 
     const rootLayout = layout.get("root");
     expect(rootLayout?.lane).toBe(0);
-    expect(rootLayout?.edges).toEqual([]);
+    expect(rootLayout?.outgoingEdges).toEqual([]);
   });
 
   it("assigns colors based on lane index", () => {
@@ -66,8 +66,8 @@ describe("computeLayout", () => {
     const layout = computeLayout(commits);
 
     const mLayout = layout.get("m");
-    expect(mLayout?.edges.length).toBe(2);
-    const targetHashes = mLayout?.edges.map((e) => e.toHash);
+    expect(mLayout?.outgoingEdges.length).toBe(2);
+    const targetHashes = mLayout?.outgoingEdges.map((e) => e.toHash);
     expect(targetHashes).toContain("b");
     expect(targetHashes).toContain("c");
   });
@@ -105,7 +105,7 @@ describe("computeLayout", () => {
     const layout = computeLayout(commits);
 
     const bLayout = layout.get("b");
-    expect(bLayout?.edges[0]?.fromLane).toBe(bLayout?.lane);
+    expect(bLayout?.outgoingEdges[0]?.fromLane).toBe(bLayout?.lane);
   });
 
   it("every edge points to a valid parent hash", () => {
@@ -122,7 +122,7 @@ describe("computeLayout", () => {
     const layout = computeLayout(commits);
 
     for (const [, cl] of layout) {
-      for (const edge of cl.edges) {
+      for (const edge of cl.outgoingEdges) {
         expect(commits.some((c) => c.hash === edge.toHash)).toBe(true);
       }
     }
@@ -192,8 +192,8 @@ describe("computeLayout", () => {
     const cLayout = layout.get("c");
     const bLayout = layout.get("b");
 
-    expect(cLayout?.edges.length).toBe(1);
-    expect(bLayout?.edges.length).toBe(1);
+    expect(cLayout?.outgoingEdges.length).toBe(1);
+    expect(bLayout?.outgoingEdges.length).toBe(1);
   });
 
   it("branches get assigned lanes that may merge", () => {
@@ -203,8 +203,8 @@ describe("computeLayout", () => {
     const bLayout = layout.get("b");
     const cLayout = layout.get("c");
 
-    expect(bLayout?.edges[0]?.toHash).toBe("a");
-    expect(cLayout?.edges[0]?.toHash).toBe("a");
+    expect(bLayout?.outgoingEdges[0]?.toHash).toBe("a");
+    expect(cLayout?.outgoingEdges[0]?.toHash).toBe("a");
     expect(bLayout?.lane).toBeGreaterThanOrEqual(0);
     expect(cLayout?.lane).toBeGreaterThanOrEqual(0);
   });
@@ -224,7 +224,7 @@ describe("computeLayout", () => {
       expect(typeof cl?.lane).toBe("number");
     });
 
-    const mEdges = layout.get("m")?.edges;
+    const mEdges = layout.get("m")?.outgoingEdges;
     expect(mEdges?.length).toBe(2);
   });
 
@@ -247,7 +247,7 @@ describe("computeLayout", () => {
     expect(aLayout).toBeDefined();
     expect(bLayout).toBeDefined();
 
-    const edgeToB = aLayout!.edges.find((e) => e.toHash === "B");
+    const edgeToB = aLayout!.outgoingEdges.find((e) => e.toHash === "B");
     expect(edgeToB).toBeDefined();
     expect(edgeToB!.toLane).toBe(bLayout!.lane);
   });
