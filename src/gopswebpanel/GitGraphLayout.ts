@@ -18,8 +18,11 @@ const LANE_COLORS = [
 const getColor = (lane: number) => LANE_COLORS[lane % LANE_COLORS.length];
 
 export class GitGraphLayout {
-
-  private static computePassThroughs(snapshot: (string | null)[], lane: number, currentHash: string): PassThrough[] {
+  private static computePassThroughs(
+    snapshot: (string | null)[],
+    lane: number,
+    currentHash: string,
+  ): PassThrough[] {
     const passThroughs: PassThrough[] = [];
     snapshot.forEach((hash, idx) => {
       if (idx !== lane && hash !== null && hash !== currentHash) {
@@ -29,15 +32,23 @@ export class GitGraphLayout {
     return passThroughs;
   }
 
-  private static hasTopConnector(snapshot: (string | null)[], lane: number, currentHash: string): boolean {
-    return snapshot[lane] !== null && snapshot[lane] !== undefined && snapshot[lane] !== currentHash;
+  private static hasTopConnector(
+    snapshot: (string | null)[],
+    lane: number,
+    currentHash: string,
+  ): boolean {
+    return snapshot[lane] === currentHash;
   }
 
   private static hasBottomConnector(parent: string | null): boolean {
     return parent !== null;
   }
 
-  private static computeEdges(commit: GitCommitModel, lane: number, snapshot: (string | null)[]): Edge[] {
+  private static computeOutgoingEdges(
+    commit: GitCommitModel,
+    lane: number,
+    snapshot: (string | null)[],
+  ): Edge[] {
     const edges: Edge[] = [];
     // Create edges only for parents in different lanes. Skip edges to
     // parents in the same lane—those are handled by connectors.
@@ -45,10 +56,22 @@ export class GitGraphLayout {
       const toLane = snapshot.indexOf(p);
       if (toLane === -1) {
         // Parent not yet in snapshot — create unresolved edge
-        edges.push({ fromLane: lane, toLane: -1, fromHash: commit.hash, toHash: p, color: getColor(lane) });
+        edges.push({
+          fromLane: lane,
+          toLane: -1,
+          fromHash: commit.hash,
+          toHash: p,
+          color: getColor(lane),
+        });
       } else if (toLane !== lane) {
         // Parent in different lane — create resolved edge
-        edges.push({ fromLane: lane, toLane: toLane, fromHash: commit.hash, toHash: p, color: getColor(toLane) });
+        edges.push({
+          fromLane: lane,
+          toLane: toLane,
+          fromHash: commit.hash,
+          toHash: p,
+          color: getColor(toLane),
+        });
       }
       // Else: parent in same lane — don't create edge, handled by connector
     });
@@ -91,16 +114,21 @@ export class GitGraphLayout {
 
       laneManager.next(lane, parent);
 
-      const passThroughs = this.computePassThroughs(snapshot, lane, commit.hash);
+      const passThroughs = this.computePassThroughs(
+        snapshot,
+        lane,
+        commit.hash,
+      );
       const hasTopConnector = this.hasTopConnector(snapshot, lane, commit.hash);
       const hasBottomConnector = this.hasBottomConnector(parent);
-      const edges = this.computeEdges(commit, lane, snapshot);
+      const outgoingEdges = this.computeOutgoingEdges(commit, lane, snapshot);
 
       const commitLayout: CommitLayout = {
         hash: commit.hash,
         lane: lane,
         color: color,
-        edges: edges,
+        outgoingEdges: outgoingEdges,
+        incomingEdges: [],
         passThroughs: passThroughs,
         hasTopConnector: hasTopConnector,
         hasBottomConnector: hasBottomConnector,
@@ -112,7 +140,7 @@ export class GitGraphLayout {
     // Resolve any edges that referenced parents not present in the
     // snapshot when the edge was created (toLane === -1).
     layout.forEach((cl) => {
-      cl.edges.forEach((e) => {
+      cl.outgoingEdges.forEach((e) => {
         if (e.toLane === -1) {
           const target = layout.get(e.toHash);
           if (target) {
@@ -126,7 +154,7 @@ export class GitGraphLayout {
     console.log("LAYOUT:");
     layout.forEach((cl, hash) => {
       console.log(
-        `Commit ${hash}: lane=${cl.lane}, edges=[${cl.edges.map((e) => `from ${e.fromLane} to ${e.toLane}`).join(", ")}]`,
+        `Commit ${hash}: lane=${cl.lane}, outgoingEdges=[${cl.outgoingEdges.map((e) => `from ${e.fromLane} to ${e.toLane}`).join(", ")}]`,
       );
     });
 

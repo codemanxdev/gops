@@ -96,11 +96,11 @@ export const GitGraphRenderer = {
       // Skip edges from merge commits — they're already drawn as outgoing
       // from the merge row and shouldn't be drawn again as incoming in the
       // parent rows.
-      const isMergeCommit = cl.edges.length > 1;
+      const isMergeCommit = cl.outgoingEdges.length > 1;
       if (isMergeCommit) {
         return;
       }
-      cl.edges.forEach((edge: Edge) => {
+      cl.outgoingEdges.forEach((edge: Edge) => {
         // Skip straight edges — covered by pass-throughs
         if (edge.fromLane === edge.toLane) {
           return;
@@ -121,7 +121,7 @@ export const GitGraphRenderer = {
     isFirst: boolean,
   ): string {
     console.log("Drawing graph cell for commit", cl.hash, "with layout", cl);
-    const isMergeCommit = cl.edges.length > 1;
+    const isMergeCommit = cl.outgoingEdges.length > 1;
     const cx = this.laneX(cl.lane);
     const cy = HALF;
     let svgContent = "";
@@ -130,7 +130,7 @@ export const GitGraphRenderer = {
       (edge) => edge.toLane === cl.lane,
     );
 
-    const commitHasOutgoingBranch = cl.edges.some(
+    const commitHasOutgoingBranch = cl.outgoingEdges.some(
       (edge) => edge.fromLane === cl.lane,
     );
 
@@ -154,11 +154,11 @@ export const GitGraphRenderer = {
     // bend being drawn in both rows.
     const singleDiagonalNonMerge =
       !isMergeCommit &&
-      cl.edges.length === 1 &&
-      cl.edges[0].fromLane === cl.lane &&
-      cl.edges[0].toLane !== cl.lane;
+      cl.outgoingEdges.length === 1 &&
+      cl.outgoingEdges[0].fromLane === cl.lane &&
+      cl.outgoingEdges[0].toLane !== cl.lane;
 
-    const commitBranchesToAnotherLane = cl.edges.some(
+    const commitBranchesToAnotherLane = cl.outgoingEdges.some(
       (edge) => edge.fromLane === cl.lane && edge.toLane !== cl.lane,
     );
 
@@ -187,7 +187,7 @@ export const GitGraphRenderer = {
     const laneContinues =
       cl.passThroughs.some((pt) => pt.lane === cl.lane) ||
       incoming.some((edge) => edge.toLane === cl.lane) ||
-      cl.edges.some((edge) => edge.fromLane === cl.lane);
+      cl.outgoingEdges.some((edge) => edge.fromLane === cl.lane);
 
     if (!isFirst && laneContinues) {
       svgContent += this.makePath(cx, 0, cx, cy, cl.color);
@@ -199,7 +199,7 @@ export const GitGraphRenderer = {
     // to the next row's incoming curve).
     const laneContinuesDown =
       cl.passThroughs.some((pt) => pt.lane === cl.lane) ||
-      cl.edges.some((edge) => edge.fromLane === cl.lane);
+      cl.outgoingEdges.some((edge) => edge.fromLane === cl.lane);
 
     if (
       laneContinuesDown &&
@@ -224,7 +224,7 @@ export const GitGraphRenderer = {
     // entirely for the singleDiagonalNonMerge case, since it was
     // already drawn straight above.
     if (!singleDiagonalNonMerge) {
-      cl.edges.forEach((edge: Edge) => {
+      cl.outgoingEdges.forEach((edge: Edge) => {
         const fromX = this.laneX(edge.fromLane);
         const toX = this.laneX(edge.toLane);
         svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);

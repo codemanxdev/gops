@@ -18,7 +18,7 @@ export function renderGitGraph(
     if (entry.lane > maxLane) {
       maxLane = entry.lane;
     }
-    entry.edges.forEach((e: Edge) => {
+    entry.outgoingEdges.forEach((e: Edge) => {
       if (e.fromLane > maxLane) {
         maxLane = e.fromLane;
       }
