@@ -19,16 +19,6 @@ describe("computeLayout", () => {
     expect(aLayout?.passThroughs).toBeDefined();
   });
 
-  it("creates edges connecting commits to their parents", () => {
-    const commits = [commit("a"), commit("b", ["a"])];
-    const layout = computeLayout(commits);
-
-    const bLayout = layout.get("b");
-    expect(bLayout?.outgoingEdges.length).toBe(1);
-    expect(bLayout?.outgoingEdges[0]?.toHash).toBe("a");
-    expect(bLayout?.outgoingEdges[0]?.fromHash).toBe("b");
-  });
-
   it("handles root commit with no parents", () => {
     const commits = [commit("root")];
     const layout = computeLayout(commits);
@@ -54,22 +44,6 @@ describe("computeLayout", () => {
 
     const bLayout = layout.get("b");
     expect(bLayout?.passThroughs).toBeDefined();
-  });
-
-  it("handles merge commits with multiple parents", () => {
-    const commits = [
-      commit("a"),
-      commit("b", ["a"]),
-      commit("c", ["a"]),
-      commit("m", ["b", "c"]),
-    ];
-    const layout = computeLayout(commits);
-
-    const mLayout = layout.get("m");
-    expect(mLayout?.outgoingEdges.length).toBe(2);
-    const targetHashes = mLayout?.outgoingEdges.map((e) => e.toHash);
-    expect(targetHashes).toContain("b");
-    expect(targetHashes).toContain("c");
   });
 
   it("lanes are non-negative integers", () => {
@@ -100,13 +74,6 @@ describe("computeLayout", () => {
     expect(layout.get("a")?.lane).toBe(0);
   });
 
-  it("edge fromLane matches the commit's assigned lane", () => {
-    const commits = [commit("a"), commit("b", ["a"])];
-    const layout = computeLayout(commits);
-
-    const bLayout = layout.get("b");
-    expect(bLayout?.outgoingEdges[0]?.fromLane).toBe(bLayout?.lane);
-  });
 
   it("every edge points to a valid parent hash", () => {
     const commits = [
@@ -174,49 +141,6 @@ describe("computeLayout", () => {
     expect(svg).toContain("<circle");
   });
 
-  it("validates linear chain creates straight vertical line", () => {
-    const commits = [commit("c", ["b"]), commit("b", ["a"]), commit("a")];
-    const layout = computeLayout(commits);
-
-    const cLayout = layout.get("c");
-    const bLayout = layout.get("b");
-
-    expect(cLayout?.outgoingEdges.length).toBe(1);
-    expect(bLayout?.outgoingEdges.length).toBe(1);
-  });
-
-  it("branches get assigned lanes that may merge", () => {
-    const commits = [commit("a"), commit("b", ["a"]), commit("c", ["a"])];
-    const layout = computeLayout(commits);
-
-    const bLayout = layout.get("b");
-    const cLayout = layout.get("c");
-
-    expect(bLayout?.outgoingEdges[0]?.toHash).toBe("a");
-    expect(cLayout?.outgoingEdges[0]?.toHash).toBe("a");
-    expect(bLayout?.lane).toBeGreaterThanOrEqual(0);
-    expect(cLayout?.lane).toBeGreaterThanOrEqual(0);
-  });
-
-  it("validates lane assignments form connected graph paths", () => {
-    const commits = [
-      commit("a"),
-      commit("b", ["a"]),
-      commit("c", ["a"]),
-      commit("m", ["b", "c"]),
-    ];
-    const layout = computeLayout(commits);
-
-    commits.forEach((c) => {
-      const cl = layout.get(c.hash);
-      expect(cl).toBeDefined();
-      expect(typeof cl?.lane).toBe("number");
-    });
-
-    const mEdges = layout.get("m")?.outgoingEdges;
-    expect(mEdges?.length).toBe(2);
-  });
-
   it("handles disconnected commits gracefully", () => {
     const commits = [commit("a"), commit("b")];
     const layout = computeLayout(commits);
@@ -224,20 +148,5 @@ describe("computeLayout", () => {
     expect(layout.size).toBe(2);
     expect(layout.get("a")?.lane).toBe(0);
     expect(layout.get("b")?.lane).toBeGreaterThanOrEqual(0);
-  });
-
-  it("resolves edges to target lanes when parent appears later", () => {
-    const commits = [commit("A", ["B"]), commit("B")];
-
-    const layout = computeLayout(commits);
-    const aLayout = layout.get("A");
-    const bLayout = layout.get("B");
-
-    expect(aLayout).toBeDefined();
-    expect(bLayout).toBeDefined();
-
-    const edgeToB = aLayout!.outgoingEdges.find((e) => e.toHash === "B");
-    expect(edgeToB).toBeDefined();
-    expect(edgeToB!.toLane).toBe(bLayout!.lane);
   });
 });

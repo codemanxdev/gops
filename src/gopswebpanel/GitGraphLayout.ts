@@ -6,7 +6,6 @@ import { LaneManager } from "./LaneManager";
 
 const LANE_COLORS = [
   "#569cd6", // blue
-  "#c586c0", // purple
   "#6a9955", // green
   "#f0883e", // orange
   "#4ec9b0", // teal
@@ -108,7 +107,7 @@ export class GitGraphLayout {
           toLane: parent.lane,
           fromHash: cl.hash,
           toHash: p,
-          color: getColor(cl.lane),
+          color: getColor(parent.lane),
         });
       });
     });
