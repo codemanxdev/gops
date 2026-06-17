@@ -9,14 +9,15 @@ export const LANE_WIDTH = 20;
 export const HALF = ROW_HEIGHT / 2;
 export const EDGE_STROKE_WIDTH = 2;
 
-const COMMIT_CIRCLE_RADIUS_NORMAL = 5;
-const COMMIT_CIRCLE_RADIUS_MERGE = 7;
-const COMMIT_CIRCLE_RADIUS_HEAD = 9;
-const COMMIT_CIRCLE_STROKE_WIDTH_NORMAL = 1.5;
-const COMMIT_CIRCLE_STROKE_WIDTH_MERGE = 2.5;
-const COMMIT_CIRCLE_STROKE_WIDTH_HEAD = 3;
-const COMMIT_CIRCLE_HEAD_COLOR = "#f0a500";
-type CommitCircleKind = "commit" | "merge" | "head";
+const COMMIT_MARKER_RADIUS_NORMAL = 4;
+const COMMIT_MARKER_RADIUS_MERGE_INNER = 3;
+const COMMIT_MARKER_RADIUS_MERGE_OUTER = 4.5;
+const COMMIT_MARKER_RADIUS_HEAD = 7;
+const COMMIT_MARKER_STROKE_WIDTH_MERGE = 1;
+const COMMIT_MARKER_STROKE_WIDTH_HEAD = 3;
+const COMMIT_MARKER_HEAD_COLOR = "#f0a500";
+const MERGE_MESSAGE_COLOR = "#888888";
+type CommitMarkerKind = "commit" | "merge" | "head";
 
 export const GitGraphRenderer = {
   laneX(lane: number): number {
@@ -48,33 +49,32 @@ export const GitGraphRenderer = {
       stroke-linecap="round"/>`;
   },
 
-  makeCircle(
+  makeCommitMarker(
     cx: number,
     cy: number,
     color: string,
-    kind: CommitCircleKind,
+    kind: CommitMarkerKind,
   ): string {
-    const styles = {
-      commit: {
-        r: COMMIT_CIRCLE_RADIUS_NORMAL,
-        stroke: color,
-        strokeWidth: COMMIT_CIRCLE_STROKE_WIDTH_NORMAL,
-      },
-      merge: {
-        r: COMMIT_CIRCLE_RADIUS_MERGE,
-        stroke: color,
-        strokeWidth: COMMIT_CIRCLE_STROKE_WIDTH_MERGE,
-      },
-      head: {
-        r: COMMIT_CIRCLE_RADIUS_HEAD,
-        stroke: color,
-        strokeWidth: COMMIT_CIRCLE_STROKE_WIDTH_HEAD,
-      },
-    };
+    if (kind === "merge") {
+      // Double ring: outer circle (stroke only) + inner filled circle
+      return (
+        `<circle cx="${cx}" cy="${cy}" r="${COMMIT_MARKER_RADIUS_MERGE_OUTER}" fill="var(--vscode-editor-background)" stroke="${color}" stroke-width="${COMMIT_MARKER_STROKE_WIDTH_MERGE}"/>` +
+        `<circle cx="${cx}" cy="${cy}" r="${COMMIT_MARKER_RADIUS_MERGE_INNER}" fill="${color}" stroke="none"/>`
+      );
+    }
 
-    const s = styles[kind];
+    if (kind === "head") {
+      // Double diamond: outer diamond (stroke only) + inner filled diamond
+      const outer = COMMIT_MARKER_RADIUS_HEAD;
+      const inner = COMMIT_MARKER_RADIUS_HEAD - 3;
+      return (
+        `<polygon points="${cx},${cy - outer} ${cx + outer},${cy} ${cx},${cy + outer} ${cx - outer},${cy}" fill="var(--vscode-editor-background)" stroke="${color}" stroke-width="${COMMIT_MARKER_STROKE_WIDTH_HEAD}"/>` +
+        `<polygon points="${cx},${cy - inner} ${cx + inner},${cy} ${cx},${cy + inner} ${cx - inner},${cy}" fill="${color}" stroke="none"/>`
+      );
+    }
 
-    return `<circle cx="${cx}" cy="${cy}" r="${s.r}" fill="${color}" stroke="${s.stroke}" stroke-width="${s.strokeWidth}"/>`;
+// Normal commit: filled circle with black border
+return `<circle cx="${cx}" cy="${cy}" r="${COMMIT_MARKER_RADIUS_NORMAL}" fill="${color}" stroke="#000000" stroke-width="1"/>`;
   },
 
   makeSvg(width: number, content: string): string {
@@ -84,7 +84,7 @@ export const GitGraphRenderer = {
   },
 
   drawGraphCell(cl: CommitLayout, svgWidth: number, isFirst: boolean): string {
-    const isMergeCommit = cl.outgoingEdges.length > 1;
+    const isMergeCommit = cl.incomingEdges.length > 0;
     const cx = this.laneX(cl.lane);
     const cy = HALF;
     let svgContent = "";
@@ -94,20 +94,6 @@ export const GitGraphRenderer = {
       const x = this.laneX(pt.lane);
       svgContent += this.makePath(x, 0, x, ROW_HEIGHT, pt.color);
     });
-
-    // HANDLE COMMIT CIRCLE:
-    let kind: CommitCircleKind = "commit";
-    if (isFirst) {
-      kind = "head";
-    } else if (isMergeCommit) {
-      kind = "merge";
-    }
-    svgContent += this.makeCircle(
-      cx,
-      cy,
-      isFirst ? COMMIT_CIRCLE_HEAD_COLOR : cl.color,
-      kind,
-    );
 
     // HANDLE CONNECTORS:
     if (cl.hasTopConnector) {
@@ -133,6 +119,20 @@ export const GitGraphRenderer = {
         svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
       });
     }
+
+    // HANDLE COMMIT CIRCLE:
+    let kind: CommitMarkerKind = "commit";
+    if (isFirst) {
+      kind = "head";
+    } else if (isMergeCommit) {
+      kind = "merge";
+    }
+    svgContent += this.makeCommitMarker(
+      cx,
+      cy,
+      isFirst ? COMMIT_MARKER_HEAD_COLOR : cl.color,
+      kind,
+    );
 
     return `<div class="col-graph" style="width:${svgWidth}px;min-width:${svgWidth}px">
     ${this.makeSvg(svgWidth, svgContent)}
@@ -165,12 +165,17 @@ export const GitGraphRenderer = {
       msgText.length > 60 ? msgText.substring(0, 60) + "..." : msgText;
     const refs = commit.refs ? ` <span class="refs">${commit.refs}</span>` : "";
 
+    // Merge commit messages are styled grey
+    const messageStyle = commit.isMergeCommit
+      ? ` style="color:${MERGE_MESSAGE_COLOR}"`
+      : "";
+
     return `
       <div class="commit-row${isAlt ? " commit-row-alt" : ""}">
         ${graphCell}
         <div class="col-hash"><span class="hash">${commit.hash}</span></div>
         <div class="col-message">
-          <span class="message" title="${commit.message}">${truncated}</span>${refs}
+          <span class="message" title="${commit.message}"${messageStyle}>${truncated}</span>${refs}
         </div>
         <div class="col-author"><span class="author">${commit.author}</span></div>
         <div class="col-date"><span class="date">${this.formatDate(commit.date)}</span></div>
