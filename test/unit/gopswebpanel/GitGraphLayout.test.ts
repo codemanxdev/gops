@@ -26,6 +26,8 @@ describe("computeLayout", () => {
     const rootLayout = layout.get("root");
     expect(rootLayout?.lane).toBe(0);
     expect(rootLayout?.outgoingEdges).toEqual([]);
+    expect(rootLayout?.hasBottomConnector).toBe(false);
+    expect(rootLayout?.hasTopConnector).toBe(false);
   });
 
   it("assigns colors based on lane index", () => {
@@ -74,8 +76,7 @@ describe("computeLayout", () => {
     expect(layout.get("a")?.lane).toBe(0);
   });
 
-
-  it("every edge points to a valid parent hash", () => {
+  it("every edge points to a valid child hash", () => {
     const commits = [
       commit("a"),
       commit("b", ["a"]),
@@ -112,11 +113,7 @@ describe("computeLayout", () => {
     const commits = [commit("a"), commit("b", ["a"])];
     const layout = computeLayout(commits);
 
-    const svg = GitGraphRenderer.drawGraphCell(
-      layout.get("b")!,
-      60,
-      false,
-    );
+    const svg = GitGraphRenderer.drawGraphCell(layout.get("b")!, 60, false);
 
     expect(svg).toContain("<svg");
     expect(svg).toContain("<path");
@@ -131,11 +128,7 @@ describe("computeLayout", () => {
       commit("m", ["b", "c"]),
     ];
     const layout = computeLayout(commits);
-    const svg = GitGraphRenderer.drawGraphCell(
-      layout.get("m")!,
-      80,
-      false,
-    );
+    const svg = GitGraphRenderer.drawGraphCell(layout.get("m")!, 80, false);
 
     expect(svg).toContain("<svg");
     expect(svg).toContain("<circle");
@@ -148,5 +141,82 @@ describe("computeLayout", () => {
     expect(layout.size).toBe(2);
     expect(layout.get("a")?.lane).toBe(0);
     expect(layout.get("b")?.lane).toBeGreaterThanOrEqual(0);
+  });
+
+  it("linear history has no outgoing edges, only connectors", () => {
+    const commits = [commit("a", ["b"]), commit("b")];
+    const layout = computeLayout(commits);
+
+    expect(layout.get("a")?.outgoingEdges).toHaveLength(0);
+    expect(layout.get("a")?.hasBottomConnector).toBe(true);
+    expect(layout.get("b")?.hasTopConnector).toBe(true);
+  });
+
+  it("branch tip has no outgoing edges", () => {
+    const commits = [commit("tip", ["base"]), commit("base")];
+    const layout = computeLayout(commits);
+
+    expect(layout.get("tip")?.outgoingEdges).toHaveLength(0);
+  });
+
+  it("branch tip gets hasTopConnector set by resolveTopConnectors", () => {
+    const commits = [
+      commit("merge", ["main", "branch"]),
+      commit("main"),
+      commit("branch"),
+    ];
+    const layout = computeLayout(commits);
+
+    expect(layout.get("branch")?.hasTopConnector).toBe(true);
+  });
+
+  it("merge commit has incoming edge for secondary parent in different lane", () => {
+    const commits = [
+      commit("tip1", ["base"]),
+      commit("tip2", ["base"]),
+      commit("base"),
+      commit("merge", ["tip1", "tip2"]),
+    ];
+    const layout = computeLayout(commits);
+
+    const mergeLayout = layout.get("merge");
+    expect(mergeLayout?.incomingEdges.length).toBeGreaterThan(0);
+    const incomingToHashes = mergeLayout?.incomingEdges.map((e) => e.toHash);
+    expect(incomingToHashes).toContain("tip2");
+  });
+
+  it("non-merge commit has no incoming edges", () => {
+    const commits = [commit("a", ["b"]), commit("b")];
+    const layout = computeLayout(commits);
+
+    expect(layout.get("a")?.incomingEdges).toHaveLength(0);
+  });
+
+  it("outgoing edge toLane is always higher than fromLane", () => {
+    const commits = [
+      commit("tip1", ["base"]),
+      commit("tip2", ["base"]),
+      commit("base"),
+    ];
+    const layout = computeLayout(commits);
+
+    const baseLayout = layout.get("base");
+    baseLayout?.outgoingEdges.forEach((e) => {
+      expect(e.toLane).toBeGreaterThan(e.fromLane);
+    });
+  });
+
+  it("commit with parent has bottom connector", () => {
+    const commits = [commit("a", ["b"]), commit("b")];
+    const layout = computeLayout(commits);
+
+    expect(layout.get("a")?.hasBottomConnector).toBe(true);
+  });
+
+  it("commit that is continuation of lane has top connector", () => {
+    const commits = [commit("a", ["b"]), commit("b", ["c"]), commit("c")];
+    const layout = computeLayout(commits);
+
+    expect(layout.get("b")?.hasTopConnector).toBe(true);
   });
 });
