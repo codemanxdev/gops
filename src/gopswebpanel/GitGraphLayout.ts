@@ -139,7 +139,7 @@ export class GitGraphLayout {
       layout.set(commit.hash, commitLayout);
     }
 
-    this.resolveOutgoingEdges(layout);
+    //this.resolveOutgoingEdges(layout);
 
     console.log("LAYOUT:");
     layout.forEach((cl, hash) => {

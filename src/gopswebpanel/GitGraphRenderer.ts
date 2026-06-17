@@ -1,6 +1,7 @@
 import { Edge } from "../models/Edge";
 import { PassThrough } from "../models/Passthrough";
 import { CommitLayout } from "../models/CommitLayout";
+import { GitCommitModel } from "../models/GitCommitModel";
 
 export const ROW_HEIGHT = 40;
 export const LANE_WIDTH = 20;
@@ -87,21 +88,12 @@ export const GitGraphRenderer = {
     const cx = this.laneX(cl.lane);
     const cy = HALF;
     let svgContent = "";
-
-    const commitHasOutgoingBranch = cl.outgoingEdges.some(
-      (edge) => edge.fromLane === cl.lane,
-    );
-
-    const commitHasPassingBranch = cl.passThroughs.some(
-      (pt) => pt.lane === cl.lane,
-    );
-
     const singleDiagonalNonMerge =
       !isMergeCommit &&
       cl.outgoingEdges.length === 1 &&
       cl.outgoingEdges[0].fromLane === cl.lane &&
       cl.outgoingEdges[0].toLane !== cl.lane;
-
+    
     const commitBranchesToAnotherLane = cl.outgoingEdges.some(
       (edge) => edge.fromLane === cl.lane && edge.toLane !== cl.lane,
     );
@@ -123,35 +115,6 @@ export const GitGraphRenderer = {
       svgContent += this.makePath(x, 0, x, ROW_HEIGHT, pt.color);
     });
 
-    // HANDLE CONNECTORS:
-    // TODO: need to add a scenario to also add top connector where there is an incoming edge
-    // TODO: this needs to be done once we have incoming edges.
-    if (cl.hasTopConnector) {
-      svgContent += this.makePath(cx, 0, cx, cy, cl.color);
-    }
-
-    if (cl.hasBottomConnector) {
-      svgContent += this.makePath(cx, cy, cx, ROW_HEIGHT, cl.color);
-    }
-
-    // HANDLE OUTGOING EDGES:
-    if (!singleDiagonalNonMerge) {
-      cl.outgoingEdges.forEach((edge: Edge) => {
-        const fromX = this.laneX(edge.fromLane);
-        const toX = this.laneX(edge.toLane);
-        svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
-      });
-    }
-
-    // HANDLE INCOMING EDGES:
-    if (!isFirst) {
-      cl.incomingEdges.forEach((edge: Edge) => {
-        const fromX = this.laneX(edge.fromLane);
-        const toX = this.laneX(edge.toLane);
-        svgContent += this.makePath(fromX, 0, toX, cy, edge.color);
-      });
-    }
-
     // HANDLE COMMIT CIRCLE:
     let kind: CommitCircleKind = "commit";
     if (isFirst) {
@@ -165,6 +128,35 @@ export const GitGraphRenderer = {
       isFirst ? COMMIT_CIRCLE_HEAD_COLOR : cl.color,
       kind,
     );
+
+    // HANDLE CONNECTORS:
+    // TODO: need to add a scenario to also add top connector where there is an incoming edge
+    // TODO: this needs to be done once we have incoming edges.
+    if (cl.hasTopConnector) {
+      svgContent += this.makePath(cx, 0, cx, cy, cl.color);
+    }
+
+    if (cl.hasBottomConnector) {
+      svgContent += this.makePath(cx, cy, cx, ROW_HEIGHT, cl.color);
+    }
+
+    // // HANDLE OUTGOING EDGES:
+    // if (!singleDiagonalNonMerge) {
+    //   cl.outgoingEdges.forEach((edge: Edge) => {
+    //     const fromX = this.laneX(edge.fromLane);
+    //     const toX = this.laneX(edge.toLane);
+    //     svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
+    //   });
+    // }
+
+    // // HANDLE INCOMING EDGES:
+    // if (!isFirst) {
+    //   cl.incomingEdges.forEach((edge: Edge) => {
+    //     const fromX = this.laneX(edge.fromLane);
+    //     const toX = this.laneX(edge.toLane);
+    //     svgContent += this.makePath(fromX, 0, toX, cy, edge.color);
+    //   });
+    // }
 
     return `<div class="col-graph" style="width:${svgWidth}px;min-width:${svgWidth}px">
     ${this.makeSvg(svgWidth, svgContent)}
@@ -181,14 +173,7 @@ export const GitGraphRenderer = {
   },
 
   drawCommitRow(
-    commit: {
-      hash: string;
-      message: string;
-      author: string;
-      date: string;
-      isMergeCommit: boolean;
-      refs: string;
-    },
+    commit: GitCommitModel,
     cl: CommitLayout,
     svgWidth: number,
     isFirst: boolean,
