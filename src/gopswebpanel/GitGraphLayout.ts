@@ -88,6 +88,22 @@ export class GitGraphLayout {
     });
   }
 
+  private static resolveTopConnectors(
+    layout: Map<string, CommitLayout>,
+    commits: GitCommitModel[],
+  ): void {
+    commits.forEach((commit) => {
+      if (commit.parents.length > 1) {
+        commit.parents.slice(1).forEach((p) => {
+          const target = layout.get(p);
+          if (target) {
+            target.hasTopConnector = true;
+          }
+        });
+      }
+    });
+  }
+
   public static computeLayout(
     commits: GitCommitModel[],
   ): Map<string, CommitLayout> {
@@ -139,6 +155,10 @@ export class GitGraphLayout {
       layout.set(commit.hash, commitLayout);
     }
 
+    //SECOND PASS ACTIVITIES:
+    //second pass needed because branch tip parents appear later in the log than the merge commit that references them.
+    this.resolveTopConnectors(layout, commits);
+    //Resolve outgoing edges after all commits have been processed to ensure all target lanes are known.
     //this.resolveOutgoingEdges(layout);
 
     console.log("LAYOUT:");
