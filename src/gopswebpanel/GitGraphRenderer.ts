@@ -88,29 +88,9 @@ export const GitGraphRenderer = {
     const cx = this.laneX(cl.lane);
     const cy = HALF;
     let svgContent = "";
-    const singleDiagonalNonMerge =
-      !isMergeCommit &&
-      cl.outgoingEdges.length === 1 &&
-      cl.outgoingEdges[0].fromLane === cl.lane &&
-      cl.outgoingEdges[0].toLane !== cl.lane;
-    
-    const commitBranchesToAnotherLane = cl.outgoingEdges.some(
-      (edge) => edge.fromLane === cl.lane && edge.toLane !== cl.lane,
-    );
-
-    const commitReceivesBranchFromAnotherLane = cl.incomingEdges.some(
-      (edge) => edge.toLane === cl.lane && edge.fromLane !== cl.lane,
-    );
-
-    const commitHasDiagonalConnection =
-      !singleDiagonalNonMerge &&
-      (commitBranchesToAnotherLane || commitReceivesBranchFromAnotherLane);
 
     // HANDLE PASSTHROUGHS:
     cl.passThroughs.forEach((pt: PassThrough) => {
-      if (pt.lane === cl.lane && commitHasDiagonalConnection) {
-        return;
-      }
       const x = this.laneX(pt.lane);
       svgContent += this.makePath(x, 0, x, ROW_HEIGHT, pt.color);
     });
@@ -127,11 +107,9 @@ export const GitGraphRenderer = {
       cy,
       isFirst ? COMMIT_CIRCLE_HEAD_COLOR : cl.color,
       kind,
-    );
+    );    
 
     // HANDLE CONNECTORS:
-    // TODO: need to add a scenario to also add top connector where there is an incoming edge
-    // TODO: this needs to be done once we have incoming edges.
     if (cl.hasTopConnector) {
       svgContent += this.makePath(cx, 0, cx, cy, cl.color);
     }
@@ -141,13 +119,11 @@ export const GitGraphRenderer = {
     }
 
     // // HANDLE OUTGOING EDGES:
-    // if (!singleDiagonalNonMerge) {
-    //   cl.outgoingEdges.forEach((edge: Edge) => {
-    //     const fromX = this.laneX(edge.fromLane);
-    //     const toX = this.laneX(edge.toLane);
-    //     svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
-    //   });
-    // }
+    // cl.outgoingEdges.forEach((edge: Edge) => {
+    //   const fromX = this.laneX(edge.fromLane);
+    //   const toX = this.laneX(edge.toLane);
+    //   svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
+    // });
 
     // // HANDLE INCOMING EDGES:
     // if (!isFirst) {
