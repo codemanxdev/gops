@@ -1,6 +1,7 @@
 import { PassThrough } from "../models/Passthrough";
 import { CommitLayout } from "../models/CommitLayout";
 import { GitCommitModel } from "../models/GitCommitModel";
+import { Edge } from "../models/Edge";
 
 export const ROW_HEIGHT = 40;
 export const LANE_WIDTH = 20;
@@ -106,7 +107,7 @@ export const GitGraphRenderer = {
       cy,
       isFirst ? COMMIT_CIRCLE_HEAD_COLOR : cl.color,
       kind,
-    );    
+    );
 
     // HANDLE CONNECTORS:
     if (cl.hasTopConnector) {
@@ -117,21 +118,21 @@ export const GitGraphRenderer = {
       svgContent += this.makePath(cx, cy, cx, ROW_HEIGHT, cl.color);
     }
 
-    // // HANDLE OUTGOING EDGES:
-    // cl.outgoingEdges.forEach((edge: Edge) => {
-    //   const fromX = this.laneX(edge.fromLane);
-    //   const toX = this.laneX(edge.toLane);
-    //   svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
-    // });
+    // HANDLE OUTGOING EDGES:
+    cl.outgoingEdges.forEach((edge: Edge) => {
+      const fromX = this.laneX(edge.fromLane);
+      const toX = this.laneX(edge.toLane);
+      svgContent += this.makePath(fromX, cy, toX, 0, edge.color);
+    });
 
-    // // HANDLE INCOMING EDGES:
-    // if (!isFirst) {
-    //   cl.incomingEdges.forEach((edge: Edge) => {
-    //     const fromX = this.laneX(edge.fromLane);
-    //     const toX = this.laneX(edge.toLane);
-    //     svgContent += this.makePath(fromX, 0, toX, cy, edge.color);
-    //   });
-    // }
+    // HANDLE INCOMING EDGES:
+    if (!isFirst) {
+      cl.incomingEdges.forEach((edge: Edge) => {
+        const fromX = this.laneX(edge.fromLane);
+        const toX = this.laneX(edge.toLane);
+        svgContent += this.makePath(fromX, cy, toX, ROW_HEIGHT, edge.color);
+      });
+    }
 
     return `<div class="col-graph" style="width:${svgWidth}px;min-width:${svgWidth}px">
     ${this.makeSvg(svgWidth, svgContent)}

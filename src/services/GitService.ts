@@ -236,7 +236,6 @@ export class GitService {
         const log = await this.git.log({
           "--all": null,
           "--topo-order": null,
-          maxCount: 20,
           format: {
             hash: "%h",
             message: "%s",
@@ -246,22 +245,26 @@ export class GitService {
             refs: "%D",
           },
         });
-        return log.all.map((c: any) => new GitCommitModel(
-          c.hash,
-          c.message,
-          c.author,
-          c.date,
-          c.parents ? c.parents.trim().split(" ").filter(Boolean).length > 1
-            : false,
-          c.refs || "",
-          c.parents
-            ? c.parents
-                .trim()
-                .split(" ")
-                .filter(Boolean)
-                .map((p: string) => p.substring(0, 7))
-            : [],
-        ));
+        return log.all.map(
+          (c: any) =>
+            new GitCommitModel(
+              c.hash,
+              c.message,
+              c.author,
+              c.date,
+              c.parents
+                ? c.parents.trim().split(" ").filter(Boolean).length > 1
+                : false,
+              c.refs || "",
+              c.parents
+                ? c.parents
+                    .trim()
+                    .split(" ")
+                    .filter(Boolean)
+                    .map((p: string) => p.substring(0, 7))
+                : [],
+            ),
+        );
       },
       `Loaded commits for branch ${branchName}`,
       `Failed to load commits for branch ${branchName}`,
