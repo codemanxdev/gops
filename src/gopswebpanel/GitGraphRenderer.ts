@@ -1,4 +1,3 @@
-import { Edge } from "../models/Edge";
 import { PassThrough } from "../models/Passthrough";
 import { CommitLayout } from "../models/CommitLayout";
 import { GitCommitModel } from "../models/GitCommitModel";
