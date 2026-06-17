@@ -48,42 +48,68 @@ export class GitGraphLayout {
     return parent !== null;
   }
 
+  // Second pass: for each commit, find children in different lanes
+  // and add an outgoing edge. Children appear earlier in the log
+  // (newer first), so they're already in the layout when this runs.
   private static computeOutgoingEdges(
-    commit: GitCommitModel,
-    lane: number,
-    snapshot: (string | null)[],
-  ): Edge[] {
-    const edges: Edge[] = [];
-    commit.parents.forEach((p) => {
-      if (snapshot[lane] === p) {
-        return; // same lane — handled by connector
-      }
-      edges.push({
-        fromLane: lane,
-        toLane: -1,
-        fromHash: commit.hash,
-        toHash: p,
-        color: getColor(lane),
+    layout: Map<string, CommitLayout>,
+    childMap: Map<string, string[]>,
+  ): void {
+    layout.forEach((cl) => {
+      const children = childMap.get(cl.hash) || [];
+      children.forEach((childHash) => {
+        const child = layout.get(childHash);
+        if (!child) {
+          return;
+        }
+        if (child.lane === cl.lane) {
+          return;
+        } // same lane — handled by connector
+        if (child.lane < cl.lane) {
+          return;
+        } // child converges back — incoming edge, not outgoing
+        cl.outgoingEdges.push({
+          fromLane: cl.lane,
+          toLane: child.lane,
+          fromHash: cl.hash,
+          toHash: childHash,
+          color: getColor(child.lane),
+        });
       });
     });
-    return edges;
   }
 
-  private static resolveOutgoingEdges(layout: Map<string, CommitLayout>): void {
-    layout.forEach((cl) => {
-      cl.outgoingEdges = cl.outgoingEdges.filter((e) => {
-        if (e.toLane === -1) {
-          const target = layout.get(e.toHash);
-          console.log(
-            `Resolving edge: fromHash=${e.fromHash} toHash=${e.toHash} target lane=${target?.lane}`,
-          );
-          if (target) {
-            e.toLane = target.lane;
-            e.color = getColor(e.toLane);
-          }
+  private static computeIncomingEdges(
+    layout: Map<string, CommitLayout>,
+    commits: GitCommitModel[],
+  ): void {
+    commits.forEach((commit) => {
+      const cl = layout.get(commit.hash);
+      if (!cl) {
+        return;
+      }
+      const isMergeCommit = commit.parents.length > 1;
+      if (!isMergeCommit) {
+        return;
+      } // only merge commits have incoming edges
+      commit.parents.forEach((p, index) => {
+        if (index === 0) {
+          return;
+        } // primary parent — handled by bottom connector
+        const parent = layout.get(p);
+        if (!parent) {
+          return;
         }
-        // Drop unresolved and same-lane edges
-        return e.toLane !== -1 && e.toLane !== e.fromLane;
+        if (parent.lane === cl.lane) {
+          return;
+        } // same lane — handled by connector
+        cl.incomingEdges.push({
+          fromLane: cl.lane,
+          toLane: parent.lane,
+          fromHash: cl.hash,
+          toHash: p,
+          color: getColor(cl.lane),
+        });
       });
     });
   }
@@ -104,6 +130,21 @@ export class GitGraphLayout {
     });
   }
 
+  private static calculateChildMap(
+    commits: GitCommitModel[],
+  ): Map<string, string[]> {
+    const childMap = new Map<string, string[]>();
+    commits.forEach((commit) => {
+      commit.parents.forEach((p) => {
+        if (!childMap.has(p)) {
+          childMap.set(p, []);
+        }
+        childMap.get(p)!.push(commit.hash);
+      });
+    });
+    return childMap;
+  }
+
   public static computeLayout(
     commits: GitCommitModel[],
   ): Map<string, CommitLayout> {
@@ -117,6 +158,10 @@ export class GitGraphLayout {
     commits.forEach((c, i) => hashToIndex.set(c.hash, i));
     console.log("HASH TO INDEX:");
     hashToIndex.forEach((i, h) => console.log(`hash=${h} -> ${i}`));
+
+    // Build child map: parent hash → list of child hashes
+    // Needed for computing outgoing edges in the second pass.
+    const childMap = this.calculateChildMap(commits);
 
     for (let i = 0; i < commits.length; i++) {
       const commit = commits[i];
@@ -139,13 +184,12 @@ export class GitGraphLayout {
       );
       const hasTopConnector = this.hasTopConnector(snapshot, lane, commit.hash);
       const hasBottomConnector = this.hasBottomConnector(parent);
-      const outgoingEdges = this.computeOutgoingEdges(commit, lane, snapshot);
 
       const commitLayout: CommitLayout = {
         hash: commit.hash,
         lane: lane,
         color: color,
-        outgoingEdges: outgoingEdges,
+        outgoingEdges: [],
         incomingEdges: [],
         passThroughs: passThroughs,
         hasTopConnector: hasTopConnector,
@@ -158,13 +202,13 @@ export class GitGraphLayout {
     //SECOND PASS ACTIVITIES:
     //second pass needed because branch tip parents appear later in the log than the merge commit that references them.
     this.resolveTopConnectors(layout, commits);
-    //Resolve outgoing edges after all commits have been processed to ensure all target lanes are known.
-    //this.resolveOutgoingEdges(layout);
-
+    //Outgoing edges computed after all commits are placed so all child lanes are known.
+    this.computeOutgoingEdges(layout, childMap);
+    this.computeIncomingEdges(layout, commits);
     console.log("LAYOUT:");
     layout.forEach((cl, hash) => {
       console.log(
-        `Commit ${hash}: lane=${cl.lane}, outgoingEdges=[${cl.outgoingEdges.map((e) => `from ${e.fromLane} to ${e.toLane}`).join(", ")}]`,
+        `Commit ${hash}: lane=${cl.lane}, outgoingEdges=[${cl.outgoingEdges.map((e) => `from ${e.fromLane} to ${e.toLane}`).join(", ")}], incomingEdges=[${cl.incomingEdges.map((e) => `from ${e.fromLane} to ${e.toLane}`).join(", ")}]`,
       );
     });
 
