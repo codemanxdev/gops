@@ -4,7 +4,7 @@ import { GitGraphRenderer } from "../../../src/gopswebpanel/GitGraphRenderer";
 import { GitCommitModel } from "../../../src/models/GitCommitModel";
 
 const commit = (hash: string, parents: string[] = []): GitCommitModel =>
-  new GitCommitModel(hash, "", "", "", false, "", parents);
+  new GitCommitModel(hash, "", "", "", false, [], parents);
 
 describe("computeLayout", () => {
   it("returns a layout map with correct structure", () => {

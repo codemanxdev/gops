@@ -1,3 +1,10 @@
+import { RefKind } from "./RefKind";
+
+export interface ParsedRef {
+  label: string;
+  kind: RefKind;
+}
+
 export class GitCommitModel {
   constructor(
     public hash: string,
@@ -5,7 +12,7 @@ export class GitCommitModel {
     public author: string,
     public date: string,
     public isMergeCommit: boolean,
-    public refs: string,
+    public refs: ParsedRef[],
     public parents: string[],
   ) {}
 
@@ -14,11 +21,12 @@ export class GitCommitModel {
   private static readonly REFS_WIDTH = 40;
 
   public toString(): string {
+    const refsStr = this.refs.map((r) => `${r.kind}:${r.label}`).join(", ");
     return [
       `hash=${this.fixedWidth(this.hash, GitCommitModel.HASH_WIDTH)}`,
       `merge=${this.fixedWidth(this.isMergeCommit, 5)}`,
       `date=${this.fixedWidth(this.date, GitCommitModel.DATE_WIDTH)}`,
-      `refs=${this.fixedWidth(this.refs, GitCommitModel.REFS_WIDTH)}`,
+      `refs=${this.fixedWidth(refsStr, GitCommitModel.REFS_WIDTH)}`,
       `parentCount=${this.parents.length}`,
       `parents=[${this.parents
         .map((p) => p.substring(0, GitCommitModel.HASH_WIDTH))

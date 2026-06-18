@@ -14,6 +14,7 @@ import { LocalBranchModel } from "../models/LocalBranchModel";
 import { RemoteBranchModel } from "../models/RemoteBranchModel";
 import { BranchInfoModel } from "../models/BranchInfoModel";
 import { GitCommitModel } from "../models/GitCommitModel";
+import { parseRefs } from "../utils/parseRefs";
 
 export class GitService {
   private git: SimpleGit;
@@ -255,7 +256,7 @@ export class GitService {
               c.parents
                 ? c.parents.trim().split(" ").filter(Boolean).length > 1
                 : false,
-              c.refs || "",
+              parseRefs(c.refs),
               c.parents
                 ? c.parents
                     .trim()

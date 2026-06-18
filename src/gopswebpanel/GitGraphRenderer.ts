@@ -2,6 +2,7 @@ import { PassThrough } from "../models/Passthrough";
 import { CommitLayout } from "../models/CommitLayout";
 import { GitCommitModel } from "../models/GitCommitModel";
 import { Edge } from "../models/Edge";
+import { RefKind } from "../models/RefKind";
 
 export const ROW_HEIGHT = 40;
 export const LANE_WIDTH = 20;
@@ -73,8 +74,8 @@ export const GitGraphRenderer = {
       );
     }
 
-// Normal commit: filled circle with black border
-return `<circle cx="${cx}" cy="${cy}" r="${COMMIT_MARKER_RADIUS_NORMAL}" fill="${color}" stroke="#000000" stroke-width="1"/>`;
+    // Normal commit: filled circle with black border
+    return `<circle cx="${cx}" cy="${cy}" r="${COMMIT_MARKER_RADIUS_NORMAL}" fill="${color}" stroke="#000000" stroke-width="1"/>`;
   },
 
   makeSvg(width: number, content: string): string {
@@ -156,6 +157,9 @@ return `<circle cx="${cx}" cy="${cy}" r="${COMMIT_MARKER_RADIUS_NORMAL}" fill="$
     isAlt: boolean,
   ): string {
     const graphCell = this.drawGraphCell(cl, svgWidth, isFirst);
+    commit.refs.forEach((ref) =>
+      console.log(`kind=${ref.kind} label=${ref.label}`),
+    );
 
     let msgText = commit.isMergeCommit
       ? "[MERGE] " + commit.message
@@ -163,7 +167,15 @@ return `<circle cx="${cx}" cy="${cy}" r="${COMMIT_MARKER_RADIUS_NORMAL}" fill="$
 
     const truncated =
       msgText.length > 60 ? msgText.substring(0, 60) + "..." : msgText;
-    const refs = commit.refs ? ` <span class="refs">${commit.refs}</span>` : "";
+
+    const refs =
+      commit.refs.length > 0
+        ? commit.refs
+            .map(
+              (ref) => `<span class="ref ref-${ref.kind}">${ref.label}</span>`,
+            )
+            .join("")
+        : "";
 
     // Merge commit messages are styled grey
     const messageStyle = commit.isMergeCommit
