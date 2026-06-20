@@ -9,7 +9,7 @@
     "url": "https://github.com/codemanxdev/gops.git"
   },
   "engines": {
-    "vscode": "^1.110.0"
+    "vscode": "^1.125.0"
   },
   "categories": [
     "SCM Providers",
