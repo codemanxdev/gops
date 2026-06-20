@@ -236,17 +236,17 @@ svg.graph {
 
 .ref-local {
   background: #2d5a1b;
-  color: #7ef447;
+  color: #d4f447;
 }
 
 .ref-remote {
   background: #5e46cb;
-  color: #80c6ff;
+  color: #ffffff;
 }
 
 .ref-tag {
   background: #ea6c00;
-  color: #ffffff;
+  color: #000000;
 }
 
 .ref-tag::before {
