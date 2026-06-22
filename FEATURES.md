@@ -4,12 +4,16 @@
 
 - Create, checkout, delete, and rename branches
 - Publish local branches to remote with upstream tracking
+- Checkout remote branches as local tracking branches (right-click any remote branch)
 - Visual git graph showing commit history per branch
 - Ahead/behind tracking for local branches
 
 **File Operations**
 
 - Stage and unstage files individually or all at once
+- Stage untracked files directly from the changes section
+- Discard changes to tracked files individually or all at once
+- Permanently delete untracked files with a dedicated trash icon
 - View diffs for changed files
 - Auto-refresh on file save
 
@@ -27,7 +31,9 @@
 
 - Clean tree view with organized sections (branches, changes, staged, tags, stash)
 - Context-aware inline buttons and menus
-- Modal dialogs for confirmations
+- Activity bar badge showing the number of changed files
+- Tracked and untracked files visually differentiated with distinct icons and actions
+- Modal dialogs for confirmations, with stronger warnings for destructive actions
 - Syntax highlighting and VSCode theme integration
 
 **Git Graph**
@@ -50,4 +56,4 @@
 
 **Testing**
 
-- 80+ unit and integration tests
+- 90+ unit and integration tests

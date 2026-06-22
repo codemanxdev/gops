@@ -4,6 +4,22 @@ All notable changes to the "gops" extension will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [0.0.16]
+
+### Added
+
+- Checkout remote branches as local tracking branches via right-click context menu
+- Discard changes to individual tracked files with confirmation dialog
+- Discard all tracked file changes at once with confirmation dialog
+- Delete untracked files permanently with a dedicated trash icon and stronger warning dialog
+- Stage untracked files directly from the changes section
+- Untracked files visually differentiated with a distinct icon and separate context actions
+- Activity bar badge showing the number of currently changed files
+
+### Fixed
+
+- Untracked files now correctly appear in the changes section
+
 ## [0.0.15]
 
 ### Added
