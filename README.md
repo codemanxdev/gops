@@ -1,59 +1,100 @@
-# Gops (Git Ops - Visual Git Toolkit)
+# Gops — Visual Git Toolkit for VS Code
 
-Git Operations - Visual Git Toolkit for VS Code
+A fast, visual Git interface built into VS Code. Manage branches, stage files, view diffs, discard changes, and explore your commit history — all without leaving the editor.
 
 ## Build Status
 
 [![CI Builds](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/thedev-codeman/gops/actions/workflows/ci.yml)
-
 [![Unit Coverage](https://codecov.io/gh/codemanxdev/gops/branch/develop/graph/badge.svg?flag=unit)](https://codecov.io/gh/codemanxdev/gops)
-
 [![Integration Coverage](https://codecov.io/gh/codemanxdev/gops/branch/develop/graph/badge.svg?flag=integration)](https://codecov.io/gh/codemanxdev/gops)
+
+---
 
 ## Features
 
+Gops covers branch management, file staging, diff viewing, discard workflows, remote operations, and a visual git graph.
+
 See [FEATURES.md](./FEATURES.md) for the full feature list.
+
+---
 
 ## Requirements
 
-Git should be installed
+- Git installed and available in `PATH`
+- VS Code `^1.125.0`
 
-## Extension Settings
+---
 
-This extension contributes the following settings:
+## Getting Started
 
-- N/A
+1. Install the extension from the VS Code Marketplace
+2. Open a Git repository in VS Code
+3. Click the **Gops** icon in the activity bar
+4. Your branches, changes, staged files, tags, and stash are all visible in the tree view
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+---
 
 ## Release Notes
 
-Refer to CHANGELOG.md
+See [CHANGELOG.md](./CHANGELOG.md) for the full history of changes.
 
-## Build Process
+---
 
-#### Install Dependences
+## Contributing & Development
 
-- npm install
+#### Install dependencies
+```bash
+npm install
+```
 
 #### Compile
+```bash
+npm run compile
+```
 
-- npm run compile
+#### Watch mode
+```bash
+npm run watch
+```
 
-#### Build
+#### Run unit tests
+```bash
+npm run test:unit
+```
 
-- npm run build
+#### Run integration tests
+```bash
+npm run test:integration
+```
 
-#### Check the files that will be packaged
+#### Build for production
+```bash
+npm run build
+```
 
-- vsce ls
+#### Preview packaged files
+```bash
+vsce ls
+```
 
 #### Package
-
-- vsce package --no-dependencies
+```bash
+vsce package --no-dependencies
+```
 
 #### Publish
+```bash
+vsce publish --no-dependencies
+```
 
-- vsce publish --no-dependencies
+---
+
+## Known Issues
+
+See the [GitHub Issues](https://github.com/codemanxdev/gops/issues) page for open bugs and feature requests.
+
+---
+
+## Feedback
+
+If you find Gops useful, consider leaving a rating on the VS Code Marketplace — it helps others discover the extension.
