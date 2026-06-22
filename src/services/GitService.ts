@@ -208,6 +208,17 @@ export class GitService {
     );
   }
 
+  async checkoutRemoteBranch(
+    branchName: string,
+    remoteName: string,
+  ): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.checkoutBranch(branchName, `${remoteName}/${branchName}`),
+      `Checked out remote branch ${branchName} successfully`,
+      `Failed to checkout remote branch ${branchName}`,
+    );
+  }
+
   async push() {
     return this.executeGitAction(
       () => this.git.push(),

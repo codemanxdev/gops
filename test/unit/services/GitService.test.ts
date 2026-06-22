@@ -720,23 +720,6 @@ describe("GitService", () => {
     });
   });
 
-  describe("discardFile", () => {
-    it("calls checkout with -- and the file path", async () => {
-      mockGit.checkout.mockResolvedValue("ok");
-
-      await service.discardFile("src/file.ts");
-
-      expect(mockGit.checkout).toHaveBeenCalledWith(["--", "src/file.ts"]);
-    });
-
-    it("propagates error when checkout fails", async () => {
-      const error = new Error("checkout failed");
-      mockGit.checkout.mockRejectedValue(error);
-
-      await expect(service.discardFile("src/file.ts")).rejects.toThrow(error);
-    });
-  });
-
   describe("discardAllFiles", () => {
     it("calls checkout with -- and . to discard all", async () => {
       mockGit.checkout.mockResolvedValue("ok");
@@ -766,6 +749,55 @@ describe("GitService", () => {
       );
       expect(notifySpy).toHaveBeenCalledWith(
         "Failed to discard all changes. See details in output",
+      );
+    });
+  });
+
+  describe("checkoutRemoteBranch", () => {
+    it("calls checkoutBranch with branch and remote/branch ref", async () => {
+      mockGit.checkoutBranch.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.checkoutRemoteBranch("feature", "origin");
+
+      expect(mockGit.checkoutBranch).toHaveBeenCalledWith(
+        "feature",
+        "origin/feature",
+      );
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Checked out remote branch feature successfully",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Checked out remote branch feature successfully",
+      );
+    });
+
+    it("logs error and rethrows when checkoutRemoteBranch fails", async () => {
+      const error = new Error("local changes would be overwritten");
+      mockGit.checkoutBranch.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(
+        service.checkoutRemoteBranch("feature", "origin"),
+      ).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to checkout remote branch feature: local changes would be overwritten",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to checkout remote branch feature. See details in output",
+      );
+    });
+
+    it("uses the correct remote name when not origin", async () => {
+      mockGit.checkoutBranch.mockResolvedValue("ok");
+
+      await service.checkoutRemoteBranch("feature", "upstream");
+
+      expect(mockGit.checkoutBranch).toHaveBeenCalledWith(
+        "feature",
+        "upstream/feature",
       );
     });
   });

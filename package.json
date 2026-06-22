@@ -153,6 +153,11 @@
         "command": "gops.popStash",
         "title": "Pop Stash",
         "icon": "$(remove)"
+      },
+      {
+        "command": "gops.checkoutRemoteBranch",
+        "title": "Checkout Remote Branch",
+        "icon": "$(git-branch)"
       }
     ],
     "viewsContainers": {
@@ -281,6 +286,11 @@
           "command": "gops.popStash",
           "when": "view == gitOpsTreeview && viewItem == stash",
           "group": "inline"
+        },
+        {
+          "command": "gops.checkoutRemoteBranch",
+          "when": "view == gitOpsTreeview && viewItem == remoteBranches",
+          "group": "navigation"
         }
       ]
     }

@@ -14,6 +14,9 @@ export class CommandRegistrar {
     this.register(COMMANDS.CHECKOUT_BRANCH, (node) =>
       this.delegate.checkoutBranch(node),
     );
+    this.register(COMMANDS.CHECKOUT_REMOTE_BRANCH, (node) =>
+      this.delegate.checkoutRemoteBranch(node),
+    );
     this.register(COMMANDS.DELETE_BRANCH, (node) =>
       this.delegate.deleteBranch(node),
     );

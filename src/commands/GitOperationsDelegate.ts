@@ -9,6 +9,7 @@ import { GitGraphPanel } from "../gopswebpanel/GitGraphPanel";
 import { LocalBranchNode } from "../gopstree/nodes/LocalBranchNode";
 import { Notifications } from "../notifications/Notifications";
 import { StashNode } from "../gopstree/nodes/StashNode";
+import { RemoteBranchNode } from "../gopstree/nodes/RemoteBranchNode";
 
 export class GitOperationsDelegate {
   constructor(
@@ -30,6 +31,19 @@ export class GitOperationsDelegate {
     await this.gitService.checkout(node.branchName);
     await this.treeDataProvider.refreshRootNode();
     this.treeDataProvider.refreshLocalBranchesNode();
+  }
+
+  async checkoutRemoteBranch(node: GitTreeNode): Promise<void> {
+    if (!node || !(node instanceof RemoteBranchNode)) {
+      return;
+    }
+
+    await this.gitService.checkoutRemoteBranch(
+      node.branchName,
+      node.remoteName,
+    );
+    await this.treeDataProvider.refreshRootNode();
+    await this.treeDataProvider.refreshLocalBranchesNode();
   }
 
   async deleteBranch(node: GitTreeNode): Promise<void> {
