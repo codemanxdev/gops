@@ -19,6 +19,7 @@ export enum ContextValue {
   ChangesSection = "changesSection",
   ChangesSectionEmpty = "changesSectionEmpty",
   Changes = "changedFile",
+  UntrackedFile = "untrackedFile",
 
   //Context related to Staged Changes
   StagedChangesSection = "stagedChangesSection",

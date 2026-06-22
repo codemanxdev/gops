@@ -49,9 +49,7 @@ export class GitService {
 
   async getChangedFiles(): Promise<string[]> {
     const status = await this.git.status();
-    return status.files
-      .filter((f) => f.working_dir !== " " && f.working_dir !== "?")
-      .map((f) => f.path);
+    return status.files.filter((f) => f.working_dir !== " ").map((f) => f.path);
   }
 
   async getStagedFiles(): Promise<string[]> {
@@ -167,6 +165,21 @@ export class GitService {
         name: name.substring(remote.length + 1),
         remote: remote,
       }));
+  }
+
+  async getUntrackedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.files
+      .filter((f) => f.working_dir === "?" && f.index === "?")
+      .map((f) => f.path);
+  }
+
+  async deleteUntrackedFile(fileName: string): Promise<void> {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const repoPath = this.getRepoPath();
+    const fullPath = path.join(repoPath, fileName);
+    await fs.unlink(fullPath);
   }
 
   async getTags(): Promise<string[]> {

@@ -69,7 +69,6 @@ export const createRemoteBranchTooltip = (
   isTracking: boolean,
 ): string => {
   return [
-
     `Remote: ${remote}`,
     `Branch: ${branch}`,
     isTracking ? "Tracking enabled" : "Not tracking",
@@ -85,8 +84,10 @@ export const formatChangedFileLabel = (
   };
 };
 
-export const createChangedFileTooltip = (
-  fileName: string,
-): string => {
+export const createChangedFileTooltip = (fileName: string): string => {
   return `File: ${fileName}`;
+};
+
+export const createUntrackedFileTooltip = (fileName: string): string => {
+  return `Untracked File: ${fileName}\nThis file is not tracked by git`;
 };

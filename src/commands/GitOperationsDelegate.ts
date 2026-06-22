@@ -265,4 +265,23 @@ export class GitOperationsDelegate {
     await this.gitService.discardAllFiles();
     await this.treeDataProvider.refreshChangesNode();
   }
+
+  async deleteUntrackedFile(node: GitTreeNode): Promise<void> {
+    if (!node || !(node instanceof ChangedFileNode) || !node.isUntracked) {
+      return;
+    }
+
+    const confirm = await vscode.window.showWarningMessage(
+      `Permanently delete "${node.fileName}"? This file is untracked and cannot be recovered.`,
+      { modal: true },
+      "Delete",
+    );
+
+    if (confirm !== "Delete") {
+      return;
+    }
+
+    await this.gitService.deleteUntrackedFile(node.fileName);
+    await this.treeDataProvider.refreshChangesNode();
+  }
 }

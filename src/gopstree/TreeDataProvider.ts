@@ -99,13 +99,14 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
 
   private async getChanges(): Promise<TreeItemModel[]> {
     const changedFiles = await this.gitService.getChangedFiles();
-    const allChangedFiles = changedFiles.map((f) => {
-      const node = new ChangedFileNode(f);
+    const untrackedFiles = await this.gitService.getUntrackedFiles();
+    const untrackedSet = new Set(untrackedFiles);
+
+    return changedFiles.map((f) => {
+      const node = new ChangedFileNode(f, untrackedSet.has(f));
       console.debug(node.toString());
       return node;
     });
-
-    return allChangedFiles;
   }
 
   private async getStagedChanges(): Promise<TreeItemModel[]> {

@@ -59,6 +59,9 @@ export class CommandRegistrar {
     this.register(COMMANDS.DISCARD_ALL_FILES, () =>
       this.delegate.discardAllFiles(),
     );
+    this.register(COMMANDS.DELETE_UNTRACKED_FILE, (node) =>
+      this.delegate.deleteUntrackedFile(node),
+    );
   }
 
   private register(

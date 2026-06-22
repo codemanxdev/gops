@@ -361,21 +361,7 @@ describe("GitService", () => {
     );
   });
 
-  it("returns only unstaged changed files", async () => {
-    mockGit.status.mockResolvedValue({
-      files: [
-        { path: "src/modified.ts", index: " ", working_dir: "M" },
-        { path: "src/staged.ts", index: "M", working_dir: " " },
-        { path: "src/untracked.ts", index: "?", working_dir: "?" },
-      ],
-    });
-
-    const result = await service.getChangedFiles();
-
-    expect(result).toEqual(["src/modified.ts"]);
-  });
-
-  it("returns empty array when no unstaged files", async () => {
+  it("returns empty array when no changed or untracked files", async () => {
     mockGit.status.mockResolvedValue({
       files: [{ path: "src/staged.ts", index: "M", working_dir: " " }],
     });
@@ -800,5 +786,19 @@ describe("GitService", () => {
         "upstream/feature",
       );
     });
+  });
+
+  it("returns unstaged and untracked changed files", async () => {
+    mockGit.status.mockResolvedValue({
+      files: [
+        { path: "src/modified.ts", index: " ", working_dir: "M" },
+        { path: "src/staged.ts", index: "M", working_dir: " " },
+        { path: "src/untracked.ts", index: "?", working_dir: "?" },
+      ],
+    });
+
+    const result = await service.getChangedFiles();
+
+    expect(result).toEqual(["src/modified.ts", "src/untracked.ts"]);
   });
 });

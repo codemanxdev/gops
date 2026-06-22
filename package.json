@@ -127,7 +127,7 @@
       {
         "command": "gops.discardAllFiles",
         "title": "Discard All Changes",
-        "icon": "$(discard)"
+        "icon": "$(eraser)"
       },
       {
         "command": "gops.showGitGraph",
@@ -158,6 +158,11 @@
         "command": "gops.checkoutRemoteBranch",
         "title": "Checkout Remote Branch",
         "icon": "$(git-branch)"
+      },
+      {
+        "command": "gops.deleteUntrackedFile",
+        "title": "Delete Untracked File",
+        "icon": "$(trash)"
       }
     ],
     "viewsContainers": {
@@ -236,6 +241,12 @@
           "group": "inline"
         },
         {
+          "command": "gops.stageFile",
+          "title": "Stage File",
+          "when": "view == gitOpsTreeview && viewItem == untrackedFile",
+          "group": "inline"
+        },
+        {
           "command": "gops.unstageFile",
           "title": "Unstage File",
           "when": "view == gitOpsTreeview && viewItem == stagedFile",
@@ -291,6 +302,11 @@
           "command": "gops.checkoutRemoteBranch",
           "when": "view == gitOpsTreeview && viewItem == remoteBranches",
           "group": "navigation"
+        },
+        {
+          "command": "gops.deleteUntrackedFile",
+          "when": "view == gitOpsTreeview && viewItem == untrackedFile",
+          "group": "inline"
         }
       ]
     }

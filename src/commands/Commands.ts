@@ -14,6 +14,7 @@ export const COMMANDS = {
   STAGE_ALL_FILES: "gops.stageAllFiles",
   DISCARD_FILE: "gops.discardFile",
   DISCARD_ALL_FILES: "gops.discardAllFiles",
+  DELETE_UNTRACKED_FILE: "gops.deleteUntrackedFile",
   UNSTAGE_FILE: "gops.unstageFile",
   UNSTAGE_ALL_FILES: "gops.unstageAllFiles",
   COMMIT: "gops.commit",
