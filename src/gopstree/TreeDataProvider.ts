@@ -23,8 +23,16 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
   private _onDidChangeTreeData = new vscode.EventEmitter<
     GitTreeNode | undefined
   >();
+  private _onDidChangeBadge = new vscode.EventEmitter<void>();
 
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+  readonly onDidChangeBadge = this._onDidChangeBadge.event;
+
+  private _badge: vscode.ViewBadge | undefined;
+  get badge(): vscode.ViewBadge | undefined {
+    return this._badge;
+  }
+
   private rootNode: RepositoryNode | undefined;
   private localBranchesNode: LocalBranchesSection | undefined;
   private remoteBranchesNode: RemoteBranchesSection | undefined;
@@ -153,6 +161,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
       this.setContext(CONTEXT_KEYS.HAS_CHANGED_FILES, hasChangedFiles),
     ]);
 
+    this.updateBadge(changedFiles.length);
+
     const localBranchesItem = new LocalBranchesSection(
       this.localBranchesNode?.collapsibleState ||
         vscode.TreeItemCollapsibleState.Collapsed,
@@ -205,6 +215,17 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     ];
   }
 
+  private updateBadge(changedFilesCount: number): void {
+    this._badge =
+      changedFilesCount > 0
+        ? {
+            value: changedFilesCount,
+            tooltip: `${changedFilesCount} changed file${changedFilesCount === 1 ? "" : "s"}`,
+          }
+        : undefined;
+    this._onDidChangeBadge.fire();
+  }
+
   private async setContext(key: string, value: boolean): Promise<void> {
     await vscode.commands.executeCommand("setContext", key, value);
   }
@@ -254,6 +275,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     this.changesNode.contextValue = hasChangedFiles
       ? ContextValue.ChangesSection
       : ContextValue.ChangesSectionEmpty;
+    this.updateBadge(changedFiles.length);
     this._onDidChangeTreeData.fire(this.changesNode);
   }
 

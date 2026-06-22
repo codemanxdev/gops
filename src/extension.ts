@@ -25,6 +25,12 @@ export async function activate(context: vscode.ExtensionContext) {
   const treeDataProvider = new TreeDataProvider(gitService);
   const treeView = vscode.window.createTreeView("gitOpsTreeview", {
     treeDataProvider,
+    showCollapseAll: true,
+  });
+
+  treeView.badge = treeDataProvider.badge;
+  treeDataProvider.onDidChangeBadge(() => {
+    treeView.badge = treeDataProvider.badge;
   });
 
   const delegate = new GitOperationsDelegate(
