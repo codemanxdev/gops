@@ -702,4 +702,71 @@ describe("GitService", () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe("discardFile", () => {
+    it("calls checkout with -- and the file path", async () => {
+      mockGit.checkout.mockResolvedValue("ok");
+
+      await service.discardFile("src/file.ts");
+
+      expect(mockGit.checkout).toHaveBeenCalledWith(["--", "src/file.ts"]);
+    });
+
+    it("propagates error when checkout fails", async () => {
+      const error = new Error("checkout failed");
+      mockGit.checkout.mockRejectedValue(error);
+
+      await expect(service.discardFile("src/file.ts")).rejects.toThrow(error);
+    });
+  });
+
+  describe("discardFile", () => {
+    it("calls checkout with -- and the file path", async () => {
+      mockGit.checkout.mockResolvedValue("ok");
+
+      await service.discardFile("src/file.ts");
+
+      expect(mockGit.checkout).toHaveBeenCalledWith(["--", "src/file.ts"]);
+    });
+
+    it("propagates error when checkout fails", async () => {
+      const error = new Error("checkout failed");
+      mockGit.checkout.mockRejectedValue(error);
+
+      await expect(service.discardFile("src/file.ts")).rejects.toThrow(error);
+    });
+  });
+
+  describe("discardAllFiles", () => {
+    it("calls checkout with -- and . to discard all", async () => {
+      mockGit.checkout.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.discardAllFiles();
+
+      expect(mockGit.checkout).toHaveBeenCalledWith(["--", "."]);
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Discarded all changes successfully",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Discarded all changes successfully",
+      );
+    });
+
+    it("logs error and rethrows when discardAllFiles fails", async () => {
+      const error = new Error("discard all failed");
+      mockGit.checkout.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.discardAllFiles()).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to discard all changes: discard all failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to discard all changes. See details in output",
+      );
+    });
+  });
 });

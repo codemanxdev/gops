@@ -220,4 +220,35 @@ export class GitOperationsDelegate {
     await this.gitService.stashChanges();
     this.treeDataProvider.refresh();
   }
+
+  async discardFile(node: ChangedFileNode): Promise<void> {
+    const fileName = node.fileName;
+
+    const confirm = await vscode.window.showWarningMessage(
+      `Discard changes to ${fileName}?`,
+      { modal: true },
+      "Discard",
+    );
+
+    if (confirm !== "Discard") {
+      return;
+    }
+
+    await this.gitService.discardFile(fileName);
+    await this.treeDataProvider.refreshChangesNode();
+  }
+
+  async discardAllFiles(): Promise<void> {
+    const confirm = await Notifications.choice(
+      "Discard all changes? This cannot be undone.",
+      ["Discard All"],
+    );
+
+    if (confirm !== "Discard All") {
+      return;
+    }
+
+    await this.gitService.discardAllFiles();
+    await this.treeDataProvider.refreshChangesNode();
+  }
 }

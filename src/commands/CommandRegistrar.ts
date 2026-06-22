@@ -50,6 +50,12 @@ export class CommandRegistrar {
     this.register(COMMANDS.FETCH, () => this.delegate.fetch());
     this.register(COMMANDS.POP_STASH, (node) => this.delegate.popStash(node));
     this.register(COMMANDS.STASH_CHANGES, () => this.delegate.stashChanges());
+    this.register(COMMANDS.DISCARD_FILE, (node) =>
+      this.delegate.discardFile(node),
+    );
+    this.register(COMMANDS.DISCARD_ALL_FILES, () =>
+      this.delegate.discardAllFiles(),
+    );
   }
 
   private register(

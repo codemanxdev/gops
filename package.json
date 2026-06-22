@@ -120,6 +120,16 @@
         "icon": "$(expand-all)"
       },
       {
+        "command": "gops.discardFile",
+        "title": "Discard Changes",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "gops.discardAllFiles",
+        "title": "Discard All Changes",
+        "icon": "$(discard)"
+      },
+      {
         "command": "gops.showGitGraph",
         "title": "Show Git Graph",
         "icon": "$(graph)"
@@ -235,6 +245,17 @@
         {
           "command": "gops.stageAllFiles",
           "title": "Stage All Files",
+          "when": "view == gitOpsTreeview && viewItem == changesSection",
+          "group": "inline"
+        },
+        {
+          "command": "gops.discardFile",
+          "title": "Discard Changes",
+          "when": "view == gitOpsTreeview && viewItem == changedFile",
+          "group": "inline"
+        },
+        {
+          "command": "gops.discardAllFiles",
           "when": "view == gitOpsTreeview && viewItem == changesSection",
           "group": "inline"
         },

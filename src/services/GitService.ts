@@ -77,6 +77,18 @@ export class GitService {
     );
   }
 
+  async discardFile(fileName: string): Promise<void> {
+    await this.git.checkout(["--", fileName]);
+  }
+
+  async discardAllFiles(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.checkout(["--", "."]),
+      "Discarded all changes successfully",
+      "Failed to discard all changes",
+    );
+  }
+
   async unstageAllFiles(): Promise<void> {
     await this.executeGitAction(
       () => this.git.reset(["HEAD"]),
