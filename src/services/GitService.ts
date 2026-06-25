@@ -15,6 +15,7 @@ import { RemoteBranchModel } from "../models/RemoteBranchModel";
 import { BranchInfoModel } from "../models/BranchInfoModel";
 import { GitCommitModel } from "../models/GitCommitModel";
 import { parseRefs } from "../utils/parseRefs";
+import { CommitDetail } from "../models/CommitDetail";
 
 export class GitService {
   private git: SimpleGit;
@@ -43,81 +44,7 @@ export class GitService {
     }
   }
 
-  async getStatus(): Promise<StatusResult> {
-    return this.git.status();
-  }
-
-  async getChangedFiles(): Promise<string[]> {
-    const status = await this.git.status();
-    return status.files.filter((f) => f.working_dir !== " ").map((f) => f.path);
-  }
-
-  async getStagedFiles(): Promise<string[]> {
-    const status = await this.git.status();
-    return status.files
-      .filter((f) => f.index !== " " && f.index !== "?")
-      .map((f) => f.path);
-  }
-
-  async stageFile(filePath: string): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.add(filePath),
-      `Staged file ${filePath} successfully`,
-      `Failed to stage file ${filePath}`,
-    );
-  }
-
-  async unstageFile(filePath: string): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.reset(["HEAD", filePath]),
-      `Unstaged file ${filePath} successfully`,
-      `Failed to unstage file ${filePath}`,
-    );
-  }
-
-  async discardFile(fileName: string): Promise<void> {
-    await this.git.checkout(["--", fileName]);
-  }
-
-  async discardAllFiles(): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.checkout(["--", "."]),
-      "Discarded all changes successfully",
-      "Failed to discard all changes",
-    );
-  }
-
-  async unstageAllFiles(): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.reset(["HEAD"]),
-      "Unstaged all files successfully",
-      "Failed to unstage all files",
-    );
-  }
-
-  async stageAllFiles(): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.add("."),
-      "Staged all files successfully",
-      "Failed to stage all files",
-    );
-  }
-
-  async deleteBranch(branchName: string): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.deleteLocalBranch(branchName),
-      `Branch ${branchName} deleted successfully`,
-      `Failed to delete branch ${branchName}`,
-    );
-  }
-
-  async renameBranch(oldName: string, newName: string): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.raw(["branch", "-m", oldName, newName]),
-      `Branch renamed to ${newName} successfully`,
-      `Failed to rename branch ${oldName}`,
-    );
-  }
+  // #region [Branch Operations]
 
   async getBranches(): Promise<BranchSummary> {
     return this.git.branch();
@@ -137,73 +64,10 @@ export class GitService {
     });
   }
 
-  async popStash(stashId: string): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.stash(["pop", stashId]),
-      `Popped stash ${stashId}`,
-      `Failed to pop stash ${stashId}`,
-    );
+  async getCurrentBranch(): Promise<string> {
+    const branchSummary = await this.git.branch();
+    return branchSummary.current;
   }
-
-  async stashChanges(): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.stash(),
-      "Changes stashed successfully",
-      "Failed to stash changes",
-    );
-  }
-
-  async getRemotes(): Promise<RemoteWithoutRefs[]> {
-    return this.git.getRemotes();
-  }
-
-  async getRemoteBranches(remote: string): Promise<RemoteBranchModel[]> {
-    const branches = await this.git.branch({ "--remotes": null });
-    return branches.all
-      .filter((name) => name.startsWith(`${remote}/`))
-      .map((name) => ({
-        name: name.substring(remote.length + 1),
-        remote: remote,
-      }));
-  }
-
-  async getUntrackedFiles(): Promise<string[]> {
-    const status = await this.git.status();
-    return status.files
-      .filter((f) => f.working_dir === "?" && f.index === "?")
-      .map((f) => f.path);
-  }
-
-  async deleteUntrackedFile(fileName: string): Promise<void> {
-    const fs = await import("fs/promises");
-    const path = await import("path");
-    const repoPath = this.getRepoPath();
-    const fullPath = path.join(repoPath, fileName);
-    await fs.unlink(fullPath);
-  }
-
-  async getTags(): Promise<string[]> {
-    return (await this.git.tags()).all;
-  }
-
-  async getStash(): Promise<{ ref: string; message: string }[]> {
-    const stashList = await this.git.stashList();
-    return stashList.all.map((s, index) => ({
-      ref: `stash@{${index}}`,
-      message: s.message,
-    }));
-  }
-
-  async getLog(): Promise<readonly (DefaultLogFields & ListLogLine)[]> {
-    const log = await this.git.log();
-    return log.all;
-  }
-
-  public async getFileContent(ref: string, filePath: string): Promise<string> {
-    return await this.git.show([`${ref}:${filePath}`]);
-  }
-
-  // #region [Branch Operations]
 
   async checkout(branch: string) {
     return this.executeGitAction(
@@ -221,6 +85,14 @@ export class GitService {
     );
   }
 
+  async checkoutLocalBranch(branchName: string) {
+    return this.executeGitAction(
+      () => this.git.checkoutLocalBranch(branchName),
+      `Branch ${branchName} created successfully`,
+      `Failed to create branch ${branchName}`,
+    );
+  }
+
   async checkoutRemoteBranch(
     branchName: string,
     remoteName: string,
@@ -232,38 +104,19 @@ export class GitService {
     );
   }
 
-  async push() {
-    return this.executeGitAction(
-      () => this.git.push(),
-      "Pushed to remote successfully",
-      "Push failed",
+  async renameBranch(oldName: string, newName: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.raw(["branch", "-m", oldName, newName]),
+      `Branch renamed to ${newName} successfully`,
+      `Failed to rename branch ${oldName}`,
     );
   }
 
-  async commit(message: string) {
-    const status = await this.git.status();
-    Logger.info(`Staged files before commit: ${JSON.stringify(status.staged)}`);
-    Logger.info(`All files: ${JSON.stringify(status.files)}`);
-    return this.executeGitAction(
-      () => this.git.commit(message, []),
-      "Commit successful",
-      "Commit failed",
-    );
-  }
-
-  async pull() {
-    return this.executeGitAction(
-      () => this.git.pull(),
-      "Pull successful",
-      "Pull failed",
-    );
-  }
-
-  async checkoutLocalBranch(branchName: string) {
-    return this.executeGitAction(
-      () => this.git.checkoutLocalBranch(branchName),
-      `Branch ${branchName} created successfully`,
-      `Failed to create branch ${branchName}`,
+  async deleteBranch(branchName: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.deleteLocalBranch(branchName),
+      `Branch ${branchName} deleted successfully`,
+      `Failed to delete branch ${branchName}`,
     );
   }
 
@@ -308,11 +161,37 @@ export class GitService {
     );
   }
 
-  async publishBranch(branchName: string): Promise<void> {
-    await this.executeGitAction(
-      () => this.git.push(["--set-upstream", "origin", branchName]),
-      `Branch ${branchName} published to origin`,
-      `Failed to publish branch ${branchName}`,
+  // #endregion
+
+  // #region [Remote Operations]
+
+  async getRemotes(): Promise<RemoteWithoutRefs[]> {
+    return this.git.getRemotes();
+  }
+
+  async getRemoteBranches(remote: string): Promise<RemoteBranchModel[]> {
+    const branches = await this.git.branch({ "--remotes": null });
+    return branches.all
+      .filter((name) => name.startsWith(`${remote}/`))
+      .map((name) => ({
+        name: name.substring(remote.length + 1),
+        remote: remote,
+      }));
+  }
+
+  async push() {
+    return this.executeGitAction(
+      () => this.git.push(),
+      "Pushed to remote successfully",
+      "Push failed",
+    );
+  }
+
+  async pull() {
+    return this.executeGitAction(
+      () => this.git.pull(),
+      "Pull successful",
+      "Pull failed",
     );
   }
 
@@ -323,11 +202,202 @@ export class GitService {
       "Failed to fetch changes",
     );
   }
+
+  async publishBranch(branchName: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.push(["--set-upstream", "origin", branchName]),
+      `Branch ${branchName} published to origin`,
+      `Failed to publish branch ${branchName}`,
+    );
+  }
+
   // #endregion
+
+  // #region [File Operations]
+
+  async getStatus(): Promise<StatusResult> {
+    return this.git.status();
+  }
+
+  async getChangedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.files.filter((f) => f.working_dir !== " ").map((f) => f.path);
+  }
+
+  async getStagedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.files
+      .filter((f) => f.index !== " " && f.index !== "?")
+      .map((f) => f.path);
+  }
+
+  async getUntrackedFiles(): Promise<string[]> {
+    const status = await this.git.status();
+    return status.files
+      .filter((f) => f.working_dir === "?" && f.index === "?")
+      .map((f) => f.path);
+  }
+
+  async stageFile(filePath: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.add(filePath),
+      `Staged file ${filePath} successfully`,
+      `Failed to stage file ${filePath}`,
+    );
+  }
+
+  async stageAllFiles(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.add("."),
+      "Staged all files successfully",
+      "Failed to stage all files",
+    );
+  }
+
+  async unstageFile(filePath: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.reset(["HEAD", filePath]),
+      `Unstaged file ${filePath} successfully`,
+      `Failed to unstage file ${filePath}`,
+    );
+  }
+
+  async unstageAllFiles(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.reset(["HEAD"]),
+      "Unstaged all files successfully",
+      "Failed to unstage all files",
+    );
+  }
+
+  async discardFile(fileName: string): Promise<void> {
+    await this.git.checkout(["--", fileName]);
+  }
+
+  async discardAllFiles(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.checkout(["--", "."]),
+      "Discarded all changes successfully",
+      "Failed to discard all changes",
+    );
+  }
+
+  async deleteUntrackedFile(fileName: string): Promise<void> {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const repoPath = this.getRepoPath();
+    const fullPath = path.join(repoPath, fileName);
+    await fs.unlink(fullPath);
+  }
+
+  async commit(message: string) {
+    const status = await this.git.status();
+    Logger.info(`Staged files before commit: ${JSON.stringify(status.staged)}`);
+    Logger.info(`All files: ${JSON.stringify(status.files)}`);
+    return this.executeGitAction(
+      () => this.git.commit(message, []),
+      "Commit successful",
+      "Commit failed",
+    );
+  }
+
+  // #endregion
+
+  // #region [Stash]
+
+  async getStash(): Promise<{ ref: string; message: string }[]> {
+    const stashList = await this.git.stashList();
+    return stashList.all.map((s, index) => ({
+      ref: `stash@{${index}}`,
+      message: s.message,
+    }));
+  }
+
+  async stashChanges(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.stash(),
+      "Changes stashed successfully",
+      "Failed to stash changes",
+    );
+  }
+
+  async popStash(stashId: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.stash(["pop", stashId]),
+      `Popped stash ${stashId}`,
+      `Failed to pop stash ${stashId}`,
+    );
+  }
+
+  // #endregion
+
+  // #region [Tag Operations]
+
+  async getTags(): Promise<string[]> {
+    return (await this.git.tags()).all;
+  }
+
+  async createTag(name: string, hash: string, message?: string): Promise<void> {
+    await this.executeGitAction(
+      () =>
+        message
+          ? this.git.tag(["-a", name, hash, "-m", message])
+          : this.git.tag([name, hash]),
+      `Tag ${name} created successfully`,
+      `Failed to create tag ${name}`,
+    );
+  }
+
+  // #endregion
+
+  // #region [Log & History]
+
+  async getLog(): Promise<readonly (DefaultLogFields & ListLogLine)[]> {
+    const log = await this.git.log();
+    return log.all;
+  }
+
+  async getCommitDetail(hash: string): Promise<CommitDetail> {
+    return this.executeGitAction(
+      async () => {
+        const log = await this.git.log({
+          maxCount: 1,
+          from: hash,
+          to: hash,
+          format: {
+            hash: "%h",
+            message: "%B",
+            author: "%an",
+            date: "%ai",
+          },
+        });
+
+        const entry = log.latest as any;
+        const diff = await this.git.raw(["show", "--stat", "-p", hash]);
+
+        return {
+          hash: entry?.hash ?? hash,
+          message: entry?.message?.trim() ?? "",
+          author: entry?.author ?? "",
+          date: entry?.date ?? "",
+          diff,
+        };
+      },
+      `Loaded commit detail for ${hash}`,
+      `Failed to load commit detail for ${hash}`,
+    );
+  }
+
+  public async getFileContent(ref: string, filePath: string): Promise<string> {
+    return await this.git.show([`${ref}:${filePath}`]);
+  }
+
+  // #endregion
+
+  // #region [Utilities]
 
   getRepoName(): string {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-
     const repoName = workspaceFolder
       ? path.basename(workspaceFolder.uri.fsPath)
       : "";
@@ -337,11 +407,6 @@ export class GitService {
   getRepoPath(): string {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     return workspaceFolder ? workspaceFolder.uri.fsPath : "";
-  }
-
-  async getCurrentBranch(): Promise<string> {
-    const branchSummary = await this.git.branch();
-    return branchSummary.current;
   }
 
   private async executeGitAction<T>(
@@ -373,4 +438,6 @@ export class GitService {
       hasUpstream,
     };
   }
+
+  // #endregion
 }

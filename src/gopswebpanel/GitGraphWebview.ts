@@ -3,15 +3,16 @@ import { GitCommitModel } from "../models/GitCommitModel";
 import { GitGraphLayout } from "./GitGraphLayout";
 import { GitGraphRenderer } from "./GitGraphRenderer";
 import { CommitLayout } from "../models/CommitLayout";
+import { renderDetailPanel } from "./GitGraphDetailsPanel";
 
 export function renderGitGraph(
   branchName: string,
   commits: GitCommitModel[],
   cssUri: vscode.Uri,
+  scriptUri: vscode.Uri,
 ): string {
   const layout = GitGraphLayout.computeLayout(commits);
 
-  // Calculate svg width
   let maxLane = 0;
   layout.forEach((entry: CommitLayout) => {
     if (entry.lane > maxLane) {
@@ -66,6 +67,14 @@ export function renderGitGraph(
       <div id="commits-container">
         ${rows}
       </div>
+
+      <div id="context-menu">
+        <div class="context-menu-item" id="ctx-create-tag">🏷 Create tag here</div>
+      </div>
+
+      ${renderDetailPanel()}
+
+      <script src="${scriptUri}"></script>
     </body>
     </html>
   `;

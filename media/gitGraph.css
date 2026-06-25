@@ -40,11 +40,6 @@ body {
 }
 
 #header h2 {
-  font-family:
-    "Segoe UI",
-    system-ui,
-    -apple-system,
-    sans-serif;
   font-size: 12px;
   font-weight: 600;
   color: var(--vscode-sideBarSectionHeader-foreground);
@@ -82,21 +77,17 @@ body {
   width: var(--col-graph-width);
   flex-shrink: 0;
 }
-
 #column-headers .col-hash {
   width: var(--col-hash-width);
   flex-shrink: 0;
 }
-
 #column-headers .col-message {
   flex: 1;
 }
-
 #column-headers .col-author {
   width: var(--col-author-width);
   flex-shrink: 0;
 }
-
 #column-headers .col-date {
   width: var(--col-date-width);
   flex-shrink: 0;
@@ -127,44 +118,6 @@ body {
   flex: 1;
 }
 
-.col-hash {
-  width: var(--col-hash-width);
-  flex-shrink: 0;
-  padding: 8px 12px;
-}
-
-.col-author {
-  width: var(--col-author-width);
-  flex-shrink: 0;
-  padding: 8px 12px;
-}
-
-.col-date {
-  width: var(--col-date-width);
-  flex-shrink: 0;
-  padding: 8px 12px;
-}
-
-.hash {
-  font-family: "Cascadia Mono", monospace;
-  color: var(--vscode-textLink-foreground);
-  font-weight: 700;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.author {
-  color: var(--vscode-terminal-ansiGreen);
-  white-space: nowrap;
-  font-size: 12px;
-}
-
-.date {
-  color: var(--vscode-descriptionForeground);
-  white-space: nowrap;
-  font-size: 12px;
-}
-
 .commit-row {
   display: flex;
   align-items: stretch;
@@ -190,11 +143,10 @@ body {
   align-items: stretch;
 }
 
-svg.graph {
-  height: 100%;
-  width: 100%;
-  display: block;
-  overflow: visible;
+.col-hash {
+  width: var(--col-hash-width);
+  flex-shrink: 0;
+  padding: 8px 12px;
 }
 
 .col-message {
@@ -207,6 +159,38 @@ svg.graph {
   white-space: nowrap;
 }
 
+.col-author {
+  width: var(--col-author-width);
+  flex-shrink: 0;
+  padding: 8px 12px;
+}
+
+.col-date {
+  width: var(--col-date-width);
+  flex-shrink: 0;
+  padding: 8px 12px;
+}
+
+svg.graph {
+  height: 100%;
+  width: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.hash {
+  font-family: "Cascadia Mono", monospace;
+  color: var(--vscode-textLink-foreground);
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.hash:hover {
+  text-decoration: underline;
+}
+
 .message {
   color: var(--vscode-editor-foreground);
   overflow: hidden;
@@ -216,6 +200,18 @@ svg.graph {
   min-width: 0;
   flex-shrink: 1;
   font-family: "Cascadia Code", monospace;
+}
+
+.author {
+  color: var(--vscode-terminal-ansiGreen);
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.date {
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+  font-size: 12px;
 }
 
 .ref {
@@ -233,17 +229,14 @@ svg.graph {
   background: #f0a500;
   color: #000000;
 }
-
 .ref-local {
   background: #2d5a1b;
   color: #d4f447;
 }
-
 .ref-remote {
   background: #5e46cb;
   color: #ffffff;
 }
-
 .ref-tag {
   background: #ea6c00;
   color: #000000;
@@ -252,4 +245,187 @@ svg.graph {
 .ref-tag::before {
   content: "🎯 ";
   font-size: 9px;
+}
+
+#context-menu {
+  display: none;
+  position: fixed;
+  background: var(--vscode-menu-background);
+  border: 1px solid var(--vscode-menu-border);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 160px;
+}
+
+.context-menu-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--vscode-menu-foreground);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.context-menu-item:hover {
+  background: var(--vscode-menu-selectionBackground);
+  color: var(--vscode-menu-selectionForeground);
+}
+
+#detail-panel {
+  display: none;
+  flex-shrink: 0;
+  border-top: 2px solid var(--vscode-panel-border);
+  background: var(--vscode-editor-background);
+  flex-direction: column;
+  height: 340px;
+}
+
+#detail-panel.visible {
+  display: flex;
+}
+
+#detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  background: var(--vscode-sideBarSectionHeader-background);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+#detail-header-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+#detail-hash {
+  font-family: "Cascadia Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vscode-textLink-foreground);
+}
+
+#detail-message {
+  font-family: "Cascadia Code", monospace;
+  font-size: 13px;
+  color: var(--vscode-editor-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#detail-author-date {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+#detail-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.detail-action-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid var(--vscode-button-border, var(--vscode-panel-border));
+  border-radius: 3px;
+  cursor: pointer;
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  white-space: nowrap;
+}
+
+.detail-action-btn:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.detail-action-btn.primary {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border-color: transparent;
+}
+
+.detail-action-btn.primary:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+#detail-close {
+  background: transparent;
+  border: none;
+  color: var(--vscode-descriptionForeground);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+#detail-close:hover {
+  color: var(--vscode-editor-foreground);
+}
+
+#detail-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px 16px;
+}
+
+#detail-loading {
+  padding: 24px 0;
+  color: var(--vscode-descriptionForeground);
+  font-size: 13px;
+}
+
+.diff-file {
+  margin-bottom: 16px;
+}
+
+.diff-file-header {
+  font-family: "Cascadia Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vscode-editor-foreground);
+  padding: 4px 8px;
+  background: var(--vscode-sideBarSectionHeader-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+}
+
+.diff-lines {
+  font-family: "Cascadia Mono", monospace;
+  font-size: 12px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 0 0 3px 3px;
+  overflow: hidden;
+}
+
+.diff-line {
+  padding: 1px 8px;
+  white-space: pre;
+  line-height: 1.6;
+}
+
+.diff-line-add {
+  background: rgba(70, 149, 74, 0.15);
+  color: #4ec994;
+}
+.diff-line-remove {
+  background: rgba(255, 80, 80, 0.12);
+  color: #f47474;
+}
+.diff-line-hunk {
+  background: rgba(86, 156, 214, 0.1);
+  color: var(--vscode-descriptionForeground);
+}
+.diff-line-context {
+  color: var(--vscode-editor-foreground);
+  opacity: 0.7;
 }

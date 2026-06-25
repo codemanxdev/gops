@@ -183,7 +183,7 @@ export const GitGraphRenderer = {
       : "";
 
     return `
-      <div class="commit-row${isAlt ? " commit-row-alt" : ""}">
+      <div class="commit-row${isAlt ? " commit-row-alt" : ""}" data-hash="${commit.hash}">
         ${graphCell}
         <div class="col-hash"><span class="hash">${commit.hash}</span></div>
         <div class="col-message">
