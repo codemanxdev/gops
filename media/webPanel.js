@@ -1,53 +1,5 @@
 const vscode = acquireVsCodeApi();
 
-const menu = document.getElementById("context-menu");
-let activeHash = null;
-
-document
-  .getElementById("commits-container")
-  .addEventListener("contextmenu", (e) => {
-    const hashEl = e.target.closest(".hash");
-    if (!hashEl) {
-      return;
-    }
-
-    const row = hashEl.closest("[data-hash]");
-    if (!row) {
-      return;
-    }
-
-    e.preventDefault();
-
-    activeHash = row.dataset.hash;
-    menu.style.display = "block";
-    menu.style.left = `${e.clientX}px`;
-    menu.style.top = `${e.clientY}px`;
-  });
-
-document.getElementById("ctx-create-tag").addEventListener("click", () => {
-  if (!activeHash) {
-    return;
-  }
-
-  vscode.postMessage({
-    command: "createTag",
-    hash: activeHash,
-  });
-
-  menu.style.display = "none";
-});
-
-document.addEventListener("click", () => {
-  menu.style.display = "none";
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    menu.style.display = "none";
-    closeDetail();
-  }
-});
-
 const detailPanel = document.getElementById("detail-panel");
 
 document.getElementById("commits-container").addEventListener("click", (e) => {
@@ -62,6 +14,12 @@ document.getElementById("commits-container").addEventListener("click", (e) => {
   }
 
   openDetail(row.dataset.hash);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeDetail();
+  }
 });
 
 function openDetail(hash) {

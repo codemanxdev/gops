@@ -1,17 +1,18 @@
 :root {
-  --color-1: #f0883e;
-  --color-2: #6a9955;
-  --color-3: #569cd6;
-  --color-4: #c586c0;
-  --color-5: #ce9178;
-  --color-6: #9cdcfe;
-  --color-7: #4ec9b0;
-  --color-8: #dcdcaa;
-
   --col-graph-width: 50px;
   --col-hash-width: 90px;
   --col-author-width: 160px;
   --col-date-width: 160px;
+
+  /* Lane colors — using VS Code's terminal ANSI palette for theme-awareness */
+  --color-1: var(--vscode-terminal-ansiYellow);
+  --color-2: var(--vscode-terminal-ansiGreen);
+  --color-3: var(--vscode-terminal-ansiBlue);
+  --color-4: var(--vscode-terminal-ansiMagenta);
+  --color-5: var(--vscode-terminal-ansiRed);
+  --color-6: var(--vscode-terminal-ansiCyan);
+  --color-7: var(--vscode-terminal-ansiBrightCyan);
+  --color-8: var(--vscode-terminal-ansiBrightYellow);
 }
 
 * {
@@ -23,6 +24,8 @@
 body {
   background: var(--vscode-editor-background);
   color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
   height: 100vh;
   overflow: hidden;
   display: flex;
@@ -102,11 +105,7 @@ body {
   color: var(--vscode-sideBarSectionHeader-foreground);
   white-space: nowrap;
   border-right: 1px solid var(--vscode-panel-border);
-  font-family:
-    "Segoe UI",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--vscode-font-family);
 }
 
 #column-headers div:last-child {
@@ -179,7 +178,7 @@ svg.graph {
 }
 
 .hash {
-  font-family: "Cascadia Mono", monospace;
+  font-family: var(--vscode-editor-font-family);
   color: var(--vscode-textLink-foreground);
   font-weight: 700;
   font-size: 12px;
@@ -189,6 +188,7 @@ svg.graph {
 
 .hash:hover {
   text-decoration: underline;
+  color: var(--vscode-textLink-activeForeground);
 }
 
 .message {
@@ -199,17 +199,19 @@ svg.graph {
   display: inline-block;
   min-width: 0;
   flex-shrink: 1;
-  font-family: "Cascadia Code", monospace;
+  font-family: var(--vscode-editor-font-family);
 }
 
 .author {
   color: var(--vscode-terminal-ansiGreen);
+  font-family: var(--vscode-editor-font-family);
   white-space: nowrap;
   font-size: 12px;
 }
 
 .date {
   color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family);
   white-space: nowrap;
   font-size: 12px;
 }
@@ -218,59 +220,42 @@ svg.graph {
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 3px;
-  border: 1px solid #000000;
+  border: 1px solid var(--vscode-panel-border);
   display: inline-block;
   white-space: nowrap;
   flex-shrink: 0;
-  font-family: "Cascadia Mono", monospace;
+  font-family: var(--vscode-editor-font-family);
 }
 
 .ref-head {
-  background: #f0a500;
-  color: #000000;
+  background: var(--vscode-terminal-ansiYellow);
+  color: var(--vscode-editor-background);
 }
+
 .ref-local {
-  background: #2d5a1b;
-  color: #d4f447;
+  background: var(--vscode-terminal-ansiBlue);
+  color: var(
+    --vscode-terminal-ansiBrightWhite,
+    var(--vscode-editor-background)
+  );
 }
+
 .ref-remote {
-  background: #5e46cb;
-  color: #ffffff;
+  background: var(--vscode-terminal-ansiBrightBlue);
+  color: var(--vscode-editor-background);
 }
+
 .ref-tag {
-  background: #ea6c00;
-  color: #000000;
+  background: var(
+    --vscode-terminal-ansiOrange,
+    var(--vscode-terminal-ansiYellow)
+  );
+  color: var(--vscode-editor-background);
 }
 
 .ref-tag::before {
   content: "🎯 ";
   font-size: 9px;
-}
-
-#context-menu {
-  display: none;
-  position: fixed;
-  background: var(--vscode-menu-background);
-  border: 1px solid var(--vscode-menu-border);
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-  min-width: 160px;
-}
-
-.context-menu-item {
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--vscode-menu-foreground);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.context-menu-item:hover {
-  background: var(--vscode-menu-selectionBackground);
-  color: var(--vscode-menu-selectionForeground);
 }
 
 #detail-panel {
@@ -279,7 +264,7 @@ svg.graph {
   border-top: 2px solid var(--vscode-panel-border);
   background: var(--vscode-editor-background);
   flex-direction: column;
-  height: 340px;
+  height: 50vh;
 }
 
 #detail-panel.visible {
@@ -305,14 +290,14 @@ svg.graph {
 }
 
 #detail-hash {
-  font-family: "Cascadia Mono", monospace;
+  font-family: var(--vscode-editor-font-family);
   font-size: 12px;
   font-weight: 700;
   color: var(--vscode-textLink-foreground);
 }
 
 #detail-message {
-  font-family: "Cascadia Code", monospace;
+  font-family: var(--vscode-editor-font-family);
   font-size: 13px;
   color: var(--vscode-editor-foreground);
   white-space: nowrap;
@@ -340,6 +325,7 @@ svg.graph {
   background: var(--vscode-button-secondaryBackground);
   color: var(--vscode-button-secondaryForeground);
   white-space: nowrap;
+  font-family: var(--vscode-font-family);
 }
 
 .detail-action-btn:hover {
@@ -388,7 +374,7 @@ svg.graph {
 }
 
 .diff-file-header {
-  font-family: "Cascadia Mono", monospace;
+  font-family: var(--vscode-editor-font-family);
   font-size: 12px;
   font-weight: 700;
   color: var(--vscode-editor-foreground);
@@ -400,7 +386,7 @@ svg.graph {
 }
 
 .diff-lines {
-  font-family: "Cascadia Mono", monospace;
+  font-family: var(--vscode-editor-font-family);
   font-size: 12px;
   border: 1px solid var(--vscode-panel-border);
   border-radius: 0 0 3px 3px;
@@ -414,17 +400,26 @@ svg.graph {
 }
 
 .diff-line-add {
-  background: rgba(70, 149, 74, 0.15);
-  color: #4ec994;
+  background: var(
+    --vscode-diffEditor-insertedLineBackground,
+    rgba(70, 149, 74, 0.15)
+  );
+  color: var(--vscode-terminal-ansiGreen);
 }
+
 .diff-line-remove {
-  background: rgba(255, 80, 80, 0.12);
-  color: #f47474;
+  background: var(
+    --vscode-diffEditor-removedLineBackground,
+    rgba(255, 80, 80, 0.12)
+  );
+  color: var(--vscode-terminal-ansiRed);
 }
+
 .diff-line-hunk {
-  background: rgba(86, 156, 214, 0.1);
+  background: var(--vscode-diffEditor-diagonalFill, rgba(86, 156, 214, 0.1));
   color: var(--vscode-descriptionForeground);
 }
+
 .diff-line-context {
   color: var(--vscode-editor-foreground);
   opacity: 0.7;

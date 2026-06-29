@@ -68,10 +68,6 @@ export function renderGitGraph(
         ${rows}
       </div>
 
-      <div id="context-menu">
-        <div class="context-menu-item" id="ctx-create-tag">🏷 Create tag here</div>
-      </div>
-
       ${renderDetailPanel()}
 
       <script src="${scriptUri}"></script>
