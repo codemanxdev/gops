@@ -50,8 +50,8 @@ export function renderGitGraph(
     </head>
     <body>
       <div id="header">
-        <span style="font-size: 16px;">⎇</span>
-        <h2>Git Graph</h2>
+        <span style="font-size: 20px;">⋔</span>
+        <h2>GIT GRAPH</h2>
         <span class="branch-badge">${branchName}</span>
         <span class="commit-count">${commits.length} commits</span>
       </div>

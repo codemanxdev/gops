@@ -43,19 +43,21 @@ body {
 }
 
 #header h2 {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--vscode-sideBarSectionHeader-foreground);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--vscode-textLink-foreground);
   font-family: var(--vscode-font-family);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 #header .branch-badge {
-  background: var(--vscode-badge-background);
-  color: var(--vscode-badge-foreground);
-  padding: 2px 8px;
+  background: var(--vscode-terminal-ansiBrightGreen);
+  color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-editor-background);
+  padding: 3px 10px;
   border-radius: 10px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 #header .commit-count {
@@ -98,11 +100,10 @@ body {
 
 #column-headers div {
   padding: 0 12px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--vscode-sideBarSectionHeader-foreground);
+  color: var(--vscode-textLink-foreground);
   white-space: nowrap;
   border-right: 1px solid var(--vscode-panel-border);
   font-family: var(--vscode-font-family);
