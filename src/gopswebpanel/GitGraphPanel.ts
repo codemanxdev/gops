@@ -37,10 +37,19 @@ export class GitGraphPanel {
     const cssUri = this.panel.webview.asWebviewUri(
       vscode.Uri.joinPath(extensionUri, "media", "gitGraph.css"),
     );
+    const detailCssUri = this.panel.webview.asWebviewUri(
+      vscode.Uri.joinPath(extensionUri, "media", "gitGraphDetail.css"),
+    );
     const scriptUri = this.panel.webview.asWebviewUri(
       vscode.Uri.joinPath(extensionUri, "media", "webPanel.js"),
     );
-    this.panel.webview.html = renderGitGraph(branchName, commits, cssUri, scriptUri);
+    this.panel.webview.html = renderGitGraph(
+      branchName,
+      commits,
+      cssUri,
+      detailCssUri,
+      scriptUri,
+    );
   }
 
   private registerMessageHandler(gitService: GitService) {

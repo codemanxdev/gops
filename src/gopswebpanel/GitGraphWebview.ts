@@ -9,6 +9,7 @@ export function renderGitGraph(
   branchName: string,
   commits: GitCommitModel[],
   cssUri: vscode.Uri,
+  detailCssUri: vscode.Uri,
   scriptUri: vscode.Uri,
 ): string {
   const layout = GitGraphLayout.computeLayout(commits);
@@ -43,6 +44,7 @@ export function renderGitGraph(
     <html>
     <head>
       <link rel="stylesheet" href="${cssUri}">
+      <link rel="stylesheet" href="${detailCssUri}">
       <style>
         .col-graph { width: ${svgWidth}px; min-width: ${svgWidth}px; }
         #header-graph { width: ${svgWidth}px; min-width: ${svgWidth}px; }

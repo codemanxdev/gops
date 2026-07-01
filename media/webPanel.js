@@ -23,6 +23,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 function openDetail(hash) {
+  detailPanel.style.display = "flex";
   detailPanel.classList.add("visible");
 
   document.getElementById("detail-loading").style.display = "block";
@@ -35,6 +36,7 @@ function openDetail(hash) {
 }
 
 function closeDetail() {
+  detailPanel.style.display = "none";
   detailPanel.classList.remove("visible");
 }
 
@@ -79,8 +81,6 @@ function renderDetail(detail) {
 
   document.getElementById("detail-hash").textContent = detail.hash;
   document.getElementById("detail-message").textContent = detail.message;
-  document.getElementById("detail-author-date").textContent =
-    `${detail.author} · ${detail.date}`;
 
   const diffContainer = document.getElementById("detail-diff");
   diffContainer.innerHTML = renderDiff(detail.diff);
