@@ -68,6 +68,37 @@ document
     });
   });
 
+document
+  .getElementById("detail-action-copy-hash")
+  .addEventListener("click", () => {
+    const hash = detailPanel.dataset.hash;
+    if (!hash) {
+      return;
+    }
+
+    navigator.clipboard.writeText(hash).then(() => {
+      const btn = document.getElementById("detail-action-copy-hash");
+      btn.textContent = "Copied!";
+      setTimeout(() => {
+        btn.textContent = "Copy Hash";
+      }, 1500);
+    });
+  });
+
+document
+  .getElementById("detail-action-cherry-pick")
+  .addEventListener("click", () => {
+    const hash = detailPanel.dataset.hash;
+    if (!hash) {
+      return;
+    }
+
+    vscode.postMessage({
+      command: "cherryPick",
+      hash,
+    });
+  });
+
 window.addEventListener("message", (event) => {
   const msg = event.data;
 
@@ -79,7 +110,7 @@ window.addEventListener("message", (event) => {
 function renderDetail(detail) {
   detailPanel.dataset.hash = detail.hash;
 
-  document.getElementById("detail-hash").textContent = detail.hash;
+  document.getElementById("detail-hash").textContent = `[${detail.hash}]`;
   document.getElementById("detail-message").textContent = detail.message;
 
   const diffContainer = document.getElementById("detail-diff");
@@ -103,6 +134,22 @@ function renderDiff(diffText) {
 
       const headerLine =
         lines.find((line) => line.startsWith("diff --git")) ?? "";
+
+      if (!headerLine) {
+        const content = lines
+          .filter((line) => line.trim())
+          .map(
+            (line) =>
+              `<div class="diff-line diff-line-context">${escapeHtml(line)}</div>`,
+          )
+          .join("");
+        return `
+          <div class="diff-file">
+            <div class="diff-file-header">Summary</div>
+            <div class="diff-lines">${content}</div>
+          </div>
+        `;
+      }
 
       const match = headerLine.match(/diff --git a\/(.+) b\//);
       const fileName = match ? match[1] : "unknown";

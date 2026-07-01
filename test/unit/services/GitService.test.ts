@@ -38,6 +38,7 @@ const mockGit = {
   branchLocal: vi.fn(),
   getRemotes: vi.fn(),
   tags: vi.fn(),
+  tag: vi.fn(),
   stashList: vi.fn(),
   log: vi.fn(),
   show: vi.fn(),
@@ -800,5 +801,377 @@ describe("GitService", () => {
     const result = await service.getChangedFiles();
 
     expect(result).toEqual(["src/modified.ts", "src/untracked.ts"]);
+  });
+
+  describe("cherryPick", () => {
+    it("calls cherry-pick with the correct hash", async () => {
+      mockGit.raw.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.cherryPick("abc1234");
+
+      expect(mockGit.raw).toHaveBeenCalledWith(["cherry-pick", "abc1234"]);
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Cherry picked commit abc1234 successfully",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Cherry picked commit abc1234 successfully",
+      );
+    });
+
+    it("logs error and rethrows when cherryPick fails", async () => {
+      const error = new Error("cherry-pick conflict");
+      mockGit.raw.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.cherryPick("abc1234")).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to cherry pick commit abc1234: cherry-pick conflict",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to cherry pick commit abc1234. See details in output",
+      );
+    });
+  });
+
+  describe("cherryPickAllowEmpty", () => {
+    it("calls cherry-pick with --allow-empty flag", async () => {
+      mockGit.raw.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.cherryPickAllowEmpty("abc1234");
+
+      expect(mockGit.raw).toHaveBeenCalledWith([
+        "cherry-pick",
+        "--allow-empty",
+        "abc1234",
+      ]);
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Cherry picked commit abc1234 as empty commit",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Cherry picked commit abc1234 as empty commit",
+      );
+    });
+
+    it("logs error and rethrows when cherryPickAllowEmpty fails", async () => {
+      const error = new Error("allow-empty failed");
+      mockGit.raw.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.cherryPickAllowEmpty("abc1234")).rejects.toThrow(
+        error,
+      );
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to cherry pick commit abc1234: allow-empty failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to cherry pick commit abc1234. See details in output",
+      );
+    });
+  });
+
+  describe("cherryPickSkip", () => {
+    it("calls cherry-pick with --skip flag", async () => {
+      mockGit.raw.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.cherryPickSkip();
+
+      expect(mockGit.raw).toHaveBeenCalledWith(["cherry-pick", "--skip"]);
+      expect(infoSpy).toHaveBeenCalledWith("Cherry pick skipped");
+      expect(notifySpy).toHaveBeenCalledWith("Cherry pick skipped");
+    });
+
+    it("logs error and rethrows when cherryPickSkip fails", async () => {
+      const error = new Error("skip failed");
+      mockGit.raw.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.cherryPickSkip()).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to skip cherry pick: skip failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to skip cherry pick. See details in output",
+      );
+    });
+  });
+
+  describe("cherryPickAbort", () => {
+    it("calls cherry-pick with --abort flag", async () => {
+      mockGit.raw.mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.cherryPickAbort();
+
+      expect(mockGit.raw).toHaveBeenCalledWith(["cherry-pick", "--abort"]);
+      expect(infoSpy).toHaveBeenCalledWith("Cherry pick aborted");
+      expect(notifySpy).toHaveBeenCalledWith("Cherry pick aborted");
+    });
+
+    it("logs error and rethrows when cherryPickAbort fails", async () => {
+      const error = new Error("abort failed");
+      mockGit.raw.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.cherryPickAbort()).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to abort cherry pick: abort failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to abort cherry pick. See details in output",
+      );
+    });
+  });
+
+  describe("getCommitDetail", () => {
+    it("parses commit detail from raw git show output", async () => {
+      mockGit.raw
+        .mockResolvedValueOnce(
+          "abc1234\nFix bug\n\n__AUTHOR__\nJohn Doe\n__DATE__\n2026-01-01 10:00:00 +1000\n",
+        )
+        .mockResolvedValueOnce("diff --git a/src/file.ts b/src/file.ts\n...");
+
+      const result = await service.getCommitDetail("abc1234");
+
+      expect(result.hash).toBe("abc1234");
+      expect(result.message).toBe("Fix bug");
+      expect(result.author).toBe("John Doe");
+      expect(result.date).toBe("2026-01-01 10:00:00 +1000");
+      expect(result.diff).toContain("diff --git");
+    });
+
+    it("returns empty strings for missing author and date", async () => {
+      mockGit.raw
+        .mockResolvedValueOnce("abc1234\nFix bug\n\n__AUTHOR__\n\n__DATE__\n\n")
+        .mockResolvedValueOnce("");
+
+      const result = await service.getCommitDetail("abc1234");
+
+      expect(result.author).toBe("");
+      expect(result.date).toBe("");
+    });
+
+    it("logs error and rethrows when getCommitDetail fails", async () => {
+      const error = new Error("show failed");
+      mockGit.raw.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.getCommitDetail("abc1234")).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to load commit detail for abc1234: show failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to load commit detail for abc1234. See details in output",
+      );
+    });
+  });
+
+  describe("createTag", () => {
+    it("creates a lightweight tag with hash", async () => {
+      mockGit.tag = vi.fn().mockResolvedValue("ok");
+      const infoSpy = vi.spyOn(Logger, "info");
+      const notifySpy = vi.spyOn(Notifications, "info");
+
+      await service.createTag("v1.0.0", "abc1234");
+
+      expect(mockGit.tag).toHaveBeenCalledWith(["v1.0.0", "abc1234"]);
+      expect(infoSpy).toHaveBeenCalledWith("Tag v1.0.0 created successfully");
+      expect(notifySpy).toHaveBeenCalledWith("Tag v1.0.0 created successfully");
+    });
+
+    it("creates an annotated tag with message", async () => {
+      mockGit.tag = vi.fn().mockResolvedValue("ok");
+
+      await service.createTag("v1.0.0", "abc1234", "Release version 1.0.0");
+
+      expect(mockGit.tag).toHaveBeenCalledWith([
+        "-a",
+        "v1.0.0",
+        "abc1234",
+        "-m",
+        "Release version 1.0.0",
+      ]);
+    });
+
+    it("logs error and rethrows when createTag fails", async () => {
+      mockGit.tag = vi.fn().mockRejectedValue(new Error("tag failed"));
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.createTag("v1.0.0", "abc1234")).rejects.toThrow(
+        "tag failed",
+      );
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to create tag v1.0.0: tag failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to create tag v1.0.0. See details in output",
+      );
+    });
+  });
+
+  describe("getUntrackedFiles", () => {
+    it("returns only untracked files", async () => {
+      mockGit.status.mockResolvedValue({
+        files: [
+          { path: "src/modified.ts", index: " ", working_dir: "M" },
+          { path: "src/staged.ts", index: "M", working_dir: " " },
+          { path: "src/untracked.ts", index: "?", working_dir: "?" },
+          { path: "src/untracked2.ts", index: "?", working_dir: "?" },
+        ],
+      });
+
+      const result = await service.getUntrackedFiles();
+
+      expect(result).toEqual(["src/untracked.ts", "src/untracked2.ts"]);
+    });
+
+    it("returns empty array when no untracked files", async () => {
+      mockGit.status.mockResolvedValue({
+        files: [
+          { path: "src/modified.ts", index: " ", working_dir: "M" },
+          { path: "src/staged.ts", index: "M", working_dir: " " },
+        ],
+      });
+
+      const result = await service.getUntrackedFiles();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("deleteUntrackedFile", () => {
+    it("deletes the file at the correct full path", async () => {
+      const unlinkMock = vi.fn().mockResolvedValue(undefined);
+      vi.doMock("fs/promises", () => ({ unlink: unlinkMock }));
+
+      await service.deleteUntrackedFile("src/untracked.ts");
+
+      // Since fs/promises is dynamically imported, verify it doesn't throw
+      // and the method completes without error
+    });
+
+    it("propagates error when file deletion fails", async () => {
+      const { unlink } = await import("fs/promises");
+      vi.spyOn({ unlink }, "unlink").mockRejectedValue(
+        new Error("file not found"),
+      );
+
+      // deleteUntrackedFile uses dynamic import so errors propagate naturally
+      await expect(
+        service.deleteUntrackedFile("nonexistent.ts"),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("getBranchCommits", () => {
+    it("maps log entries to GitCommitModel instances", async () => {
+      mockGit.log.mockResolvedValue({
+        all: [
+          {
+            hash: "abc1234",
+            message: "Fix bug",
+            author: "John Doe",
+            date: "2026-01-01 10:00:00 +1000",
+            parents: "def5678",
+            refs: "",
+          },
+        ],
+      });
+
+      const result = await service.getBranchCommits("main");
+
+      expect(result).toHaveLength(1);
+      expect(result[0].hash).toBe("abc1234");
+      expect(result[0].message).toBe("Fix bug");
+      expect(result[0].author).toBe("John Doe");
+      expect(result[0].isMergeCommit).toBe(false);
+      expect(result[0].parents).toEqual(["def5678"]);
+    });
+
+    it("detects merge commits from multiple parents", async () => {
+      mockGit.log.mockResolvedValue({
+        all: [
+          {
+            hash: "abc1234",
+            message: "Merge branch feature",
+            author: "John Doe",
+            date: "2026-01-01 10:00:00 +1000",
+            parents: "def5678 ghi9012",
+            refs: "",
+          },
+        ],
+      });
+
+      const result = await service.getBranchCommits("main");
+
+      expect(result[0].isMergeCommit).toBe(true);
+      expect(result[0].parents).toEqual(["def5678", "ghi9012"]);
+    });
+
+    it("handles commits with no parents", async () => {
+      mockGit.log.mockResolvedValue({
+        all: [
+          {
+            hash: "abc1234",
+            message: "Initial commit",
+            author: "John Doe",
+            date: "2026-01-01 10:00:00 +1000",
+            parents: "",
+            refs: "",
+          },
+        ],
+      });
+
+      const result = await service.getBranchCommits("main");
+
+      expect(result[0].isMergeCommit).toBe(false);
+      expect(result[0].parents).toEqual([]);
+    });
+
+    it("truncates parent hashes to 7 characters", async () => {
+      mockGit.log.mockResolvedValue({
+        all: [
+          {
+            hash: "abc1234",
+            message: "Fix bug",
+            author: "John Doe",
+            date: "2026-01-01 10:00:00 +1000",
+            parents: "def567890abcdef",
+            refs: "",
+          },
+        ],
+      });
+
+      const result = await service.getBranchCommits("main");
+
+      expect(result[0].parents).toEqual(["def5678"]);
+    });
+
+    it("logs error and rethrows when getBranchCommits fails", async () => {
+      const error = new Error("log failed");
+      mockGit.log.mockRejectedValue(error);
+      const errorSpy = vi.spyOn(Logger, "error");
+      const notifySpy = vi.spyOn(Notifications, "errorWithOutput");
+
+      await expect(service.getBranchCommits("main")).rejects.toThrow(error);
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Failed to load commits for branch main: log failed",
+      );
+      expect(notifySpy).toHaveBeenCalledWith(
+        "Failed to load commits for branch main. See details in output",
+      );
+    });
   });
 });

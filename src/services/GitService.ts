@@ -360,26 +360,30 @@ export class GitService {
   async getCommitDetail(hash: string): Promise<CommitDetail> {
     return this.executeGitAction(
       async () => {
-        const log = await this.git.log({
-          maxCount: 1,
-          from: hash,
-          to: hash,
-          format: {
-            hash: "%h",
-            message: "%B",
-            author: "%an",
-            date: "%ai",
-          },
-        });
+        const format = [
+          `--format=%h%n%B%n__AUTHOR__%n%an%n__DATE__%n%ai`,
+          "--no-patch",
+          hash,
+        ];
 
-        const entry = log.latest as any;
+        const raw = await this.git.raw(["show", ...format]);
+        const lines = raw.split("\n");
+
+        const commitHash = lines[0].trim();
+        const authorIdx = lines.indexOf("__AUTHOR__");
+        const dateIdx = lines.indexOf("__DATE__");
+
+        const message = lines.slice(1, authorIdx).join("\n").trim();
+        const author = lines[authorIdx + 1]?.trim() ?? "";
+        const date = lines[dateIdx + 1]?.trim() ?? "";
+
         const diff = await this.git.raw(["show", "--stat", "-p", hash]);
 
         return {
-          hash: entry?.hash ?? hash,
-          message: entry?.message?.trim() ?? "",
-          author: entry?.author ?? "",
-          date: entry?.date ?? "",
+          hash: commitHash,
+          message,
+          author,
+          date,
           diff,
         };
       },
@@ -390,6 +394,38 @@ export class GitService {
 
   public async getFileContent(ref: string, filePath: string): Promise<string> {
     return await this.git.show([`${ref}:${filePath}`]);
+  }
+
+  async cherryPick(hash: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.raw(["cherry-pick", hash]),
+      `Cherry picked commit ${hash} successfully`,
+      `Failed to cherry pick commit ${hash}`,
+    );
+  }
+
+  async cherryPickAllowEmpty(hash: string): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.raw(["cherry-pick", "--allow-empty", hash]),
+      `Cherry picked commit ${hash} as empty commit`,
+      `Failed to cherry pick commit ${hash}`,
+    );
+  }
+
+  async cherryPickSkip(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.raw(["cherry-pick", "--skip"]),
+      "Cherry pick skipped",
+      "Failed to skip cherry pick",
+    );
+  }
+
+  async cherryPickAbort(): Promise<void> {
+    await this.executeGitAction(
+      () => this.git.raw(["cherry-pick", "--abort"]),
+      "Cherry pick aborted",
+      "Failed to abort cherry pick",
+    );
   }
 
   // #endregion

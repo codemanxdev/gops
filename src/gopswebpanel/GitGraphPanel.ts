@@ -64,6 +64,9 @@ export class GitGraphPanel {
         case "checkoutCommit":
           await GitGraphPanel.handleCheckoutCommit(message.hash, gitService);
           break;
+        case "cherryPick":
+          await GitGraphPanel.handleCherryPick(message.hash, gitService);
+          break;
       }
     });
   }
@@ -142,6 +145,44 @@ export class GitGraphPanel {
     );
     if (confirmed === "Checkout") {
       await gitService.checkout(hash);
+    }
+  }
+
+  private static async handleCherryPick(hash: string, gitService: GitService) {
+    const confirmed = await vscode.window.showWarningMessage(
+      `Cherry pick commit ${hash} onto current branch?`,
+      { modal: true },
+      "Cherry Pick",
+    );
+    if (confirmed !== "Cherry Pick") {
+      return;
+    }
+
+    try {
+      await gitService.cherryPick(hash);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      if (
+        message.includes("nothing to commit") ||
+        message.includes("allow-empty")
+      ) {
+        const action = await vscode.window.showWarningMessage(
+          `Commit ${hash} is already on this branch. Commit as empty or skip?`,
+          { modal: true },
+          "Commit Empty",
+          "Skip",
+          "Abort",
+        );
+
+        if (action === "Commit Empty") {
+          await gitService.cherryPickAllowEmpty(hash);
+        } else if (action === "Skip") {
+          await gitService.cherryPickSkip();
+        } else {
+          await gitService.cherryPickAbort();
+        }
+      }
     }
   }
 }

@@ -10,8 +10,10 @@ export function renderDetailPanel(): string {
       </div>
       <div id="detail-body">
         <div id="detail-sidebar">
-          <button class="detail-action-btn primary" id="detail-action-tag">🏷 Create Tag</button>
-          <button class="detail-action-btn" id="detail-action-checkout">⎇ Checkout</button>
+          <button class="detail-action-btn primary" id="detail-action-tag">Create Tag</button>
+          <button class="detail-action-btn" id="detail-action-checkout">Checkout</button>
+          <button class="detail-action-btn" id="detail-action-copy-hash">Copy Hash</button>
+          <button class="detail-action-btn" id="detail-action-cherry-pick">Cherry Pick</button>          
         </div>
         <div id="detail-main">
           <div id="detail-loading" style="display:none;">Loading diff…</div>
