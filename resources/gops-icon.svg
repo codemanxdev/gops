@@ -1,4 +1,35 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M6 4C5.44772 4 5 4.44772 5 5C5 5.55228 5.44772 6 6 6C6.55228 6 7 5.55228 7 5C7 4.44772 6.55228 4 6 4ZM9 5C9 6.30622 8.16519 7.41746 7 7.82929V9C7 10.1046 7.89543 11 9 11C10.1947 11 11.2671 11.5238 12 12.3542C12.7329 11.5238 13.8053 11 15 11C16.1046 11 17 10.1046 17 9V7.82929C15.8348 7.41746 15 6.30622 15 5C15 3.34315 16.3431 2 18 2C19.6569 2 21 3.34315 21 5C21 6.30622 20.1652 7.41746 19 7.82929V9C19 11.2091 17.2091 13 15 13C13.8954 13 13 13.8954 13 15V16.1707C14.1652 16.5825 15 17.6938 15 19C15 20.6569 13.6569 22 12 22C10.3431 22 9 20.6569 9 19C9 17.6938 9.83481 16.5825 11 16.1707V15C11 13.8954 10.1046 13 9 13C6.79086 13 5 11.2091 5 9V7.82929C3.83481 7.41746 3 6.30622 3 5C3 3.34315 4.34315 2 6 2C7.65685 2 9 3.34315 9 5ZM12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18ZM18 6C18.5523 6 19 5.55228 19 5C19 4.44772 18.5523 4 18 4C17.4477 4 17 4.44772 17 5C17 5.55228 17.4477 6 18 6Z" fill="#000000"/>
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="800px" height="800px" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Left curly brace -->
+  <path d="M22 5 C14 5 9 11 9 18 L9 37 C9 42 5 46 2 47 C5 48 9 52 9 57 L9 76 C9 83 14 89 22 89" 
+        stroke="#4CC45A" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Right curly brace -->
+  <path d="M78 5 C86 5 91 11 91 18 L91 37 C91 42 95 46 98 47 C95 48 91 52 91 57 L91 76 C91 83 86 89 78 89" 
+        stroke="#4CC45A" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Left branch node (top) -->
+  <circle cx="38" cy="28" r="8" fill="#4CC45A"/>
+
+  <!-- Left branch stem -->
+  <line x1="38" y1="36" x2="38" y2="64" stroke="#5BC8F5" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Right branch stem -->
+  <line x1="62" y1="42" x2="62" y2="64" stroke="#5BC8F5" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Merge arrow horizontal -->
+  <line x1="62" y1="34" x2="48" y2="34" stroke="#5BC8F5" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Merge arrow vertical connector -->
+  <line x1="62" y1="34" x2="62" y2="42" stroke="#5BC8F5" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Arrow head pointing left -->
+  <polygon points="46,27 46,41 34,34" fill="#5BC8F5"/>
+
+  <!-- Bottom left node -->
+  <circle cx="38" cy="72" r="8" fill="#4CC45A"/>
+
+  <!-- Bottom right node -->
+  <circle cx="62" cy="72" r="8" fill="#4CC45A"/>
 </svg>
