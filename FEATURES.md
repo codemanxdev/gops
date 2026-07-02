@@ -47,6 +47,14 @@
 - Color-coded ref pills by kind: HEAD (amber), local branch (blue), remote (light blue), tag (orange)
 - Tag pills prefixed with 🎯 bookmark emoji
 - Merge commits styled in grey with [MERGE] prefix
+- Click any commit hash to open a detail panel showing full commit information
+- Detail panel displays commit hash, message, and unified diff with syntax highlighting
+- Diff split into per-file sections with added, removed, hunk, and context line styling
+- Summary block at the top of the diff showing files changed
+- Sidebar action buttons per commit: Create Tag, Checkout, Copy Hash, Cherry Pick
+- Copy Hash button provides instant clipboard copy with visual confirmation
+- Cherry Pick applies a selected commit onto the current branch with conflict handling
+- All colors, fonts, and spacing follow the active VS Code theme via CSS variables
 
 ## Developer Features
 
@@ -56,4 +64,4 @@
 
 **Testing**
 
-- 90+ unit and integration tests
+- 170+ unit and integration tests
