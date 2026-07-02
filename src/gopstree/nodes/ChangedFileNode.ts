@@ -40,6 +40,7 @@ export class ChangedFileNode extends TreeItemModel<NodeType.Changes> {
       command: COMMANDS.SHOW_DIFF,
       arguments: [this],
     };
+    this.resourceUri = vscode.Uri.file(fileName);
   }
 
   public toString(): string {

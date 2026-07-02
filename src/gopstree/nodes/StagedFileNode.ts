@@ -1,15 +1,16 @@
 import { ContextValue } from "../ContextValue";
 import { NodeType } from "./NodeType";
 import { TreeItemModel } from "../TreeItemModel";
-import * as vscode from 'vscode';
-import { createChangedFileTooltip, formatChangedFileLabel } from "./utils/nodeUtils";
+import * as vscode from "vscode";
+import {
+  createChangedFileTooltip,
+  formatChangedFileLabel,
+} from "./utils/nodeUtils";
 import { COMMANDS } from "../../commands/Commands";
 
 export class StagedFileNode extends TreeItemModel<NodeType.StagedChanges> {
   public override command?: vscode.Command;
-  constructor(
-    public readonly fileName: string,
-  ) {
+  constructor(public readonly fileName: string) {
     const fomatted = formatChangedFileLabel(fileName);
     super(
       {
@@ -25,10 +26,8 @@ export class StagedFileNode extends TreeItemModel<NodeType.StagedChanges> {
       command: COMMANDS.SHOW_DIFF,
       arguments: [this],
     };
-    
-    this.tooltip = createChangedFileTooltip(
-      fileName,
-    );
+    this.tooltip = createChangedFileTooltip(fileName);
+    this.resourceUri = vscode.Uri.file(fileName);
   }
 
   public toString(): string {

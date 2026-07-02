@@ -176,8 +176,10 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     this.remoteBranchesNode = remoteBranchesItem;
 
     const changesItem = new ChangesSection(
-      this.changesNode?.collapsibleState ||
-        vscode.TreeItemCollapsibleState.Collapsed,
+      this.changesNode?.collapsibleState ??
+        (hasChangedFiles
+          ? vscode.TreeItemCollapsibleState.Expanded
+          : vscode.TreeItemCollapsibleState.Collapsed),
     );
     changesItem.contextValue = hasChangedFiles
       ? ContextValue.ChangesSection
@@ -185,8 +187,10 @@ export class TreeDataProvider implements vscode.TreeDataProvider<GitTreeNode> {
     this.changesNode = changesItem;
 
     const stagedItem = new StagedChangesSection(
-      this.stagedNode?.collapsibleState ||
-        vscode.TreeItemCollapsibleState.Collapsed,
+      this.stagedNode?.collapsibleState ??
+        (hasStagedFiles
+          ? vscode.TreeItemCollapsibleState.Expanded
+          : vscode.TreeItemCollapsibleState.Collapsed),
     );
     stagedItem.contextValue = hasStagedFiles
       ? ContextValue.StagedChangesSection
